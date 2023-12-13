@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torchdiffeq import odeint_adjoint as odeint
 import pandas as pd
+import numpy as np
 from time import time
 import matplotlib.pyplot as plt
 
@@ -49,11 +50,21 @@ def val_shift_split(train_dur, val_shift):
     return train_data, val_data, test_data
 
 
-train_data, val_data, test_data = val_shift_split(3, .3)
+train_data, val_data, test_data = val_shift_split(3, 0)
 
 print(train_data[0].shape, val_data[0].shape, test_data[0].shape, train_data[1].shape, val_data[1].shape, test_data[1].shape)
 
 
+batch_time = 25
+batch_size = 50
+
+
+
+def get_batch():
+    s = torch.from_numpy(np.random.choice(np.arange(len(t_tensor) - batch_time, dtype=np.int64), batch_size, replace=False))
+    batch_t = t_tensor[:batch_time]  # (T)
+    batch_y = torch.stack([features_tensor[s + i] for i in range(batch_time)], dim=0)  # (T, M, D)
+    return batch_t.to(device), batch_y.to(device)
 
 def tictoc(func):
     def wrapper(*args, **kwargs):
@@ -72,8 +83,6 @@ class ODEFunc(nn.Module):
         self.net = nn.Sequential(
             nn.Linear(num_feat, N_neurons),
             nn.Tanh(),
-            nn.Linear(N_neurons, N_neurons),
-            nn.Tanh(),
             nn.Linear(N_neurons, num_feat)
         )
         
@@ -89,7 +98,7 @@ class ODEFunc(nn.Module):
 
 #loss functions
 
-
+MAELoss = nn.L1Loss()
 MSELoss = nn.MSELoss()
 
 def normalized_loss(pred, real):
@@ -112,7 +121,7 @@ def mean_fourth_power_error(y_true, y_pred):
 #cross entropy loss
 
 @tictoc
-def trainmodel(data, data2, learning_rate, num_epochs, num_neurons, rel_tol=1e-7, abs_tol=1e-9, live_plot=False, intermidiate_prediction=False):
+def trainmodel(data, data2, learning_rate, num_epochs, num_neurons, rel_tol=1e-7, abs_tol=1e-9, live_plot=False, intermidiate_pred=False, use_bathces=False):
     """
     Trains a neural network model using the NODE (Neural Ordinary Differential Equations) approach.
 
@@ -130,6 +139,7 @@ def trainmodel(data, data2, learning_rate, num_epochs, num_neurons, rel_tol=1e-7
     Returns:
         tuple: A tuple containing the trained neural network model and a tuple of training and validation losses.
     """
+    train_losses_cache = []
     train_losses = []
     val_losses = []
     t, features = data
@@ -139,6 +149,7 @@ def trainmodel(data, data2, learning_rate, num_epochs, num_neurons, rel_tol=1e-7
     loss_function = MSELoss
 
     optimizer = optim.Adam(net.parameters(), lr=learning_rate)
+    # optimizer = optim.RMSprop(net.parameters(), lr=learning_rate)
     
     if live_plot:
         plt.ion()  # Turn on interactive mode
@@ -160,8 +171,12 @@ def trainmodel(data, data2, learning_rate, num_epochs, num_neurons, rel_tol=1e-7
         return loss
 
     for epoch in range(num_epochs):
-        
-        if isinstance(optimizer, torch.optim.LBFGS):
+        #get batch
+        if use_bathces:
+            t, features = get_batch()
+
+        #training
+        if isinstance(optimizer, torch.optim.LBFGS): #LBFGS needs a closure function but LBFGS is prob not the best optimizer for this
             loss = optimizer.step(closure)
         
         else:
@@ -170,27 +185,35 @@ def trainmodel(data, data2, learning_rate, num_epochs, num_neurons, rel_tol=1e-7
             loss = loss_function(pred_y, features)
             loss.backward()
             optimizer.step()
-
-        with torch.no_grad():
-            pred_y_val = odeint(net, val_features[0], val_t) 
-            loss_val = loss_function(pred_y_val, val_features)
         
-        train_losses.append(loss.item())
-        val_losses.append(loss_val.item())
-
-        print(f"Epoch {epoch+1}: loss = {loss.item()}, val_loss = {loss_val.item()}")
-
-        if live_plot and epoch % 5 == 4:
-            line1.set_data(range(epoch + 1), train_losses)
-            line2.set_data(range(epoch + 1), val_losses)
-            ax.relim()  # Recalculate limits
-            ax.autoscale_view(True,True,True)  # Autoscale
-            plt.draw()
-            plt.pause(0.2)  # Pause to update the plot
-
+        train_losses_cache.append(loss.item())
+        print(f"Epoch {epoch+1}: loss = {loss.item()}")
         
 
-        if intermidiate_prediction and epoch % 30 == 29:
+        #validation
+        if epoch % 5 == 4:
+            with torch.no_grad():
+                pred_y_val = odeint(net, val_features[0], val_t) 
+                loss_val = loss_function(pred_y_val, val_features)
+            
+            train_losses.append(np.mean(train_losses_cache))
+            val_losses.append(loss_val.item())
+
+            print(f"Epoch {epoch+1}: val_loss = {loss_val.item()}")
+
+
+            #live training vs validation plot
+            if live_plot:
+                line1.set_data(range(0, epoch + 1, 5), train_losses)
+                line2.set_data(range(0, epoch + 1, 5), val_losses)
+                ax.relim()  # Recalculate limits
+                ax.autoscale_view(True,True,True)  # Autoscale
+                plt.draw()
+                plt.pause(0.4)  # Pause to update the plot
+
+        
+        #intermidiate prediction
+        if intermidiate_pred and epoch % 100 == 99:
             intermidiate_prediction(net, epoch)
     
     return net, (train_losses, val_losses)
@@ -222,7 +245,7 @@ def intermidiate_prediction(network, epoch):
 
 
 
-network, losses = trainmodel(train_data, val_data, 0.01, 150, 50, 1e-7, 1e-5)
+network, losses = trainmodel(train_data, tensor_data, 0.01, 20, 50, use_bathces=True, intermidiate_pred=True, live_plot=False)
 
 
 
@@ -295,13 +318,23 @@ if plot_actual_vs_predicted_full:
 
 
 if plot_training_vs_validation:
-    plt.figure(figsize=(10, 6))
-    plt.plot(losses[0], label='Training Loss')
-    plt.plot(losses[1], label='Validation Loss')
+    fig, ax1 = plt.subplots(figsize=(10, 6))
+    ax2 = ax1.twinx()
+
+    ax1.plot(losses[0], label='Training Loss', color='blue')  
+    ax2.plot(losses[1], label='Validation Loss', color='orange')
+
+    ax1.set_xlabel('Epoch')
+    ax1.set_ylabel('Training Loss', color='blue')
+    ax2.set_ylabel('Validation Loss', color='orange')
+
+    ax1.tick_params(axis='y', labelcolor='blue')
+    ax2.tick_params(axis='y', labelcolor='orange')
+
     plt.title('Training vs Validation Loss')
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
-    plt.legend()
+    
+    ax1.legend(loc='upper left')  
+    ax2.legend(loc='upper right')
 
 
 if plot_phase_space:
