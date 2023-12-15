@@ -4,7 +4,7 @@ import torch.optim as optim
 from torchdiffeq import odeint_adjoint as odeint
 import pandas as pd
 import numpy as np
-from time import time
+from time import perf_counter as time
 import matplotlib.pyplot as plt
 
 
@@ -55,13 +55,13 @@ train_data, val_data, test_data = val_shift_split(3, 0)
 print(train_data[0].shape, val_data[0].shape, test_data[0].shape, train_data[1].shape, val_data[1].shape, test_data[1].shape)
 
 
-batch_time = 25
+batch_time = 20
 batch_size = 50
 
 
 
 def get_batch():
-    s = torch.from_numpy(np.random.choice(np.arange(len(t_tensor) - batch_time, dtype=np.int64), batch_size, replace=False))
+    s = torch.from_numpy(np.random.choice(np.arange(len(t_tensor) - batch_time-1000, dtype=np.int64), batch_size, replace=False))
     batch_t = t_tensor[:batch_time]  # (T)
     batch_y = torch.stack([features_tensor[s + i] for i in range(batch_time)], dim=0)  # (T, M, D)
     return batch_t.to(device), batch_y.to(device)
@@ -93,7 +93,7 @@ class ODEFunc(nn.Module):
 
     def forward(self, t, y):
         y = y.to(device)
-        return self.net(y**3)
+        return self.net(torch.sin(y))
 
 
 #loss functions
@@ -121,7 +121,7 @@ def mean_fourth_power_error(y_true, y_pred):
 #cross entropy loss
 
 @tictoc
-def trainmodel(data, data2, learning_rate, num_epochs, num_neurons, rel_tol=1e-7, abs_tol=1e-9, live_plot=False, intermidiate_pred=False, use_bathces=False):
+def trainmodel(data, data2, learning_rate, num_epochs, num_neurons, rel_tol=1e-7, abs_tol=1e-9, live_plot=False, intermidiate_pred=False, use_batches=False):
     """
     Trains a neural network model using the NODE (Neural Ordinary Differential Equations) approach.
 
@@ -172,7 +172,7 @@ def trainmodel(data, data2, learning_rate, num_epochs, num_neurons, rel_tol=1e-7
 
     for epoch in range(num_epochs):
         #get batch
-        if use_bathces:
+        if use_batches:
             t, features = get_batch()
 
         #training
@@ -245,7 +245,7 @@ def intermidiate_prediction(network, epoch):
 
 
 
-network, losses = trainmodel(train_data, tensor_data, 0.01, 20, 50, use_bathces=True, intermidiate_pred=True, live_plot=False)
+network, losses = trainmodel(train_data, tensor_data, 0.01, 300, 50, use_batches=True, intermidiate_pred=True)
 
 
 
@@ -321,8 +321,8 @@ if plot_training_vs_validation:
     fig, ax1 = plt.subplots(figsize=(10, 6))
     ax2 = ax1.twinx()
 
-    ax1.plot(losses[0], label='Training Loss', color='blue')  
-    ax2.plot(losses[1], label='Validation Loss', color='orange')
+    ax1.plot(range(1, 301, 5), losses[0], label='Training Loss', color='blue')  
+    ax2.plot(range(1, 301, 5), losses[1], label='Validation Loss', color='orange')
 
     ax1.set_xlabel('Epoch')
     ax1.set_ylabel('Training Loss', color='blue')
