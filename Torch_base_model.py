@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn  
 from torchdiffeq import odeint_adjoint as odeint
 import numpy as np
-from Data_preproc import simple_split, val_shift_split
+from NODE.toyData_preproc_ import simple_split, val_shift_split
 import matplotlib.pyplot as plt
 from time import perf_counter as time
 

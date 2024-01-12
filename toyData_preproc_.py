@@ -1,0 +1,122 @@
+import torch
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt 
+
+
+def load_data(num_feat, filename = "toydatafixed.csv", ):
+    #import data
+    data = pd.read_csv(filename, delimiter=';')
+
+    #check for duplicates
+    duplicates = data.duplicated(subset=['t'])
+    if duplicates.any():
+        print("Duplicates found in the time axis.")
+    else:
+        print("No duplicates found in the time axis.")
+
+    #defining tensors
+    t_tensor = torch.tensor(data['t'].values, dtype=torch.float32)
+    features_tensor = torch.tensor(data.iloc[:, 1:num_feat+1].values, dtype=torch.float32)
+
+    return t_tensor, normalize_data(features_tensor)
+
+def normalize_data(features_tensor):
+    #normalizing features between 0 and 1
+    min_vals = torch.min(features_tensor, dim=0)[0]
+    max_vals = torch.max(features_tensor, dim=0)[0]
+    features_tensor = (features_tensor - min_vals) / (max_vals - min_vals)
+    return features_tensor
+
+
+def get_timestep(t_tensor):
+    timestep = torch.min(t_tensor[1:] - t_tensor[:-1])
+    return timestep
+
+
+def simple_split(data_tuple, train_dur, val_dur=0, timestep=None):
+    t_tensor, features_tensor = data_tuple
+    
+    if not timestep:
+        timestep = get_timestep(t_tensor)
+    
+    split_train = int(train_dur / timestep)
+    split_val = int((val_dur + train_dur) / timestep)
+
+    train_data = (t_tensor[:split_train], features_tensor[:split_train])
+    val_data = (t_tensor[split_train:split_val], features_tensor[split_train:split_val])
+    test_data = (t_tensor[split_val:], features_tensor[split_val:])
+
+    print(f"training size: {train_data[0].shape[0]}, validation size: {val_data[0].shape[0]}, test size: {test_data[0].shape[0]}")
+
+    return train_data, val_data, test_data
+
+
+def val_shift_split(data_tuple, train_dur, val_shift, timestep=None):
+    t_tensor, features_tensor = data_tuple
+
+    if not timestep:
+        timestep = get_timestep(t_tensor)
+
+    #time to index
+    split_train = int(train_dur / timestep)  
+    shift_val = int(val_shift  / timestep)
+
+    train_data = (t_tensor[:split_train], features_tensor[:split_train])
+    val_data = (t_tensor[shift_val:split_train + shift_val], features_tensor[shift_val:split_train + shift_val])
+    test_data = (t_tensor[split_train:], features_tensor[split_train:])
+
+    print(f"training size: {train_data[0].shape[0]}, validation size: {val_data[0].shape[0]} starting at {shift_val}, test size: {test_data[0].shape[0]}")
+
+    return train_data, val_data, test_data
+
+
+def plot_data(data_tuple):
+    time_points = data_tuple[0].numpy()  
+    feature_data = data_tuple[1].numpy() 
+
+    fig, ax1 = plt.subplots(figsize=(14, 6))
+    ax2 = ax1.twinx()
+
+    ax1.plot(time_points, feature_data[:, 0], label='Feature 1 (speed)', color='blue')
+    ax2.plot(time_points, feature_data[:, 1], label='Feature 2 (angle)', color='red')
+
+    ax1.set_xlabel('Time (seconds)')
+    ax1.set_ylabel('Feature 1 (speed)', color='blue')
+    ax2.set_ylabel('Feature 2 (angle)', color='red')
+
+    ax1.tick_params(axis='y', labelcolor='blue')
+    ax2.tick_params(axis='y', labelcolor='red')
+
+    plt.title('Features Over Time')
+    plt.legend()
+    plt.show()
+
+
+# train_data, val_data, test_data = val_shift_split(3, 0)
+
+
+
+# batch_time = 20
+# batch_size = 50
+
+# def get_batch():
+#     s = torch.from_numpy(np.random.choice(np.arange(len(t_tensor) - batch_time-1100, dtype=np.int64), batch_size, replace=False))
+#     batch_t = t_tensor[:batch_time]  # (T)
+#     batch_y = torch.stack([features_tensor[s + i] for i in range(batch_time)], dim=0)  # (T, M, D)
+#     return batch_t, batch_y
+
+if __name__ == "__main__":
+    # Add your code here
+    savefile = True
+    
+    data = load_data(2)
+
+    # train_data, val_data, test_data = simple_split(data, 3, 0)
+    # train_data, val_data, test_data = val_shift_split(data, 3, .2)
+
+    if savefile:
+        torch.save(data, "toydata_norm_0_1.pt")
+
+    
+    
