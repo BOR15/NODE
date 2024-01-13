@@ -3,8 +3,13 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt 
 
+"""
+READ THIS:
+This stuff hasnt been worked on yet, right now its just an old copy of toydata_processing.py 
+"""
 
-def load_data(num_feat, filename = "toydatafixed.csv", ):
+
+def load_data(num_feat, filename = "NODE/Input_Data/toydatafixed.csv", ):
     #import data
     data = pd.read_csv(filename, delimiter=';')
 
@@ -108,15 +113,16 @@ def plot_data(data_tuple):
 
 if __name__ == "__main__":
     # Add your code here
-    savefile = True
+    savefile = False
     
     data = load_data(2)
+    plot_data(data)
 
     # train_data, val_data, test_data = simple_split(data, 3, 0)
     # train_data, val_data, test_data = val_shift_split(data, 3, .2)
 
     if savefile:
-        torch.save(data, "toydata_norm_0_1.pt")
+        torch.save(data, "toydata_norm_error.pt")
 
     
     

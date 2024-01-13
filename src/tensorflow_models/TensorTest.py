@@ -3,6 +3,11 @@ from tfdiffeq import odeint
 import pandas as pd
 import numpy as np
 
+"""
+a lot of this garbage is outdated, go look at pytorch versions for more up to date code
+some of the code in this file is replaced by functions that should work in tensorflow aswell i think
+"""
+
 print(f"using TensorFlow version {tf.__version__}")
 
 data = pd.read_csv("toydatafixed.csv", delimiter=';')
