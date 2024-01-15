@@ -5,30 +5,37 @@ import matplotlib.pyplot as plt
 
 """
 READ THIS:
+
 This stuff hasnt been worked on yet, right now its just an old copy of toydata_processing.py 
+
+I have now started on this but still mess 
 """
 
 
-def load_data(num_feat, filename = "NODE/Input_Data/toydatafixed.csv", ):
-    #import data
-    data = pd.read_csv(filename, delimiter=';')
+def load_data(filename="NODE/Input_Data/Raw_data/Dynamics40h17.csv", shift=0, start=300):
+    # Import data
+    data = pd.read_csv(filename, delimiter=',')
 
-    #check for duplicates
+    # Check for duplicates
     duplicates = data.duplicated(subset=['t'])
     if duplicates.any():
-        print("Duplicates found in the time axis.")
+        print("Duplicates found in the time axis. Removing duplicates...")
+        data = data.drop_duplicates(subset=['t'])
     else:
         print("No duplicates found in the time axis.")
 
-    #defining tensors
-    t_tensor = torch.tensor(data['t'].values, dtype=torch.float32)
-    features_tensor = torch.tensor(data.iloc[:, 1:num_feat+1].values, dtype=torch.float32)
-
-    return t_tensor, normalize_data(features_tensor)
+    # Defining tensors
+    t_tensor = torch.tensor(data.iloc[start:, 1].values, dtype=torch.float32)
+    features_tensor = torch.tensor(data.iloc[start:, 2+shift:27+shift:5].values, dtype=torch.float32)
+    print(features_tensor.shape, t_tensor.shape)
+    print(features_tensor[0], t_tensor[0])
+    features_tensor = normalize_data(features_tensor)
+    return t_tensor, features_tensor
 
 def normalize_data(features_tensor):
     #normalizing features between 0 and 1
     min_vals = torch.min(features_tensor, dim=0)[0]
+    print(min_vals)
     max_vals = torch.max(features_tensor, dim=0)[0]
     features_tensor = (features_tensor - min_vals) / (max_vals - min_vals)
     return features_tensor
@@ -76,53 +83,65 @@ def val_shift_split(data_tuple, train_dur, val_shift, timestep=None):
     return train_data, val_data, test_data
 
 
-def plot_data(data_tuple):
-    time_points = data_tuple[0].numpy()  
-    feature_data = data_tuple[1].numpy() 
+# with seperate axis but not working
+# def plot_data(data_tuple):
+#     time_points = data_tuple[0].numpy()  
+#     feature_data = data_tuple[1].numpy() 
 
-    fig, ax1 = plt.subplots(figsize=(14, 6))
-    ax2 = ax1.twinx()
+#     fig, ax1 = plt.subplots(figsize=(14, 6))
+#     ax2 = ax1.twinx()
 
-    ax1.plot(time_points, feature_data[:, 0], label='Feature 1 (speed)', color='blue')
-    ax2.plot(time_points, feature_data[:, 1], label='Feature 2 (angle)', color='red')
+#     ax1.plot(time_points, feature_data[:, 0], label='Feature 1 (speed)', color='blue')
+#     ax2.plot(time_points, feature_data[:, 1], label='Feature 2 (angle)', color='red')
 
-    ax1.set_xlabel('Time (seconds)')
-    ax1.set_ylabel('Feature 1 (speed)', color='blue')
-    ax2.set_ylabel('Feature 2 (angle)', color='red')
+#     ax1.set_xlabel('Time (seconds)')
+#     ax1.set_ylabel('Feature 1 (speed)', color='blue')
+#     ax2.set_ylabel('Feature 2 (angle)', color='red')
 
-    ax1.tick_params(axis='y', labelcolor='blue')
-    ax2.tick_params(axis='y', labelcolor='red')
+#     ax1.tick_params(axis='y', labelcolor='blue')
+#     ax2.tick_params(axis='y', labelcolor='red')
 
-    plt.title('Features Over Time')
-    plt.legend()
-    plt.show()
+#     plt.title('Features Over Time')
+#     plt.legend()
+#     plt.show()
 
 
 # train_data, val_data, test_data = val_shift_split(3, 0)
 
 
+# plotting input data
+def plot_data(data_tuple):
+    time_points = data_tuple[0].numpy()  
+    feature_data = data_tuple[1].numpy() 
+    
+    plt.figure(figsize=(14, 6))
 
-# batch_time = 20
-# batch_size = 50
+    
+    plt.plot(time_points, feature_data[:, 0], label='Angle (Delta)') 
+    plt.plot(time_points, feature_data[:, 1], label='frequency (f)')
+    plt.plot(time_points, feature_data[:, 2], label='Voltage (V)')
+    plt.plot(time_points, feature_data[:, 3], label='Power (P)')
+    plt.plot(time_points, feature_data[:, 4], label='Reactive power (Q)')
 
-# def get_batch():
-#     s = torch.from_numpy(np.random.choice(np.arange(len(t_tensor) - batch_time-1100, dtype=np.int64), batch_size, replace=False))
-#     batch_t = t_tensor[:batch_time]  # (T)
-#     batch_y = torch.stack([features_tensor[s + i] for i in range(batch_time)], dim=0)  # (T, M, D)
-#     return batch_t, batch_y
+    plt.title('Features Over Time')
+    plt.xlabel('Time (seconds)')
+    plt.ylabel('Feature Values')
+    plt.legend()
+
 
 if __name__ == "__main__":
     # Add your code here
-    savefile = False
+    savefile = True
     
-    data = load_data(2)
+    data = load_data()
     plot_data(data)
+    plt.show()
 
     # train_data, val_data, test_data = simple_split(data, 3, 0)
     # train_data, val_data, test_data = val_shift_split(data, 3, .2)
 
     if savefile:
-        torch.save(data, "toydata_norm_error.pt")
+        torch.save(data, "real_data_scuffed1.pt")
 
     
     

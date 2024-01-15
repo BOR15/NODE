@@ -6,7 +6,7 @@ from pytorch_models.TorchTest import main as torch_test_model
 def main():
     # torch_base_model()
     
-    torch_test_model()
+    torch_test_model(num_epochs=1000, learning_rate=0.0003, intermediate_pred_freq=300)
 
 
 

@@ -2,17 +2,23 @@ import matplotlib.pyplot as plt
 
 
 # plotting input data
-def plot_data(data_tuple):
+def plot_data(data_tuple, toy=False):
     time_points = data_tuple[0].numpy()  
     feature_data = data_tuple[1].numpy() 
     
     plt.figure(figsize=(14, 6))
 
-    
-    plt.plot(time_points, feature_data[:, 0], label='Feature 1 (speed)')
-    plt.plot(time_points, feature_data[:, 1], label='Feature 2 (angle)')
-    # plt.plot(time_points, feature_data[:, 2], label='Feature 3 (e_q_t)')
-    # plt.plot(time_points, feature_data[:, 3], label='Feature 4 (e_q_st)')
+    if toy:
+        plt.plot(time_points, feature_data[:, 0], label='Feature 1 (speed)')
+        plt.plot(time_points, feature_data[:, 1], label='Feature 2 (angle)')
+        # plt.plot(time_points, feature_data[:, 2], label='Feature 3 (e_q_t)')
+        # plt.plot(time_points, feature_data[:, 3], label='Feature 4 (e_q_st)')
+    else:
+        plt.plot(time_points, feature_data[:, 0], label='Angle (Delta)') 
+        plt.plot(time_points, feature_data[:, 1], label='frequency (f)')
+        plt.plot(time_points, feature_data[:, 2], label='Voltage (V)')
+        plt.plot(time_points, feature_data[:, 3], label='Power (P)')
+        plt.plot(time_points, feature_data[:, 4], label='Reactive power (Q)')
 
     plt.title('Features Over Time')
     plt.xlabel('Time (seconds)')
@@ -20,7 +26,7 @@ def plot_data(data_tuple):
     plt.legend()
 
 # plotting actual vs predicted values
-def plot_actual_vs_predicted_full(true_y, pred_y, num_feat=2):
+def plot_actual_vs_predicted_full(true_y, pred_y, num_feat=2, toy=False):
     t = true_y[0].detach().numpy()
     true_y = true_y[1].detach().numpy()
     pred_y = pred_y.detach().numpy()
@@ -29,7 +35,11 @@ def plot_actual_vs_predicted_full(true_y, pred_y, num_feat=2):
     fig, axes = plt.subplots(nrows=2, ncols=int(num_feat/2), figsize=(12, 8))
     fig.suptitle('Actual vs Predicted Features Full')
 
-    feature_names = ['speed', 'angle', 'e_q_t', 'e_q_st']
+    if toy:
+        feature_names = ['speed', 'angle', 'e_q_t', 'e_q_st']
+    else:
+        feature_names = ['Angle (Delta)', 'frequency (f)', 'Voltage (V)', 'Power (P)', 'Reactive power (Q)']
+
     for i, ax in enumerate(axes.flatten()):
         ax.plot(t, true_y[:,i], label='Actual ' + feature_names[i])
         ax.plot(t, pred_y[:,i], label='Predicted ' + feature_names[i], linestyle='--')

@@ -52,10 +52,12 @@ class ODEFunc(nn.Module):
             torch.Tensor: Output tensor.
         """
         y = y.to(self.device)
-        return self.net(torch.sin(y))
+        # return self.net(torch.sin(y))
+        return self.net(y)
 
 
-
+    
+    
 def main(num_neurons=50, num_epochs=300, learning_rate=0.01, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, intermediate_pred_freq=0, live_plot=False):
     """
     Main function for training and evaluating a PyTorch model using ODE integration.
@@ -74,10 +76,6 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, rel_tol=1e-7, abs_t
     Returns:
         None
     """
-    
-    # Rest of the code...
-def main(num_neurons=50, num_epochs=300, learning_rate=0.01, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, live_plot=False, intermediate_pred_freq=0):
-    
     #MT
     train_losses_cache = []
     train_losses = []
@@ -87,7 +85,8 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, rel_tol=1e-7, abs_t
     device = check_cuda(use_cuda=False)
     
     #import preprocessed data
-    data = torch.load("NODE/Input_Data/toydata_norm_0_1.pt")
+    # data = torch.load("NODE/Input_Data/toydata_norm_0_1.pt")
+    data = torch.load("NODE/Input_Data/real_data_scuffed1.pt")
     num_feat = data[1].shape[1]
 
     #defining model, loss function and optimizer
@@ -110,7 +109,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, rel_tol=1e-7, abs_t
     #training loop
     for epoch in range(num_epochs):
         #get batch
-        t, features = get_batch(data, batch_size = 50, batch_dur_idx = 20, batch_range_idx=200, device=device)
+        t, features = get_batch(data, batch_size = 50, batch_dur_idx = 20, batch_range_idx=500, device=device)
 
         #training
         optimizer.zero_grad()
@@ -165,8 +164,8 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, rel_tol=1e-7, abs_t
 
     # Plotting 
     plot_data(data)
-    plot_actual_vs_predicted_full(data, predicted)
-    plot_phase_space(data, predicted)
+    plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat)
+    # plot_phase_space(data, predicted)
     plot_training_vs_validation([train_losses, val_losses], share_axis=True)
     plt.show(block=True)
 
