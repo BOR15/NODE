@@ -10,39 +10,13 @@ import matplotlib.pyplot as plt
 from tools.toydata_processing import get_batch
 from tools.misc import check_cuda, tictoc
 from tools.plots import *
+from tools.Logging-system import ModelLogger
 import csv
 import os
-import pandas
+import pandas as pd
 
 
-class ModelLogger:
-    def __init__(self, log_file='model_log.csv', logging_enabled=True):
-        self.log_file = log_file
-        self.logging_enabled = logging_enabled
-        self.create_log_file()
-
-    def create_log_file(self):
-        """Create the log file """
-        if self.logging_enabled and not os.path.exists(self.log_file):
-            with open(self.log_file, mode='w', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow(["Hyperparameters", "Plot URLs"])
-
-    def log_model(self, hyperparameters, plot_urls):
-        """Log the hyperparameters and maybe future URL's?"""
-        if self.logging_enabled:
-            with open(self.log_file, mode='a', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow([str(hyperparameters), ', '.join(plot_urls)])
-                #also add the loss metric
-                writer.writerow([str(metric())])
-
-
-
-
-logger = ModelLogger(logging_enabled=True) #enable or disable the logger for your run
-
-def metric()
+logger = ModelLogger(logging_enabled=True)
 
 class ODEFunc(nn.Module):
     """
@@ -115,7 +89,17 @@ def main(num_neurons=50, num_epochs=20, learning_rate=0.005, rel_tol=1e-7, abs_t
 
     # use cuda? No
     device = check_cuda(use_cuda=False)
-    
+
+    #parameters
+    batch_size = 50
+    batch_dur = 20
+    batch_range = 500
+
+    log_dict = {'learning rate': learning_rate, 'number of epochs': num_epochs, 'rel_tol': rel_tol, 'abs_tol': abs_tol, 'val_freq': val_freq, 'intermediate_pred_freq': intermediate_pred_freq
+                , 'batch_size': batch_size, 'batch_dur': batch_dur, 'batch_range': batch_range, 'loss function': loss_function, 'optimizer': optimizer}
+    log_df = pd.DataFrame.from_dict(log_dict, orient='columns')
+    log.df.to_csv()
+
     #import preprocessed data
     # data = torch.load("NODE/Input_Data/toydata_norm_0_1.pt")
     # data = torch.load("NODE/Input_Data/real_data_scuffed1.pt")
@@ -142,7 +126,7 @@ def main(num_neurons=50, num_epochs=20, learning_rate=0.005, rel_tol=1e-7, abs_t
     #training loop
     for epoch in range(num_epochs):
         #get batch
-        t, features = get_batch(data, batch_size = 50, batch_dur_idx = 20, batch_range_idx=500, device=device)
+        t, features = get_batch(data, batch_size = batch_size, batch_dur_idx = batch_dur, batch_range_idx=batch_range, device=device)
 
         #training
         optimizer.zero_grad()
