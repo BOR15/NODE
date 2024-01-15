@@ -1,32 +1,42 @@
 import torch
 import pandas as pd
 import numpy as np
+import tensorflow as tf
 import matplotlib.pyplot as plt 
 
 
-def load_data(num_feat, filename = "NODE/Input_Data/toydatafixed.csv", ):
-    #import data
+def load_data(num_feat, filename="NODE/Input_Data/toydatafixed.csv", for_torch=True):
+    # import data
     data = pd.read_csv(filename, delimiter=';')
 
-    #check for duplicates
+    # check for duplicates
     duplicates = data.duplicated(subset=['t'])
     if duplicates.any():
         print("Duplicates found in the time axis.")
     else:
         print("No duplicates found in the time axis.")
 
-    #defining tensors
-    t_tensor = torch.tensor(data['t'].values, dtype=torch.float32)
-    features_tensor = torch.tensor(data.iloc[:, 1:num_feat+1].values, dtype=torch.float32)
-    # features_tensor = torch.tensor(data.drop('t', axis=1).values, dtype=torch.float32)
-    #features_tensor = torch.tensor(data[['speed', 'angle']].values, dtype=torch.float32).to(device)
+    if for_torch:
+        # defining tensors for Torch
+        t_tensor = torch.tensor(data['t'].values, dtype=torch.float32)
+        features_tensor = torch.tensor(data.iloc[:, 1:num_feat + 1].values, dtype=torch.float32)
+    else:
+        # defining tensors for TensorFlow
+        t_tensor = tf.constant(data['t'].values, dtype=tf.float32)
+        features_tensor = tf.constant(data.iloc[:, 1:num_feat + 1].values, dtype=tf.float32)
 
-    return t_tensor, normalize_data(features_tensor)
 
-def normalize_data(features_tensor):
+    return t_tensor, normalize_data(features_tensor, for_torch=for_torch)
+
+def normalize_data(features_tensor, for_torch=True):
     #normalizing features between 0 and 1
-    min_vals = torch.min(features_tensor, dim=0)[0]
-    max_vals = torch.max(features_tensor, dim=0)[0]
+    if for_torch:
+        min_vals = torch.min(features_tensor, dim=0)[0]
+        max_vals = torch.max(features_tensor, dim=0)[0]
+    else:
+        min_vals = tf.reduce_min(features_tensor, axis=0)
+        max_vals = tf.reduce_max(features_tensor, axis=0)
+    
     features_tensor = (features_tensor - min_vals) / (max_vals - min_vals)
     return features_tensor
 
@@ -134,16 +144,16 @@ def get_batch(data_tuple, batch_size, batch_range_idx=None, batch_range_time=Non
 
 if __name__ == "__main__":
     # Add your code here
-    savefile = False
+    savefile = True
     
-    data = load_data(2)
+    data = load_data(2, for_torch=False)
     plot_data(data)
 
     # train_data, val_data, test_data = simple_split(data, 3, 0)
     # train_data, val_data, test_data = val_shift_split(data, 3, .2)
 
     if savefile:
-        torch.save(data, "toydata_norm_0_1.pt")
+        torch.save(data, "toydata_norm_tensorflow.pt")
 
     
     
