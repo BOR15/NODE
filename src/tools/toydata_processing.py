@@ -41,16 +41,19 @@ def normalize_data(features_tensor, for_torch=True):
     return features_tensor
 
 
-def get_timestep(t_tensor):
-    timestep = torch.min(t_tensor[1:] - t_tensor[:-1])
+def get_timestep(t_tensor, for_torch=True):
+    if for_torch:
+        timestep = torch.min(t_tensor[1:] - t_tensor[:-1])
+    else:
+        timestep = tf.reduce_min(t_tensor[1:] - t_tensor[:-1])
     return timestep
 
 
-def simple_split(data_tuple, train_dur, val_dur=0, timestep=None):
+def simple_split(data_tuple, train_dur, val_dur=0, timestep=None, for_torch=True):
     t_tensor, features_tensor = data_tuple
     
     if not timestep:
-        timestep = get_timestep(t_tensor)
+        timestep = get_timestep(t_tensor, for_torch=for_torch)
     
     split_train = int(train_dur / timestep)
     split_val = int((val_dur + train_dur) / timestep)
@@ -64,11 +67,11 @@ def simple_split(data_tuple, train_dur, val_dur=0, timestep=None):
     return train_data, val_data, test_data
 
 
-def val_shift_split(data_tuple, train_dur, val_shift, timestep=None):
+def val_shift_split(data_tuple, train_dur, val_shift, timestep=None, for_torch=True):
     t_tensor, features_tensor = data_tuple
 
     if not timestep:
-        timestep = get_timestep(t_tensor)
+        timestep = get_timestep(t_tensor, for_torch=for_torch)
 
     #time to index
     split_train = int(train_dur / timestep)  
