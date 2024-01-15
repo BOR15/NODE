@@ -101,8 +101,9 @@ def main(num_neurons=50, num_epochs=50, learning_rate=0.01, train_duration=1.5, 
     # print(data,shape)
     # Plotting the losses
     toy = True
+    for_torch = False
     plot_data(data, toy=toy)
-    plot_actual_vs_predicted_full(data, tf.reshape(predicted, [1200,2]), toy=toy)
+    plot_actual_vs_predicted_full(data, tf.reshape(predicted, [1200,2]), toy=toy, for_torch=for_torch)
     # plot_phase_space(data, tf.reshape(predicted, [1200,2]))
     plot_training_vs_validation([train_losses, val_losses], share_axis=True)
     plt.show()
