@@ -26,6 +26,7 @@ class ODEFunc(nn.Module):
         return self.net(y)
 
 
+
 def main(num_neurons=50, num_epochs=50, learning_rate=0.01, train_duration=1.5, val_shift=0.1):
     """
     This function trains a PyTorch model using the given parameters and data.
@@ -37,10 +38,7 @@ def main(num_neurons=50, num_epochs=50, learning_rate=0.01, train_duration=1.5, 
         train_duration (float): Duration of the training data (default: 1.5).
         val_shift (float): Shift for the validation data (default: 0.1).
     """
-    
-    # Rest of the code...
-def main(num_neurons=50, num_epochs=50, learning_rate=0.01, train_duration=1.5, val_shift=0.1):
-    
+
     # Defining empty lists for the data
     train_losses = []
     val_losses = []
