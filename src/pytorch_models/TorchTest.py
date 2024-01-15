@@ -10,7 +10,39 @@ import matplotlib.pyplot as plt
 from tools.toydata_processing import get_batch
 from tools.misc import check_cuda, tictoc
 from tools.plots import *
+import csv
+import os
+import pandas
 
+
+class ModelLogger:
+    def __init__(self, log_file='model_log.csv', logging_enabled=True):
+        self.log_file = log_file
+        self.logging_enabled = logging_enabled
+        self.create_log_file()
+
+    def create_log_file(self):
+        """Create the log file """
+        if self.logging_enabled and not os.path.exists(self.log_file):
+            with open(self.log_file, mode='w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(["Hyperparameters", "Plot URLs"])
+
+    def log_model(self, hyperparameters, plot_urls):
+        """Log the hyperparameters and maybe future URL's?"""
+        if self.logging_enabled:
+            with open(self.log_file, mode='a', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow([str(hyperparameters), ', '.join(plot_urls)])
+                #also add the loss metric
+                writer.writerow([str(metric())])
+
+
+
+
+logger = ModelLogger(logging_enabled=True) #enable or disable the logger for your run
+
+def metric()
 
 class ODEFunc(nn.Module):
     """
@@ -58,7 +90,7 @@ class ODEFunc(nn.Module):
 
     
     
-def main(num_neurons=50, num_epochs=300, learning_rate=0.01, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, intermediate_pred_freq=0, live_plot=False):
+def main(num_neurons=50, num_epochs=20, learning_rate=0.005, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, intermediate_pred_freq=0, live_plot=False):
     """
     Main function for training and evaluating a PyTorch model using ODE integration.
 
@@ -86,7 +118,8 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, rel_tol=1e-7, abs_t
     
     #import preprocessed data
     # data = torch.load("NODE/Input_Data/toydata_norm_0_1.pt")
-    data = torch.load("NODE/Input_Data/real_data_scuffed1.pt")
+    # data = torch.load("NODE/Input_Data/real_data_scuffed1.pt")
+    data = torch.load("C:/Users/tomas\PycharmProjects/NODE\Input_Data/real_data_scuffed1.pt")
     num_feat = data[1].shape[1]
 
     #defining model, loss function and optimizer
