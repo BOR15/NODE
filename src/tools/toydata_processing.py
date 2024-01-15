@@ -156,7 +156,8 @@ if __name__ == "__main__":
     # train_data, val_data, test_data = val_shift_split(data, 3, .2)
 
     if savefile:
-        torch.save(data, "toydata_norm_tensorflow.pt")
+        tf.saved_model.save(data, "toydata_norm_tensorflow")
+        # torch.save(data, "toydata_norm_tensorflow.pt")
 
     
     

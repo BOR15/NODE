@@ -2,6 +2,7 @@ import torch
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt 
+import tensorflow as tf
 
 """
 READ THIS:
@@ -141,7 +142,10 @@ if __name__ == "__main__":
     # train_data, val_data, test_data = val_shift_split(data, 3, .2)
 
     if savefile:
+        # tf.saved_model.save(data, "real_data_scuffed1")
+
         torch.save(data, "real_data_scuffed1.pt")
+
 
     
     
