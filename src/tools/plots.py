@@ -26,10 +26,17 @@ def plot_data(data_tuple, toy=False):
     plt.legend()
 
 # plotting actual vs predicted values
-def plot_actual_vs_predicted_full(true_y, pred_y, num_feat=2, toy=False):
-    t = true_y[0].detach().numpy()
-    true_y = true_y[1].detach().numpy()
-    pred_y = pred_y.detach().numpy()
+def plot_actual_vs_predicted_full(true_y, pred_y, num_feat=2, toy=False, for_torch=True):
+    
+    if for_torch:
+        t = true_y[0].detach().numpy()
+        true_y = true_y[1].detach().numpy()
+        pred_y = pred_y.detach().numpy()
+
+    else:
+        t = true_y[0].numpy()
+        true_y = true_y[1].numpy()
+        pred_y = pred_y.numpy()
     
 
     fig, axes = plt.subplots(nrows=2, ncols=int(num_feat/2), figsize=(12, 8))
