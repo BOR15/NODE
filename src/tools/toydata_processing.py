@@ -147,16 +147,21 @@ def get_batch(data_tuple, batch_size, batch_range_idx=None, batch_range_time=Non
 
 if __name__ == "__main__":
     # Add your code here
-    savefile = True
+    savefile = False
     
     data = load_data(2, for_torch=False)
-    plot_data(data)
+    # plot_data(data)
 
     # train_data, val_data, test_data = simple_split(data, 3, 0)
     # train_data, val_data, test_data = val_shift_split(data, 3, .2)
 
+    # loaded_data = np.load('tensors.npz')
+    # data = (tf.convert_to_tensor(loaded_data['t']), tf.convert_to_tensor(loaded_data['features']))
+
     if savefile:
-        tf.saved_model.save(data, "toydata_norm_tensorflow")
+        t, features = data[0].numpy(), data[1].numpy()
+        np.savez('tensors.npz', t=t, features=features)
+
         # torch.save(data, "toydata_norm_tensorflow.pt")
 
     
