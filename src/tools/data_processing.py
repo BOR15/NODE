@@ -13,8 +13,14 @@ I have now started on this but still mess
 """
 
 # Testing testing how to commit and push 
+berend_path = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\Raw_Data\Dynamics40h17.csv"
+boris_path = "NODE/Input_Data/Raw_data/Dynamics40h17.csv"
+laetitia_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/Raw_Data/Dynamics40h17.csv"
 
-def load_data(filename="NODE/Input_Data/Raw_data/Dynamics40h17.csv", shift=0, start=300):
+berend_scufed = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\real_data_scuffed2.pt"
+boris_scufed = "real_data_scuffed2.pt"
+
+def load_data(filename=laetitia_path, shift=0, start=300):
     # Import data
     data = pd.read_csv(filename, delimiter=',')
 
@@ -31,7 +37,7 @@ def load_data(filename="NODE/Input_Data/Raw_data/Dynamics40h17.csv", shift=0, st
     features_tensor = torch.tensor(data.iloc[start:, 2+shift:27+shift:5].values, dtype=torch.float32)
     print(features_tensor.shape, t_tensor.shape)
     print(features_tensor[0], t_tensor[0])
-    features_tensor = normalize_data(features_tensor)
+    features_tensor = normalize_data_mean_0(features_tensor)
     return t_tensor, features_tensor
 
 def normalize_data(features_tensor):
@@ -42,6 +48,17 @@ def normalize_data(features_tensor):
     features_tensor = (features_tensor - min_vals) / (max_vals - min_vals)
     return features_tensor
 
+def normalize_data_mean_0(features_tensor, for_torch=True):
+    #normalizing features between 0 and 1
+    if for_torch:
+        mean_vals = torch.mean(features_tensor, dim=0)
+        std_vals = torch.std(features_tensor, dim=0)
+    else:
+        mean_vals = tf.reduce_mean(features_tensor, axis=0)
+        std_vals = tf.math.reduce_std(features_tensor, axis=0)
+    
+    features_tensor = (features_tensor - mean_vals) / std_vals
+    return features_tensor
 
 def get_timestep(t_tensor):
     timestep = torch.min(t_tensor[1:] - t_tensor[:-1])
@@ -145,7 +162,7 @@ if __name__ == "__main__":
     if savefile:
         # tf.saved_model.save(data, "real_data_scuffed1")
 
-        torch.save(data, "real_data_scuffed1.pt")
+        torch.save(data, berend_scufed)
 
 
     
