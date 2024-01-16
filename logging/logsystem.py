@@ -38,6 +38,14 @@ def addfeature(csv_file, name, default):
     
 file = "/Users/rainiervantrigt/Documents/GitHub/NODE/log.csv"
 
+def saveplot(plt, letter):
+    os.makedirs(Node/logging/Plots, exist_ok=True)
+    df = pd.read_csv('log.csv')
+    number = len(df)
+    index = letter + number
+    filename = f"plot_{index}.png"
 
+    # Save the plot
+    plt.savefig(os.path.join(save_dir, filename))
 # Add a new feature to the CSV file
 addfeature(file, "feature4", "aarsbaviaan")

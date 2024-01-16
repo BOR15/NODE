@@ -7,7 +7,7 @@ from tensorflow_models.Tensor_base_model import main as tensor_base_model
 def main():
     # torch_base_model()
     
-    torch_test_model(num_epochs=10, learning_rate=0.0003, intermediate_pred_freq=300)
+    torch_test_model(num_epochs=1000, learning_rate=0.0003, intermediate_pred_freq=300)
     # tensor_base_model(num_epochs=5, learning_rate=0.0003)
     #testing git
 
