@@ -134,7 +134,37 @@ def get_batch(data_tuple, batch_size, batch_range_idx=None, batch_range_time=Non
 
 # train_data, val_data, test_data = val_shift_split(3, 0)
 
+def get_batch_tensorflow(data_tuple, batch_size, batch_range_idx=None, batch_range_time=None, batch_dur_idx=None, batch_dur_time=None, timestep=None, device="/GPU:0"):
+    """This is basically the same as get_batch, but it is implemented for TensorFLow"""
+    t_tensor, features_tensor = data_tuple
 
+    if not timestep and (not batch_dur_idx or not batch_range_idx):
+        timestep = get_timestep(t_tensor, for_torch=False)
+    
+    if not batch_dur_idx:
+        if not batch_dur_time:
+            print("batch_dur_idx and batch_dur_time are both None, please specify one of them")
+            return None     
+        batch_dur_idx = int(batch_dur_time / timestep)
+
+    if not batch_range_idx:
+        if not batch_range_time:
+            print("batch_range_idx and batch_range_time are both None, please specify one of them")
+            return None
+        batch_range_idx = int(batch_range_time / timestep) 
+    
+    s = tf.convert_to_tensor(np.random.choice(np.arange(batch_range_idx - batch_dur_idx, dtype=np.int64), batch_size, replace=False))
+
+    # creating a list of values from features_tensor (this should be the same as the torch.stack expression given in get_batch)
+    x = []
+    for index in s:
+        for i in range(batch_dur_idx):
+            y = features_tensor[index+i]
+            x.append(y)
+    with tf.device(device):
+        batch_t = t_tensor[:batch_dur_idx]
+        batch_y = tf.stack(x, axis=0)
+    return batch_t, batch_y
 
 # batch_time = 20
 # batch_size = 50
