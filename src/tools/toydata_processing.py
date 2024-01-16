@@ -40,6 +40,18 @@ def normalize_data(features_tensor, for_torch=True):
     features_tensor = (features_tensor - min_vals) / (max_vals - min_vals)
     return features_tensor
 
+def normalize_data_mean_0(features_tensor, for_torch=True):
+    #normalizing features between 0 and 1
+    if for_torch:
+        mean_vals = torch.mean(features_tensor, dim=0)
+        std_vals = torch.std(features_tensor, dim=0)
+    else:
+        mean_vals = tf.reduce_mean(features_tensor, axis=0)
+        std_vals = tf.math.reduce_std(features_tensor, axis=0)
+    
+    features_tensor = (features_tensor - mean_vals) / std_vals
+    return features_tensor
+
 
 def get_timestep(t_tensor, for_torch=True):
     if for_torch:

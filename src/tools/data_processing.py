@@ -34,7 +34,7 @@ def load_data(filename=laetitia_path, shift=0, start=300):
     features_tensor = torch.tensor(data.iloc[start:, 2+shift:27+shift:5].values, dtype=torch.float32)
     print(features_tensor.shape, t_tensor.shape)
     print(features_tensor[0], t_tensor[0])
-    features_tensor = normalize_data(features_tensor)
+    features_tensor = normalize_data_mean_0(features_tensor)
     return t_tensor, features_tensor
 
 def normalize_data(features_tensor):
@@ -45,6 +45,17 @@ def normalize_data(features_tensor):
     features_tensor = (features_tensor - min_vals) / (max_vals - min_vals)
     return features_tensor
 
+def normalize_data_mean_0(features_tensor, for_torch=True):
+    #normalizing features between 0 and 1
+    if for_torch:
+        mean_vals = torch.mean(features_tensor, dim=0)
+        std_vals = torch.std(features_tensor, dim=0)
+    else:
+        mean_vals = tf.reduce_mean(features_tensor, axis=0)
+        std_vals = tf.math.reduce_std(features_tensor, axis=0)
+    
+    features_tensor = (features_tensor - mean_vals) / std_vals
+    return features_tensor
 
 def get_timestep(t_tensor):
     timestep = torch.min(t_tensor[1:] - t_tensor[:-1])
@@ -148,7 +159,7 @@ if __name__ == "__main__":
     if savefile:
         # tf.saved_model.save(data, "real_data_scuffed1")
 
-        torch.save(data, "real_data_scuffed1.pt")
+        torch.save(data, "real_data_scuffed2.pt")
 
 
     
