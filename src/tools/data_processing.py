@@ -12,7 +12,8 @@ This stuff hasnt been worked on yet, right now its just an old copy of toydata_p
 I have now started on this but still mess 
 """
 
-# Testing testing how to commit and push 
+laetitia_data = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/Raw_Data/Dynamics40h17.csv"
+boris_data = "NODE/Input_Data/Raw_data/Dynamics40h17.csv"
 
 def load_data(filename="Input_Data/Raw_data/Dynamics40h17.csv", shift=0, start=300):
     # Import data
