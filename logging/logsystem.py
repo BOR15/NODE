@@ -41,7 +41,9 @@ file = "/Users/rainiervantrigt/Documents/GitHub/NODE/log.csv"
 def saveplot(plt, letter):
     os.makedirs(Node/logging/Plots, exist_ok=True)
     df = pd.read_csv('log.csv')
-    number = len(df)
+    number = str(len(df))
+    while len(number) < 10:
+        number = "0" + number
     index = letter + number
     filename = f"plot_{index}.png"
 
