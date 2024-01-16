@@ -13,8 +13,9 @@ I have now started on this but still mess
 """
 
 # Testing testing how to commit and push 
-
-def load_data(filename="NODE/Input_Data/Raw_data/Dynamics40h17.csv", shift=0, start=300):
+berend_filepath = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\Raw_Data\Dynamics40h17.csv"
+boris_filepath = "NODE/Input_Data/Raw_data/Dynamics40h17.csv"
+def load_data(filename=berend_filepath, shift=0, start=300):
     # Import data
     data = pd.read_csv(filename, delimiter=',')
 
