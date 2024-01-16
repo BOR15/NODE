@@ -4,7 +4,6 @@ from tfdiffeq import odeint
 import pandas as pd
 import matplotlib.pyplot as plt
 import torch
-import tensorflow_datasets as tfds
 import numpy as np
 from tools.toydata_processing import val_shift_split
 from tools.plots import *
@@ -13,6 +12,7 @@ from time import perf_counter as time
 from keras.layers import Dense
 from keras.activations import tanh
 # odeint(func, yo, t)
+
 
 # class odeint, build model.
 class ODEfunctens(keras.Model):
@@ -50,7 +50,8 @@ def main(num_neurons=50, num_epochs=50, learning_rate=0.01, train_duration=1.5, 
     val_losses = []
 
     # loading in the data, maybe this needs to be done through tensorflow (tfds.load but this creates a tensorflow dataset)
-    loaded_data = np.load('Input_Data/tensors.npz')
+    
+    loaded_data = np.load("Input_Data/tensors.npz")
     data = (tf.convert_to_tensor(loaded_data['t']), tf.convert_to_tensor(loaded_data['features']))
     train_data, val_data, test_data = val_shift_split(data, train_dur=train_duration, val_shift=val_shift, for_torch=for_torch)
 
