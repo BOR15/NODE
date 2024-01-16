@@ -39,17 +39,12 @@ def addcolumn(csv_file, name, default):
     
 # file = "/Users/rainiervantrigt/Documents/GitHub/NODE/log.csv"
 
-def saveplot(plt, letter):
-    # os.makedirs("Node/logging/Plots", exist_ok=True)
-    df = pd.read_csv('log.csv')
+def saveplot(plt, foldername):
+    df = pd.read_csv('logging/log.csv')
     number = str(len(df))
-    while len(number) < 10:
-        number = "0" + number
-    index = letter + number
-    filename = f"plot_{index}.png"
-
+    filename = f"logging/{foldername}/{number}.png"
     # Save the plot
-    plt.savefig("".join(("Plots/", filename)))
+    plt.savefig(filename)
 # Add a new feature to the CSV file
 
 
@@ -65,6 +60,6 @@ plt.title("Random Scatter Plot")
 plt.xlabel("X-axis")
 plt.ylabel("Y-axis")
 
-saveplot(plt, 'A')
+saveplot(plt, 'folder1')
 # Show the plot
 plt.show()
