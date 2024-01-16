@@ -39,7 +39,7 @@ def plot_actual_vs_predicted_full(true_y, pred_y, num_feat=2, toy=False, for_tor
         pred_y = pred_y.numpy()
     
 
-    fig, axes = plt.subplots(nrows=2, ncols=int(num_feat/2), figsize=(12, 8))
+    fig, axes = plt.subplots(nrows=int((num_feat+1)//2), ncols=2, figsize=(12, 8))
     fig.suptitle('Actual vs Predicted Features Full')
 
     if toy:
@@ -48,6 +48,8 @@ def plot_actual_vs_predicted_full(true_y, pred_y, num_feat=2, toy=False, for_tor
         feature_names = ['Angle (Delta)', 'frequency (f)', 'Voltage (V)', 'Power (P)', 'Reactive power (Q)']
 
     for i, ax in enumerate(axes.flatten()):
+        if i == 5:
+            break
         ax.plot(t, true_y[:,i], label='Actual ' + feature_names[i])
         ax.plot(t, pred_y[:,i], label='Predicted ' + feature_names[i], linestyle='--')
         ax.set_xlabel('Time (s)')
