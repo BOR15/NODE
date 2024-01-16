@@ -1,6 +1,7 @@
 from pytorch_models.Torch_base_model import main as torch_base_model
 from pytorch_models.TorchTest import main as torch_test_model
 from tensorflow_models.Tensor_base_model import main as tensor_base_model
+from tensorflow_models.TensorTest import main as tensor_test_model
 
 #run everything from here
 
