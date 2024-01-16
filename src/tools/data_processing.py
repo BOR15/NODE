@@ -17,6 +17,9 @@ berend_path = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\Raw_Data\Dynamic
 boris_path = "NODE/Input_Data/Raw_data/Dynamics40h17.csv"
 laetitia_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/Raw_Data/Dynamics40h17.csv"
 
+berend_scufed = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\real_data_scuffed2.pt"
+boris_scufed = "real_data_scuffed2.pt"
+
 def load_data(filename=laetitia_path, shift=0, start=300):
     # Import data
     data = pd.read_csv(filename, delimiter=',')
@@ -159,7 +162,7 @@ if __name__ == "__main__":
     if savefile:
         # tf.saved_model.save(data, "real_data_scuffed1")
 
-        torch.save(data, "real_data_scuffed2.pt")
+        torch.save(data, berend_scufed)
 
 
     
