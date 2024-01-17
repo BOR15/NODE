@@ -7,7 +7,7 @@ import numpy as np
 from time import perf_counter as time
 import matplotlib.pyplot as plt
 
-from tools.toydata_processing import get_batch, get_batch2
+from tools.data_processing import get_batch, get_batch2, get_batch3
 from tools.misc import check_cuda, tictoc
 from tools.plots import *
 
@@ -57,8 +57,8 @@ class ODEFunc(nn.Module):
 
 
     
-    
-def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batch_dur_idx=20, batch_range_idx=500, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, mert_batch=False, intermediate_pred_freq=0, live_plot=False):
+        
+def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batch_dur_idx=20, batch_range_idx=500, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, mert_batch_scuffed=False, mert_batch=False, intermediate_pred_freq=0, live_plot=False):
     """
     Main function for training and evaluating a PyTorch model using ODE integration.
 
@@ -89,7 +89,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
     laetitia_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/real_data_scuffed40h17_avg.pt"
     boris_path = "NODE/Input_Data/real_data_scuffed1.pt"
 
-    data = torch.load("Input_Data/toydata_norm_0_1.pt")
+    data = torch.load("NODE/Input_Data/toydata_norm_0_1.pt")
     num_feat = data[1].shape[1]
 
     #defining model, loss function and optimizer
@@ -119,7 +119,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
         # pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
         
         
-        if mert_batch: #this right now forces the code to unparaledize, which is makes it really slow but maybe i can change odeint sourcecode so it works.
+        if mert_batch_scuffed: #this right now forces the code to unparaledize, which is makes it really slow but maybe i can change odeint sourcecode so it works.
             #get batch
             s, t, features = get_batch2(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
             pred_y = []
@@ -128,6 +128,26 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
                 #doing predict
                 pred_y.append(odeint(net, data[1][0], t[i], rtol=rel_tol, atol=abs_tol, method="dopri5")[-20:])
             pred_y = torch.stack(pred_y).reshape(20, 50, 5)
+        
+        elif mert_batch:
+            #get batch
+            s, t, features = get_batch3(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
+            #doing predict
+            pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
+
+            pred_y_cut = torch.zeros_like(pred_y)[:20,:,:]
+            
+            # i think this is slower then the advanced indexing but im not sure
+            # for i in range(batch_size):
+            #     pred_y_cut[:,i,:] = pred_y[:,i,:][s[i]:s[i]+batch_dur_idx]
+            # pred_y = pred_y_cut
+
+            range_tensor = torch.arange(0, batch_dur_idx, device=device)
+            index_tensor = s[:, None] + range_tensor[None, :]
+            pred_y_cut = pred_y.gather(0, index_tensor[:, :, None].expand(-1, -1, pred_y.size(2)))
+            pred_y = pred_y_cut.transpose(0, 1)
+            
+
         else:
             #get batch
             t, features = get_batch(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
@@ -186,14 +206,11 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
     # Plotting 
     plot_data(data, toy=True)
     plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, toy=True)
-    # plot_phase_space(data, predicted)
+    plot_phase_space(data, predicted)
     plot_training_vs_validation([train_losses, val_losses], share_axis=True)
     plt.show(block=True)
 
-    model_parameters = net.state_dict()
-    print(model_parameters)
-    # predicted, features = predicted.numpy(), data[1].numpy()
-    # np.savez('tensors.npz', prediction=predicted, model=features)
+    
 
 
 
