@@ -7,7 +7,7 @@ import numpy as np
 from time import perf_counter as time
 import matplotlib.pyplot as plt
 
-from tools.toydata_processing import get_batch
+from tools.toydata_processing import get_batch, get_batch2
 from tools.misc import check_cuda, tictoc
 from tools.plots import *
 
@@ -58,7 +58,7 @@ class ODEFunc(nn.Module):
 
     
     
-def main(num_neurons=50, num_epochs=300, learning_rate=0.01, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, intermediate_pred_freq=0, live_plot=False):
+def main(num_neurons=50, num_epochs=300, learning_rate=0.01, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, mert_batch=False, intermediate_pred_freq=0, live_plot=False):
     """
     Main function for training and evaluating a PyTorch model using ODE integration.
 
@@ -90,7 +90,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, rel_tol=1e-7, abs_t
     laetitia_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/real_data_scuffed1.pt"
     boris_path = "NODE/Input_Data/real_data_scuffed1.pt"
 
-    data = torch.load(laetitia_path)
+    data = torch.load("NODE/Input_Data/real_data_scuffed1.pt")
     num_feat = data[1].shape[1]
 
     #defining model, loss function and optimizer
@@ -112,12 +112,25 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, rel_tol=1e-7, abs_t
 
     #training loop
     for epoch in range(num_epochs):
-        #get batch
-        t, features = get_batch(data, batch_size = 50, batch_dur_idx = 20, batch_range_idx=500, device=device)
+        
 
         #training
         optimizer.zero_grad()
-        pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
+
+        # pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
+        
+        
+        if mert_batch:
+            s, t, features = get_batch2(data, batch_size = 50, batch_dur_idx = 20, batch_range_idx=500, device=device)
+            pred_y = []
+            for i in range(50):
+                pred_y.append(odeint(net, data[1][0], t[i], rtol=rel_tol, atol=abs_tol, method="dopri5")[-20:])
+            pred_y = torch.stack(pred_y).reshape(20, 50, 5)
+        else:
+            t, features = get_batch(data, batch_size = 50, batch_dur_idx = 20, batch_range_idx=500, device=device)
+            pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
+
+        
         loss = loss_function(pred_y, features)
         loss.backward()
         optimizer.step()
@@ -167,11 +180,11 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, rel_tol=1e-7, abs_t
 
 
     # Plotting 
-    plot_data(data)
-    plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat)
-    # plot_phase_space(data, predicted)
-    plot_training_vs_validation([train_losses, val_losses], share_axis=True)
-    plt.show(block=True)
+    # plot_data(data)
+    # plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat)
+    # # plot_phase_space(data, predicted)
+    # plot_training_vs_validation([train_losses, val_losses], share_axis=True)
+    # plt.show(block=True)
 
 
 

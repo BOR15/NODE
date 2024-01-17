@@ -144,6 +144,34 @@ def get_batch(data_tuple, batch_size, batch_range_idx=None, batch_range_time=Non
     batch_y = torch.stack([features_tensor[s + i] for i in range(batch_dur_idx)], dim=0)  # (T, M, D)
     return batch_t.to(device), batch_y.to(device)
 
+
+def get_batch2(data_tuple, batch_size, batch_range_idx=None, batch_range_time=None, batch_dur_idx=None, batch_dur_time=None, timestep=None, device=torch.device("cpu")):
+    #maybe later improve:  when using time do math using time then convert to index to reduce rounding errors
+    t_tensor, features_tensor = data_tuple
+
+    if not timestep and (not batch_dur_idx or not batch_range_idx):
+        timestep = get_timestep(t_tensor)
+
+    if not batch_dur_idx:
+        if not batch_dur_time:
+            print("batch_dur_idx and batch_dur_time are both None, please specify one of them")
+            return None
+        batch_dur_idx = int(batch_dur_time / timestep)
+
+    if not batch_range_idx:
+        if not batch_range_time:
+            print("batch_range_idx and batch_range_time are both None, please specify one of them")
+            return None
+        batch_range_idx = int(batch_range_time / timestep)
+
+
+    s = torch.from_numpy(np.random.choice(np.arange(batch_range_idx - batch_dur_idx, dtype=np.int64), batch_size, replace=False))
+    
+    batch_t = [t_tensor[0:s[i]+batch_dur_idx] for i in range(batch_size)] # (T)
+    batch_y = torch.stack([features_tensor[s + i] for i in range(batch_dur_idx)], dim=0)  # (T, M, D)
+    return s, batch_t, batch_y.to(device)
+
+
 # train_data, val_data, test_data = val_shift_split(3, 0)
 
 
