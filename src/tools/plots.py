@@ -24,6 +24,7 @@ def plot_data(data_tuple, toy=False):
     plt.xlabel('Time (seconds)')
     plt.ylabel('Feature Values')
     plt.legend()
+    
 
 # plotting actual vs predicted values
 def plot_actual_vs_predicted_full(true_y, pred_y, num_feat=2, toy=False, for_torch=True):

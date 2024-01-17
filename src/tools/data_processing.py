@@ -12,7 +12,6 @@ This stuff hasnt been worked on yet, right now its just an old copy of toydata_p
 I have now started on this but still mess 
 """
 
-# Testing testing how to commit and push 
 berend_path = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\Raw_Data\Dynamics40h17.csv"
 boris_path = "NODE/Input_Data/Raw_data/Dynamics40h17.csv"
 laetitia_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/Raw_Data/Dynamics40h17.csv"
@@ -40,6 +39,36 @@ def load_data(filename=laetitia_path, shift=0, start=300):
     features_tensor = normalize_data_mean_0(features_tensor)
     return t_tensor, features_tensor
 
+
+def load_data_avg_duplicates(filename=laetitia_path, shift=0, start=300):
+    '''
+    Averages the duplicate time points rather than deleting them.
+    Also fixes time points to be evenly spaced.
+    '''
+    # Import data
+    data = pd.read_csv(filename, delimiter=',')
+
+    # Check for duplicates
+    duplicates = data.duplicated(subset=['t'])
+    if duplicates.any():
+        print("Duplicates found in the time axis. Averaging duplicates...")
+        data = data.groupby('t', as_index=False).mean()
+    else:
+        print("No duplicates found in the time axis.")
+
+    # Replace old time column with evenly spaced time series
+    new_time_series = pd.Series(np.linspace(data['t'].iloc[0], data['t'].iloc[-1], len(data)))
+    data['t'] = new_time_series
+
+    # Defining tensors
+    t_tensor = torch.tensor(data.iloc[start:, 1].values, dtype=torch.float32)
+    features_tensor = torch.tensor(data.iloc[start:, 2+shift:27+shift:5].values, dtype=torch.float32)
+    print(features_tensor.shape, t_tensor.shape)
+    print(features_tensor[0], t_tensor[0])
+    features_tensor = normalize_data_mean_0(features_tensor)
+    return t_tensor, features_tensor
+
+
 def normalize_data(features_tensor):
     #normalizing features between 0 and 1
     min_vals = torch.min(features_tensor, dim=0)[0]
@@ -48,8 +77,9 @@ def normalize_data(features_tensor):
     features_tensor = (features_tensor - min_vals) / (max_vals - min_vals)
     return features_tensor
 
+
 def normalize_data_mean_0(features_tensor, for_torch=True):
-    #normalizing features between 0 and 1
+    #normalizing features with mean 0 and std 1
     if for_torch:
         mean_vals = torch.mean(features_tensor, dim=0)
         std_vals = torch.std(features_tensor, dim=0)
@@ -60,9 +90,13 @@ def normalize_data_mean_0(features_tensor, for_torch=True):
     features_tensor = (features_tensor - mean_vals) / std_vals
     return features_tensor
 
+
 def get_timestep(t_tensor):
     timestep = torch.min(t_tensor[1:] - t_tensor[:-1])
     return timestep
+
+
+# Try fixing the time points
 
 
 def simple_split(data_tuple, train_dur, val_dur=0, timestep=None):
@@ -152,7 +186,8 @@ if __name__ == "__main__":
     # Add your code here
     savefile = True
     
-    data = load_data()
+    # data = load_data()
+    data = load_data_avg_duplicates()
     plot_data(data)
     plt.show()
 
@@ -162,7 +197,7 @@ if __name__ == "__main__":
     if savefile:
         # tf.saved_model.save(data, "real_data_scuffed1")
 
-        torch.save(data, berend_scufed)
+        torch.save(data, "real_data_scuffed2.pt")
 
 
     
