@@ -50,3 +50,6 @@ def id():
     return len(pd.read_csv('logging/log.csv'))
 
 
+
+
+torch.save(model, f"logging/Models/{id}")

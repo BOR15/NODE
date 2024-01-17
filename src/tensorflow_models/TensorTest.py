@@ -36,7 +36,7 @@ class ODEfunctens(keras.Model):
 
 
 
-def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, intermediate_pred_freq=0, live_plot=False):
+def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batch_dur_idx=20, batch_range_idx=500, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, intermediate_pred_freq=0, live_plot=False):
     """
     Main function for training and evaluating a TensorFlow model using ODE integration.
 
@@ -66,7 +66,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, rel_
     device = 'CPU'
 
     # data loading
-    loaded_data = np.load("Input_Data/tensors.npz") # needs to become the data for the real data
+    loaded_data = np.load("NODE/Input_Data/tensors.npz") # needs to become the data for the real data
     data = (tf.convert_to_tensor(loaded_data['t']), tf.convert_to_tensor(loaded_data['features']))
     num_feat = data[1].shape[1]
     with tf.device(device):
@@ -90,7 +90,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, rel_
         for epoch in range(num_epochs):
 
             # get features and timestamps for batches
-            t, features = get_batch_tensorflow(data, batch_size=batch_size, batch_dur_idx = 20, batch_range_idx=500, device=device)
+            t, features = get_batch_tensorflow(data, batch_size=batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
             # print("feature shape", features.shape)
 
             with tf.GradientTape() as tape:
@@ -102,8 +102,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, rel_
 
             # gradient of trainable weights with resprect to loss
             # done using gradient tape.
-            grads = tape.gradient(loss, model.trainable_weights)
-
+            grads = tape.gradient(loss, model.trainable_weights)            
             optimizer.apply_gradients(zip(grads, model.trainable_weights))
 
             # saving losses
