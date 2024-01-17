@@ -76,6 +76,9 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
     Returns:
         None
     """
+
+
+
     #MT
     train_losses_cache = []
     train_losses = []
@@ -182,11 +185,30 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
         evaluation_loss = loss_function(predicted, data[1]).item()
     print(f"Mean Squared Error Loss: {evaluation_loss}")
 
+
+
+    id = id()
+
+    logdict = {
+        "num_neurons" : num_neurons,
+        "num_epochs" : num_epochs,
+        "learning_rate" : learning_rate,
+        "batch_size" : batch_size,
+        "batch_dur_idx" : batch_dur_idx,
+        "batch_range_idx" : batch_range_idx,
+        "rel_tol" : rel_tol,
+        "abs_tol" : abs_tol,
+        "val_freq" : val_freq,
+        "mert_batch" : mert_batch,
+        "loss_function" : loss_function,
+        "optimizer" : optimizer
+
+    }
     # saving model and predict
     if savemodel:
-        torch.save(net, "testing_model_save.pth")
+        torch.save(net,  f"logging/Models/{id}.pth")
     if savepredict:
-        torch.save(predicted, "testing_pred_save.pt")
+        torch.save(predicted, f"logging/Predictions/{id}.pt")
 
 
 
