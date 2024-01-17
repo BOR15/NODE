@@ -7,7 +7,7 @@ import numpy as np
 from time import perf_counter as time
 import matplotlib.pyplot as plt
 
-from tools.toydata_processing import get_batch, get_batch2
+from tools.data_processing import get_batch, get_batch2, get_batch3
 from tools.misc import check_cuda, tictoc
 from tools.plots import *
 
@@ -58,7 +58,7 @@ class ODEFunc(nn.Module):
 
     
     
-def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batch_dur_idx=20, batch_range_idx=500, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, mert_batch=False, intermediate_pred_freq=0, live_plot=False):
+def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batch_dur_idx=20, batch_range_idx=500, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, mert_batch_scuffed=False, mert_batch=False, intermediate_pred_freq=0, live_plot=False):
     """
     Main function for training and evaluating a PyTorch model using ODE integration.
 
@@ -119,7 +119,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
         # pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
         
         
-        if mert_batch: #this right now forces the code to unparaledize, which is makes it really slow but maybe i can change odeint sourcecode so it works.
+        if mert_batch_scuffed: #this right now forces the code to unparaledize, which is makes it really slow but maybe i can change odeint sourcecode so it works.
             #get batch
             s, t, features = get_batch2(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
             pred_y = []
@@ -128,6 +128,11 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
                 #doing predict
                 pred_y.append(odeint(net, data[1][0], t[i], rtol=rel_tol, atol=abs_tol, method="dopri5")[-20:])
             pred_y = torch.stack(pred_y).reshape(20, 50, 5)
+        elif mert_batch:
+            #get batch
+            t, features = get_batch3(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
+            #doing predict
+            pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
         else:
             #get batch
             t, features = get_batch(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
