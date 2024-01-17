@@ -93,7 +93,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
     num_feat = data[1].shape[1]
 
     #defining model, loss function and optimizer
-    net = ODEFunc(50, num_feat, device=device)
+    net = ODEFunc(num_neurons, num_feat, device=device)
     loss_function = nn.MSELoss()
     optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
 
@@ -190,10 +190,8 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
     plot_training_vs_validation([train_losses, val_losses], share_axis=True)
     plt.show(block=True)
 
-    model_parameters = net.state_dict()
-    print(model_parameters)
-    # predicted, features = predicted.numpy(), data[1].numpy()
-    # np.savez('tensors.npz', prediction=predicted, model=features)
+    
+    
 
 
 
