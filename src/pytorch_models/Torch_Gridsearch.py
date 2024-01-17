@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 from time import perf_counter as time
 import matplotlib.pyplot as plt
+from logging.logsystem import saveplot, addcolumn, addlog, id
 
 from tools.toydata_processing import get_batch, get_batch2
 from tools.misc import check_cuda, tictoc
@@ -214,11 +215,16 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
 
     # Plotting 
     # TODO add saving for the plots.
-    plot_data(data)
-    plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat)
-    plot_training_vs_validation([train_losses, val_losses], share_axis=True)
+        
+    saveplot(plot_training(train_losses), "TrainingLoss", id)
+    saveplot(plot_validation(val_losses), "ValidationLoss", id)
+    saveplot(plot_actual_vs_predicted_full("true_y, pred_y, num_feat=2, toy=False, for_torch=True"), "FullPredictions", id)
 
-    plt.show(block=True) #Ig we dont need this to save the graphs?
+    # plot_data(data)
+    # plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat)
+    # plot_training_vs_validation([train_losses, val_losses], share_axis=True)
+
+    # plt.show(block=True) #Ig we dont need this to save the graphs?
 
     
     
