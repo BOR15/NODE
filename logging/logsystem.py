@@ -37,7 +37,6 @@ def addcolumn(csv_file, name, default):
     # Save the updated DataFrame to the CSV file
     df.to_csv(csv_file, index=False)
     
-# file = "/Users/rainiervantrigt/Documents/GitHub/NODE/log.csv"
 
 def saveplot(plt, foldername):
     df = pd.read_csv('logging/log.csv')
@@ -45,21 +44,9 @@ def saveplot(plt, foldername):
     filename = f"logging/{foldername}/{number}.png"
     # Save the plot
     plt.savefig(filename)
-# Add a new feature to the CSV file
 
 
-# Generate random data
-x = np.random.rand(100)  # 100 random points for x-axis
-y = np.random.rand(100)  # 100 random points for y-axis
+def id():
+    return len(pd.read_csv('logging/log.csv'))
 
-# Create a scatter plot
-plt.scatter(x, y)
 
-# Add titles and labels (optional)
-plt.title("Random Scatter Plot")
-plt.xlabel("X-axis")
-plt.ylabel("Y-axis")
-
-saveplot(plt, 'folder1')
-# Show the plot
-plt.show()
