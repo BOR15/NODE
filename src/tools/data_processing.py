@@ -211,7 +211,7 @@ def get_batch3(data_tuple, batch_size, batch_range_idx=None, batch_range_time=No
     s = torch.from_numpy(np.random.choice(np.arange(batch_range_idx - batch_dur_idx, dtype=np.int64), batch_size, replace=False))
     batch_t = t_tensor[:batch_range_idx]  # (T)
     batch_y = torch.stack([features_tensor[s + i] for i in range(batch_dur_idx)], dim=0)  # (T, M, D)
-    return batch_t.to(device), batch_y.to(device)
+    return s, batch_t.to(device), batch_y.to(device)
 
 # with seperate axis but not working
 # def plot_data(data_tuple):
