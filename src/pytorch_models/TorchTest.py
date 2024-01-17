@@ -58,7 +58,7 @@ class ODEFunc(nn.Module):
 
     
     
-def main(num_neurons=50, num_epochs=300, learning_rate=0.01, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, mert_batch=False, intermediate_pred_freq=0, live_plot=False):
+def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batch_dur_idx=20, batch_range_idx=500, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, mert_batch=False, intermediate_pred_freq=0, live_plot=False):
     """
     Main function for training and evaluating a PyTorch model using ODE integration.
 
@@ -119,14 +119,19 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, rel_tol=1e-7, abs_t
         # pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
         
         
-        if mert_batch:
-            s, t, features = get_batch2(data, batch_size = 50, batch_dur_idx = 20, batch_range_idx=500, device=device)
+        if mert_batch: #this right now forces the code to unparaledize, which is makes it really slow but maybe i can change odeint sourcecode so it works.
+            #get batch
+            s, t, features = get_batch2(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
             pred_y = []
-            for i in range(50):
+            #loop through minibatches
+            for i in range(batch_size):
+                #doing predict
                 pred_y.append(odeint(net, data[1][0], t[i], rtol=rel_tol, atol=abs_tol, method="dopri5")[-20:])
             pred_y = torch.stack(pred_y).reshape(20, 50, 5)
         else:
-            t, features = get_batch(data, batch_size = 50, batch_dur_idx = 20, batch_range_idx=500, device=device)
+            #get batch
+            t, features = get_batch(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
+            #doing predict
             pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
 
         
@@ -179,11 +184,16 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, rel_tol=1e-7, abs_t
 
 
     # Plotting 
-    # plot_data(data)
-    # plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat)
-    # # plot_phase_space(data, predicted)
-    # plot_training_vs_validation([train_losses, val_losses], share_axis=True)
-    # plt.show(block=True)
+    plot_data(data)
+    plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat)
+    # plot_phase_space(data, predicted)
+    plot_training_vs_validation([train_losses, val_losses], share_axis=True)
+    plt.show(block=True)
+
+    model_parameters = net.state_dict()
+    print(model_parameters)
+    # predicted, features = predicted.numpy(), data[1].numpy()
+    # np.savez('tensors.npz', prediction=predicted, model=features)
 
 
 
