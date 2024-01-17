@@ -1,19 +1,16 @@
 # from pytorch_models.Torch_base_model import main as torch_base_model
-from pytorch_models.TorchTest import main as torch_test_model
-from pytorch_models.Torch_Gridsearch import main as torch_gridsearch_model
+# from pytorch_models.TorchTest import main as torch_test_model
 
 # from tensorflow_models.Tensor_base_model import main as tensor_base_model
 from tensorflow_models.TensorTest import main as tensor_test_model
-
-
+from pytorch_models.Torch_Toy_Model import main as torch_toy_model
 #run everything from here
 
 def main():
     # torch_base_model()
-    torch_gridsearch_model(num_epochs=300, learning_rate=0.001)
-
-    # torch_test_model(num_epochs=30, learning_rate=0.0003)
-    # tensor_test_model(num_epochs=5, learning_rate=0.0003)
+    
+    torch_toy_model(num_epochs=30, learning_rate=0.0003) #, intermediate_pred_freq=300)
+    tensor_test_model(num_epochs=30, learning_rate=0.0003)
     #testing git
 
 
