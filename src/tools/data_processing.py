@@ -74,7 +74,7 @@ def load_data_avg_duplicates(filename= berend_path, shift=0, start=300):
     return t_tensor, features_tensor
 
 #added the following to interpolate the features for a smoother graph
-def interpolate_features(t_tensor, features_tensor, num_sample_points=100):
+def interpolate_features(t_tensor, features_tensor, num_sample_points=1024):
     """
     Linearly interpolate missing values in the features_tensor based on the time points in t_tensor.
     Sample 'num_sample_points' evenly spaced points from the interpolated result.
@@ -94,6 +94,26 @@ def interpolate_features(t_tensor, features_tensor, num_sample_points=100):
     sampled_t_tensor = torch.tensor(np.linspace(t_np[0], t_np[-1], num=num_sample_points), dtype=torch.float32)
 
     return sampled_t_tensor, interpolated_features_tensor
+
+#removes first few time points that are the same after interpolation
+def remove_redundant_data(t_tensor, features_tensor):
+    # Convert tensors to numpy arrays
+    t_np = t_tensor.numpy()
+    features_np = features_tensor.numpy()
+
+    # Find the index of the first non-redundant time point
+    non_redundant_start_idx = 0
+    for i in range(1, len(t_np)):
+        if not np.allclose(features_np[i], features_np[i - 1]):
+            non_redundant_start_idx = i
+            break
+
+    # Remove redundant data
+    t_tensor_non_redundant = t_tensor[non_redundant_start_idx:]
+    features_tensor_non_redundant = features_tensor[non_redundant_start_idx:]
+
+    return t_tensor_non_redundant, features_tensor_non_redundant
+
 
 def normalize_data(features_tensor):
     #normalizing features between 0 and 1
@@ -294,10 +314,21 @@ if __name__ == "__main__":
     # Add your code here
     savefile = False
     
-    # data = load_data()
+    # # data = load_data()
+    # #plot_data(data)
+
+    # data = load_data_avg_duplicates()
+    # plot_interpolated_data(data)
+    # plt.show()
+
     data = load_data_avg_duplicates()
-    #plot_data(data)
-    plot_interpolated_data(data)
+    t_tensor, features_tensor = interpolate_features(data[0], data[1])
+    
+    # Remove redundant data
+    t_tensor_non_redundant, features_tensor_non_redundant = remove_redundant_data(t_tensor, features_tensor)
+
+    # Plot the data after removing redundant points
+    plot_data((t_tensor_non_redundant, features_tensor_non_redundant))
     plt.show()
 
     # train_data, val_data, test_data = simple_split(data, 3, 0)
@@ -305,8 +336,8 @@ if __name__ == "__main__":
 
     if savefile:
         # tf.saved_model.save(data, "real_data_scuffed1")
-
-        torch.save(data, "real_data_scuffed2.pt")
+        torch.save((t_tensor_non_redundant, features_tensor_non_redundant), "real_data_scuffed2_non_redundant.pt")
+        #torch.save(data, "real_data_scuffed2.pt")
 
 
     
