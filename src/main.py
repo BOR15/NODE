@@ -8,7 +8,6 @@ from pytorch_models.Torch_Toy_Model import main as torch_toy_model
 
 
 #run everything from here
-
 def main():
     # torch_base_model()
     
