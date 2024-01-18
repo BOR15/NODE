@@ -33,8 +33,6 @@ class ODEFunc(nn.Module):
             nn.Tanh(),
             nn.Linear(N_neurons, N_neurons),
             nn.Tanh(),
-            nn.Linear(N_neurons, N_neurons),
-            nn.Tanh(),
             nn.Linear(N_neurons, N_feat)
 
         )
@@ -226,7 +224,9 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, loss_coefficient=1,
     plot_data(data)
     plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat)
     # plot_phase_space(data, predicted)
-    plot_training_vs_validation([train_losses, val_losses], val_freq, share_axis=False)
+    plot_training_vs_validation([train_losses, val_losses], val_freq, two_plots=False)
+    plot_training_vs_validation([train_losses, val_losses], val_freq, two_plots=True)
+
     plt.show(block=True)
 
     
