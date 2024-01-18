@@ -48,5 +48,3 @@ def saveplot(plt, foldername):
 
 def id():
     return len(pd.read_csv('logging/log.csv'))
-
-
