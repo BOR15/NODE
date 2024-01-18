@@ -19,7 +19,7 @@ boris_path = "NODE/Input_Data/Raw_data/Dynamics40h17.csv"
 berend_scufed = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\real_data_scuffed2.pt"
 boris_scufed = "real_data_scuffed2.pt"
 
-def load_data(filename= berend_path , shift=0, start=300):
+def load_data(filename, shift=0, start=300):
     # Import data
     data = pd.read_csv(filename, delimiter=',')
 
