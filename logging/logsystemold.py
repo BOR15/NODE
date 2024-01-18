@@ -1,6 +1,6 @@
 import csv
 import os
-import pandas
+import pandas as pd
 
 class ModelLogger:
     def init(self, log_file='model_log.csv', logging_enabled=True):

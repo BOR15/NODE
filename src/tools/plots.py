@@ -24,6 +24,7 @@ def plot_data(data_tuple, toy=False):
     plt.xlabel('Time (seconds)')
     plt.ylabel('Feature Values')
     plt.legend()
+    
 
 # plotting actual vs predicted values
 def plot_actual_vs_predicted_full(true_y, pred_y, num_feat=2, toy=False, for_torch=True):
@@ -99,7 +100,18 @@ def plot_training_vs_validation(losses, share_axis=True):
         ax2.tick_params(axis='y', labelcolor='orange')
         ax2.legend(loc='upper right')
 
-    
+def plot_training(loss):
+    plt.plot(loss, label='Training Loss', color='blue')  
+    plt.set_xlabel('Epoch')
+    plt.set_ylabel('Loss')
+    return plt
+
+
+def plot_validation(loss):
+    plt.plot(loss, label='Validation Loss', color='orange')
+    plt.set_xlabel('Epoch')
+    plt.set_ylabel('Loss')
+    return plt
 # plotting intermediate predictions during training 
 def intermediate_prediction(tensor_data, predicted_intermidiate, evaluation_loss_intermidiate, num_feat, epoch):
 

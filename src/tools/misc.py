@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import tensorflow as tf
 from time import time
 
 #random stuff file 
@@ -11,6 +12,17 @@ def check_cuda(use_cuda=False):
         device = torch.device("cuda")
     else:
         device = torch.device("cpu")
+    print(f"using {device}")
+    return device
+
+def check_cuda_tensorflow(use_cuda=False):
+    """ Don't use it will probably not work if mutiple gpus/cpus are available"""
+    
+    print(f"gpu availible: {tf.test.is_gpu_available()}")
+    if use_cuda:
+        device = tf.config.list_physical_devices('GPU')
+    else:
+        device = tf.config.list_physical_devices('CPU')
     print(f"using {device}")
     return device
 

@@ -57,7 +57,7 @@ class ODEFunc(nn.Module):
 
 
     
-    
+        
 def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batch_dur_idx=20, batch_range_idx=500, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, mert_batch_scuffed=False, mert_batch=False, intermediate_pred_freq=0, live_plot=False):
     """
     Main function for training and evaluating a PyTorch model using ODE integration.
@@ -89,11 +89,11 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
     laetitia_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/real_data_scuffed40h17_avg.pt"
     boris_path = "NODE/Input_Data/real_data_scuffed1.pt"
 
-    data = torch.load("NODE/Input_Data/real_data_scuffed1.pt")
+    data = torch.load("NODE/Input_Data/toydata_norm_0_1.pt")
     num_feat = data[1].shape[1]
 
     #defining model, loss function and optimizer
-    net = ODEFunc(num_neurons, num_feat, device=device)
+    net = ODEFunc(50, num_feat, device=device)
     loss_function = nn.MSELoss()
     optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
 
@@ -128,6 +128,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
                 #doing predict
                 pred_y.append(odeint(net, data[1][0], t[i], rtol=rel_tol, atol=abs_tol, method="dopri5")[-20:])
             pred_y = torch.stack(pred_y).reshape(20, 50, 5)
+        
         elif mert_batch:
             #get batch
             s, t, features = get_batch3(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
@@ -203,13 +204,12 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
 
 
     # Plotting 
-    plot_data(data)
-    plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat)
-    # plot_phase_space(data, predicted)
+    plot_data(data, toy=True)
+    plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, toy=True)
+    plot_phase_space(data, predicted)
     plot_training_vs_validation([train_losses, val_losses], share_axis=True)
     plt.show(block=True)
 
-    
     
 
 

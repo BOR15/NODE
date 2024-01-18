@@ -6,8 +6,9 @@ import pandas as pd
 import numpy as np
 from time import perf_counter as time
 import matplotlib.pyplot as plt
+from logging.logsystem import saveplot, addcolumn, addlog, id
 
-from tools.data_processing import get_batch, get_batch2, get_batch3
+from tools.toydata_processing import get_batch, get_batch2
 from tools.misc import check_cuda, tictoc
 from tools.plots import *
 
@@ -58,7 +59,7 @@ class ODEFunc(nn.Module):
 
     
     
-def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batch_dur_idx=20, batch_range_idx=500, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, mert_batch_scuffed=False, mert_batch=False, intermediate_pred_freq=0, live_plot=False):
+def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batch_dur_idx=20, batch_range_idx=500, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, mert_batch=False, intermediate_pred_freq=0, live_plot=False, savemodel=False, savepredict=False):
     """
     Main function for training and evaluating a PyTorch model using ODE integration.
 
@@ -76,6 +77,9 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
     Returns:
         None
     """
+
+
+
     #MT
     train_losses_cache = []
     train_losses = []
@@ -119,7 +123,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
         # pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
         
         
-        if mert_batch_scuffed: #this right now forces the code to unparaledize, which is makes it really slow but maybe i can change odeint sourcecode so it works.
+        if mert_batch: #this right now forces the code to unparaledize, which is makes it really slow but maybe i can change odeint sourcecode so it works.
             #get batch
             s, t, features = get_batch2(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
             pred_y = []
@@ -128,25 +132,6 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
                 #doing predict
                 pred_y.append(odeint(net, data[1][0], t[i], rtol=rel_tol, atol=abs_tol, method="dopri5")[-20:])
             pred_y = torch.stack(pred_y).reshape(20, 50, 5)
-        elif mert_batch:
-            #get batch
-            s, t, features = get_batch3(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
-            #doing predict
-            pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
-
-            pred_y_cut = torch.zeros_like(pred_y)[:20,:,:]
-            
-            # i think this is slower then the advanced indexing but im not sure
-            # for i in range(batch_size):
-            #     pred_y_cut[:,i,:] = pred_y[:,i,:][s[i]:s[i]+batch_dur_idx]
-            # pred_y = pred_y_cut
-
-            range_tensor = torch.arange(0, batch_dur_idx, device=device)
-            index_tensor = s[:, None] + range_tensor[None, :]
-            pred_y_cut = pred_y.gather(0, index_tensor[:, :, None].expand(-1, -1, pred_y.size(2)))
-            pred_y = pred_y_cut.transpose(0, 1)
-            
-
         else:
             #get batch
             t, features = get_batch(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
@@ -202,12 +187,44 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
     print(f"Mean Squared Error Loss: {evaluation_loss}")
 
 
+
+    id = id()
+
+    logdict = {
+        "num_neurons" : num_neurons,
+        "num_epochs" : num_epochs,
+        "learning_rate" : learning_rate,
+        "batch_size" : batch_size,
+        "batch_dur_idx" : batch_dur_idx,
+        "batch_range_idx" : batch_range_idx,
+        "rel_tol" : rel_tol,
+        "abs_tol" : abs_tol,
+        "val_freq" : val_freq,
+        "mert_batch" : mert_batch,
+        "loss_function" : loss_function,
+        "optimizer" : optimizer
+
+    }
+    # saving model and predict
+    if savemodel:
+        torch.save(net,  f"logging/Models/{id}.pth")
+    if savepredict:
+        torch.save(predicted, f"logging/Predictions/{id}.pt")
+
+
+
     # Plotting 
-    plot_data(data)
-    plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat)
-    # plot_phase_space(data, predicted)
-    plot_training_vs_validation([train_losses, val_losses], share_axis=True)
-    plt.show(block=True)
+    # TODO add saving for the plots.
+        
+    saveplot(plot_training(train_losses), "TrainingLoss", id)
+    saveplot(plot_validation(val_losses), "ValidationLoss", id)
+    saveplot(plot_actual_vs_predicted_full("true_y, pred_y, num_feat=2, toy=False, for_torch=True"), "FullPredictions", id)
+
+    # plot_data(data)
+    # plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat)
+    # plot_training_vs_validation([train_losses, val_losses], share_axis=True)
+
+    # plt.show(block=True) #Ig we dont need this to save the graphs?
 
     
     
@@ -219,106 +236,3 @@ if __name__ == "__main__":
     # main() # this doesnt work, run from main.py
     pass
     
-
-
-# old shit
-    
-
-# @tictoc
-# def trainmodel(data, data2, learning_rate, num_epochs, num_neurons, rel_tol=1e-7, abs_tol=1e-9, live_plot=False, intermidiate_pred=False, use_batches=False):
-#     """
-#     Trains a neural network model using the NODE (Neural Ordinary Differential Equations) approach.
-
-#     Args:
-#         data (tuple): A tuple containing the training time points (t) and features.
-#         data2 (tuple): A tuple containing the validation time points (val_t) and features.
-#         learning_rate (float): The learning rate for the optimizer.
-#         num_epochs (int): The number of training epochs.
-#         num_neurons (int): The number of neurons in the ODEFunc.
-#         rel_tol (float): The relative tolerance for the ODE solver.
-#         abs_tol (float): The absolute tolerance for the ODE solver.
-#         live_plot (bool): Whether to enable live plotting of the training and validation losses.
-#         intermidiate_prediction (bool): Whether to perform intermediate predictions during training.
-
-#     Returns:
-#         tuple: A tuple containing the trained neural network model and a tuple of training and validation losses.
-#     """
-#     train_losses_cache = []
-#     train_losses = []
-#     val_losses = []
-#     t, features = data
-#     val_t, val_features = data2
-
-#     net = ODEFunc(N_neurons=num_neurons).to(device)
-#     loss_function = MSELoss
-
-#     optimizer = optim.Adam(net.parameters(), lr=learning_rate)
-#     # optimizer = optim.RMSprop(net.parameters(), lr=learning_rate)
-    
-#     if live_plot:
-#         plt.ion()  # Turn on interactive mode
-#         fig, ax = plt.subplots(figsize=(10, 6))
-#         line1, = ax.plot([], [], label='Training Loss')  # Line for training loss
-#         line2, = ax.plot([], [], label='Validation Loss')  # Line for validation loss
-#         ax.set_title('Training vs Validation Loss')
-#         ax.set_xlabel('Epoch')
-#         ax.set_ylabel('Loss')
-#         ax.legend()
-#         plt.show()
-#         plt.pause(0.1)
-
-#     def closure():
-#         optimizer.zero_grad()
-#         pred_y = odeint(net, features[0], t)
-#         loss = loss_function(pred_y, features)
-#         loss.backward()
-#         return loss
-
-#     for epoch in range(num_epochs):
-#         #get batch
-#         if use_batches:
-#             t, features = get_batch(tensor_data, batch_size = 50, batch_dur_idx = 20, batch_range_idx=200)
-
-#         #training
-#         if isinstance(optimizer, torch.optim.LBFGS): #LBFGS needs a closure function but LBFGS is prob not the best optimizer for this
-#             loss = optimizer.step(closure)
-        
-#         else:
-#             optimizer.zero_grad()
-#             pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
-#             loss = loss_function(pred_y, features)
-#             loss.backward()
-#             optimizer.step()
-        
-#         train_losses_cache.append(loss.item())
-#         print(f"Epoch {epoch+1}: loss = {loss.item()}")
-        
-
-#         #validation
-#         if epoch % 5 == 4:
-#             with torch.no_grad():
-#                 pred_y_val = odeint(net, val_features[0], val_t) 
-#                 loss_val = loss_function(pred_y_val, val_features)
-            
-#             train_losses.append(np.mean(train_losses_cache))
-#             val_losses.append(loss_val.item())
-
-#             print(f"Epoch {epoch+1}: val_loss = {loss_val.item()}")
-
-
-#             #live training vs validation plot
-#             if live_plot:
-#                 line1.set_data(range(0, epoch + 1, 5), train_losses)
-#                 line2.set_data(range(0, epoch + 1, 5), val_losses)
-#                 ax.relim()  # Recalculate limits
-#                 ax.autoscale_view(True,True,True)  # Autoscale
-#                 plt.draw()
-#                 plt.pause(0.4)  # Pause to update the plot
-
-        
-#         #intermidiate prediction
-#         if intermidiate_pred and epoch % 100 == 99:
-#             intermidiate_prediction(net, epoch)
-    
-#     return net, (train_losses, val_losses)
-
