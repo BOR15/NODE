@@ -31,7 +31,12 @@ class ODEFunc(nn.Module):
         self.net = nn.Sequential(
             nn.Linear(N_feat, N_neurons),
             nn.Tanh(),
+            nn.Linear(N_neurons, N_neurons),
+            nn.Tanh(),
+            nn.Linear(N_neurons, N_neurons),
+            nn.Tanh(),
             nn.Linear(N_neurons, N_feat)
+
         )
         self.device = device
         
@@ -58,7 +63,7 @@ class ODEFunc(nn.Module):
 
     
     
-def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batch_dur_idx=20, batch_range_idx=500, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, mert_batch_scuffed=False, mert_batch=False, intermediate_pred_freq=0, live_plot=False):
+def main(num_neurons=50, num_epochs=300, learning_rate=0.01, loss_coefficient=1, batch_size=50, batch_dur_idx=20, batch_range_idx=500, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, mert_batch_scuffed=False, mert_batch=False, intermediate_pred_freq=0, live_plot=False):
     """
     Main function for training and evaluating a PyTorch model using ODE integration.
 
@@ -154,7 +159,8 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
             pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
 
         
-        loss = loss_function(pred_y, features)
+        loss = loss_coefficient * loss_function(pred_y, features)
+        
         loss.backward()
         optimizer.step()
         
@@ -206,7 +212,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
     plot_data(data)
     plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat)
     # plot_phase_space(data, predicted)
-    plot_training_vs_validation([train_losses, val_losses], share_axis=True)
+    plot_training_vs_validation([train_losses, val_losses], val_freq, share_axis=False)
     plt.show(block=True)
 
     

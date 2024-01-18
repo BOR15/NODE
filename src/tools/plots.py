@@ -73,16 +73,18 @@ def plot_phase_space(true_y, pred_y):
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 
 # plotting training vs validation loss over epochs at the end of training with optional shared axis
-def plot_training_vs_validation(losses, share_axis=True):
+def plot_training_vs_validation(losses, sample_freq, share_axis=True):
     fig, ax1 = plt.subplots(figsize=(10, 6))
     
-    ax1.plot(losses[0], label='Training Loss', color='blue')  
+    x_axis = range(0, len(losses[0]) * sample_freq, sample_freq)
+    
+    ax1.plot(x_axis, losses[0], label='Training Loss', color='blue')  
     ax1.set_xlabel('Epoch')
     plt.title('Training vs Validation Loss')
 
     if share_axis:
         
-        ax1.plot(losses[1], label='Validation Loss', color='orange')
+        ax1.plot(x_axis, losses[1], label='Validation Loss', color='orange')
 
         ax1.set_ylabel('Loss')
         ax1.tick_params(axis='y')
@@ -94,11 +96,14 @@ def plot_training_vs_validation(losses, share_axis=True):
         ax1.legend(loc='upper left')  
 
         ax2 = ax1.twinx()
-        ax2.plot(losses[1], label='Validation Loss', color='orange')
+        ax2.plot(x_axis, losses[1], label='Validation Loss', color='orange')
 
         ax2.set_ylabel('Validation Loss', color='orange')
         ax2.tick_params(axis='y', labelcolor='orange')
         ax2.legend(loc='upper right')
+
+
+
 
 def plot_training(loss):
     plt.plot(loss, label='Training Loss', color='blue')  
