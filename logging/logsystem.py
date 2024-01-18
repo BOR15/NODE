@@ -38,8 +38,10 @@ def addcolumn(csv_file, name, default):
     df.to_csv(csv_file, index=False)
     
 
-def saveplot(plt, foldername, id):
-    filename = f"logging/{foldername}/{id}.png"
+def saveplot(plt, foldername):
+    df = pd.read_csv('logging/log.csv')
+    number = str(len(df))
+    filename = f"logging/{foldername}/{number}.png"
     # Save the plot
     plt.savefig(filename)
 
@@ -47,3 +49,7 @@ def saveplot(plt, foldername, id):
 def id():
     return len(pd.read_csv('logging/log.csv'))
 
+
+
+
+torch.save(model, f"logging/Models/{id}")

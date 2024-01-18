@@ -25,6 +25,10 @@ def var_norm_loss(pred, real):
     var = torch.var(real)
     return loss_func(pred, real) / var
 
+def MAELoss(y_true, y_pred):
+    L1loss = nn.L1Loss()
+    return L1loss(y_true, y_pred)
+
 """
 Metrics for evaluation not training below
 """
