@@ -87,10 +87,10 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, rel_tol=1e-7, abs_t
     #import preprocessed data
     # data = torch.load("NODE/Input_Data/toydata_norm_0_1.pt")
     berend_path = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\real_data_scuffed1.pt"
-    laetitia_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/real_data_scuffed1.pt"
+    #laetitia_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/real_data_scuffed1.pt"
     boris_path = "NODE/Input_Data/real_data_scuffed1.pt"
 
-    data = torch.load(laetitia_path)
+    data = torch.load(berend_path)
     num_feat = data[1].shape[1]
 
     #defining model, loss function and optimizer
