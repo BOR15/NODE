@@ -1,5 +1,6 @@
 # from pytorch_models.Torch_base_model import main as torch_base_model
 from pytorch_models.TorchTest import main as torch_test_model
+import numpy as np
 # from pytorch_models.Torch_Toy_Model import main as torch_toy_model
 
 
@@ -8,17 +9,86 @@ from pytorch_models.TorchTest import main as torch_test_model
 
 
 #run everything from here
-
-def main():
-    torch_test_model(num_epochs=50, num_neurons=80, learning_rate=0.005, batch_range_idx=600, intermediate_pred_freq=150)
+def main(bla=None, blaa=None, blaaa=None): #all hyperparameters get passed here as arguments
+    
+    # torch_test_model(num_epochs=200, num_neurons=60, learning_rate=0.01, loss_coefficient=1000, batch_range_idx=600, intermediate_pred_freq=100, mert_batch=True)
     
     # torch_base_model()
 
     # torch_toy_model(num_epochs=30, learning_rate=0.0003) #, intermediate_pred_freq=300)
     # torch_toy_model(num_epochs=150, learning_rate=0.01, batch_range_idx=300, mert_batch=False, intermediate_pred_freq=40)
     
-    pass
+    return np.random.rand()
 
+
+def gridsearch():
+    """
+    This function will do a gridsearch over the hyperparameters.
+    so far it should work for all floats but gotta add something for integers. 
+    
+    """
+    
+    #number of features
+    N = 3
+    
+    scores = np.zeros((3,) * N)
+
+
+    # for initializations 
+    feat1 = [1,2,4]
+    feat2 = [1,2,4]
+    feat3 = [1,2,4]
+    
+
+    feat_red = [1/5, 1/5, 1/5]
+
+    # list of autotuning features
+    features = [feat1, feat2, feat3] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
+    
+    feat_diff = []
+    feat_diff1 = []
+    feat_diff2 = []
+    feat_mid = []
+    
+    #getting diff and mid
+    for feature in features:
+        feat_mid.append(feature[1])
+        
+        feat_diff2.append(feature[2]-feature[1])
+        feat_diff1.append(feature[1]-feature[0])
+
+        
+        # feat_diff.append((feature[2] - feature[0]) / 2)
+
+    # for iteration
+    
+
+    for i in range(3):
+        for i1, f1 in enumerate(feat1):
+            for i2, f2 in enumerate(feat2):
+                for i3, f3 in enumerate(feat3):
+                    scores[i1, i2, i3] = main(f1, f2, f3)
+        #get best score
+        best_score = np.max(scores)
+        best_indices = np.unravel_index(np.argmax(scores), scores.shape)
+        
+        # print(scores)
+        # print(best_indices)
+
+        for i, feature in enumerate(features):
+            if feat_mid[i] == feature[best_indices[i]]:
+                feat_diff1[i] *= feat_red[i]
+                feat_diff2[i] *= feat_red[i]
+                # feat_diff[i] *= feat_red[i]
+            feat_mid[i] = feature[best_indices[i]]
+            features[i] = [feat_mid[i] - feat_diff1[i], feat_mid[i], feat_mid[i] + feat_diff2[i]]
+
+        print("Best features: ", feat_mid)
+        print("Now trying: ", features)
+
+    pass
+    
 
 if __name__ == "__main__":
+    # gridsearch()
     main()

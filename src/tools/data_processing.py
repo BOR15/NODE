@@ -42,7 +42,7 @@ def load_data(filename= berend_path , shift=0, start=300):
     return t_tensor, features_tensor
 
 
-def load_data_avg_duplicates(filename=laetitia_path, shift=0, start=300):
+def load_data_avg_duplicates(filename, shift=0, start=300):
     '''
     Averages the duplicate time points rather than deleting them.
     Also fixes time points to be evenly spaced.
