@@ -14,12 +14,12 @@ I have now started on this but still mess
 
 berend_path = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\Raw_Data\Dynamics40h17.csv"
 boris_path = "NODE/Input_Data/Raw_data/Dynamics40h17.csv"
-laetitia_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/Raw_Data/Dynamics40h17.csv"
+#laetitia_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/Raw_Data/Dynamics40h17.csv"
 
 berend_scufed = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\real_data_scuffed2.pt"
 boris_scufed = "real_data_scuffed2.pt"
 
-def load_data(filename=laetitia_path, shift=0, start=300):
+def load_data(filename= berend_path , shift=0, start=300):
     # Import data
     data = pd.read_csv(filename, delimiter=',')
 
@@ -27,7 +27,9 @@ def load_data(filename=laetitia_path, shift=0, start=300):
     duplicates = data.duplicated(subset=['t'])
     if duplicates.any():
         print("Duplicates found in the time axis. Removing duplicates...")
-        data = data.drop_duplicates(subset=['t'])
+        #data = data.drop_duplicates(subset=['t'])
+
+        data = data.groupby('t').mean().reset_index()
     else:
         print("No duplicates found in the time axis.")
 
@@ -71,6 +73,7 @@ def load_data_avg_duplicates(filename=laetitia_path, shift=0, start=300):
 
 def normalize_data(features_tensor):
     #normalizing features between 0 and 1
+    #It has been found that normalising the data between 0 and 1 is the best for neural networks
     min_vals = torch.min(features_tensor, dim=0)[0]
     print(min_vals)
     max_vals = torch.max(features_tensor, dim=0)[0]

@@ -43,8 +43,11 @@ def main(num_neurons=50, num_epochs=50, learning_rate=0.01, train_duration=1.5, 
     train_losses = []
     val_losses = []
     
+    berend_dataPath1= r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\real_data_scuffed1.pt"
+    boris_dataPath1 = "NODE/Input_Data/toydata_norm_0_1.pt"
+
     # Load the saved data and split it into train, val and test
-    data = torch.load("NODE/Input_Data/toydata_norm_0_1.pt")
+    data = torch.load(berend_dataPath1)
     train_data, val_data, test_data = val_shift_split(data, train_dur=train_duration, val_shift=val_shift)
 
     # Defining parameters
