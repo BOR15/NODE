@@ -57,10 +57,6 @@ def load_data_avg_duplicates(filename= berend_path, shift=0, start=300):
     else:
         print("No duplicates found in the time axis.")
 
-    # Replace old time column with evenly spaced time series
-    new_time_series = pd.Series(np.linspace(data['t'].iloc[0], data['t'].iloc[-1], len(data)))
-    data['t'] = new_time_series
-
     # Defining tensors
     t_tensor = torch.tensor(data.iloc[start:, 1].values, dtype=torch.float32)
     features_tensor = torch.tensor(data.iloc[start:, 2+shift:27+shift:5].values, dtype=torch.float32)
@@ -69,11 +65,27 @@ def load_data_avg_duplicates(filename= berend_path, shift=0, start=300):
     features_tensor = normalize_data_mean_0(features_tensor)
     return t_tensor, features_tensor
 
+
+def even_space_time_series(t_tensor, train_time=None, val_time=None):
+    '''
+    Output new tensor with evenly-spaced time-points.
+    If training time and validation time are given, return  corresponding index in new time series for that point.
+    '''
+    t_tensor_linspaced = np.linspace(t_tensor[0], t_tensor[-1], len(t_tensor))
+    
+    if train_time:
+        train_index = [index for index, value in enumerate(torch.round(t_tensor)) if train_time == value][0]
+    if val_time:
+        val_index = [index for index, value in enumerate(torch.round(t_tensor)) if val_time == value][0]
+
+    return t_tensor_linspaced, train_index, val_index
+
+
 #added the following to interpolate the features for a smoother graph
 def interpolate_features(t_tensor, features_tensor, num_sample_points=1024):
     """
     Linearly interpolate missing values in the features_tensor based on the time points in t_tensor.
-    Sample 'num_sample_points' evenly spaced points from the interpolated result.
+    Sample `num_sample_points` evenly spaced points from the interpolated result.
     """
     # Convert tensors to numpy arrays for interpolation
     t_np = t_tensor.numpy()
