@@ -6,12 +6,15 @@ def frechet_distance(P, Q, metric='euclidean'):
     Compute discrete Fréchet distance between polygonal curves P and Q.
 
     P and Q are represented as matrices with each column corresponding to a point.
-    """
+    # """
     if P.shape[0] != Q.shape[0]:
         raise ValueError("Points in polygonal lines P and Q must have the same dimension.")
 
     # Compute pairwise distances
     couplings = cdist(P.T, Q.T, metric= metric)
+    #might not need to transpose
+    # couplings = cdist(P, Q, metric= metric)
+
 
     m, n = couplings.shape
 
@@ -37,3 +40,19 @@ print(frechet_distance(P, Q))
 # print("Chebyshev Distance: ", frechet_distance(P, Q, metric='chebyshev')) # takes the maximum deviation
 # print("Manhattan Distance: ", frechet_distance(P, Q, metric='cityblock')) # might be more usefull than euclidean when we want to
 # focus more on small deviations
+def mean_frechet_distance(P, Q, width):
+    "compartmentalizes the Frechet distance and takes the mean to give a more smooth result"
+    return np.mean([frechet_distance(P[t: t + width], Q) for t in range(len(P)- width + 1)])
+
+np.random.seed(0)
+
+# Generate a base line for P and Q
+base_line = np.linspace(0, 10, 20)
+
+# Create P and Q as similar lines with small random variations
+P = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)]).T
+Q = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)]).T
+# P = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)])
+# Q = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)])
+# print(len(P))
+print(mean_frechet_distance(P, Q, width=5))
