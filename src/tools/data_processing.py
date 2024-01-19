@@ -103,24 +103,45 @@ def interpolate_features(t_tensor, features_tensor, num_sample_points=1024):
 
     return sampled_t_tensor, interpolated_features_tensor
 
-#removes first few time points that are the same after interpolation
-def remove_redundant_data(t_tensor, features_tensor):
+def remove_spikes(t_tensor, features_tensor, spike_threshold=0.1):
+    """
+    Remove the first few data points up to the first discontinuity spike after interpolation.
+    The threshold defines the maximum allowed relative change in feature values.
+    """
     # Convert tensors to numpy arrays
     t_np = t_tensor.numpy()
     features_np = features_tensor.numpy()
 
-    # Find the index of the first non-redundant time point
-    non_redundant_start_idx = 0
-    for i in range(1, len(t_np)):
-        if not np.allclose(features_np[i], features_np[i - 1]):
-            non_redundant_start_idx = i
-            break
+    # Calculate relative changes in feature values
+    relative_changes = np.abs((features_np[1:] - features_np[:-1]) / features_np[:-1])
 
-    # Remove redundant data
-    t_tensor_non_redundant = t_tensor[non_redundant_start_idx:]
-    features_tensor_non_redundant = features_tensor[non_redundant_start_idx:]
+    # Find the index of the first spike exceeding the threshold
+    spike_idx = np.argmax(relative_changes > spike_threshold)
 
-    return t_tensor_non_redundant, features_tensor_non_redundant
+    # Remove data up to the spike
+    t_tensor_no_spikes = t_tensor[spike_idx:]
+    features_tensor_no_spikes = features_tensor[spike_idx:]
+
+    return t_tensor_no_spikes, features_tensor_no_spikes
+
+# #removes first few time points that are the same after interpolation
+# def remove_redundant_data(t_tensor, features_tensor):
+#     # Convert tensors to numpy arrays
+#     t_np = t_tensor.numpy()
+#     features_np = features_tensor.numpy()
+
+#     # Find the index of the first non-redundant time point
+#     non_redundant_start_idx = 0
+#     for i in range(1, len(t_np)):
+#         if not np.allclose(features_np[i], features_np[i - 1]):
+#             non_redundant_start_idx = i
+#             break
+
+#     # Remove redundant data
+#     t_tensor_non_redundant = t_tensor[non_redundant_start_idx:]
+#     features_tensor_non_redundant = features_tensor[non_redundant_start_idx:]
+
+#     return t_tensor_non_redundant, features_tensor_non_redundant
 
 
 def normalize_data(features_tensor):
@@ -318,35 +339,54 @@ def plot_data(data_tuple):
     plt.legend()
 
 
-if __name__ == "__main__":
-    # Add your code here
-    savefile = False
+# if __name__ == "__main__":
+#     # Add your code here
+#     savefile = False
     
-    # # data = load_data()
-    # #plot_data(data)
+#     # # data = load_data()
+#     # #plot_data(data)
 
-    # data = load_data_avg_duplicates()
-    # plot_interpolated_data(data)
-    # plt.show()
+#     data = load_data_avg_duplicates()
+#     plot_interpolated_data(data)
+#     plt.show()
+
+#     #previous
+#     # data = load_data_avg_duplicates()
+#     # t_tensor, features_tensor = interpolate_features(data[0], data[1])
+#     # # Remove redundant data
+#     # t_tensor_non_redundant, features_tensor_non_redundant = remove_redundant_data(t_tensor, features_tensor)
+#     # # Plot the data after removing redundant points
+#     # plot_data((t_tensor_non_redundant, features_tensor_non_redundant))
+#     # plt.show()
+
+#     # train_data, val_data, test_data = simple_split(data, 3, 0)
+#     # train_data, val_data, test_data = val_shift_split(data, 3, .2)
+
+#     if savefile:
+#         # tf.saved_model.save(data, "real_data_scuffed1")
+
+#         #previous
+#         #torch.save((t_tensor_non_redundant, features_tensor_non_redundant), "real_data_scuffed2_non_redundant.pt")
+
+#         torch.save(data, "real_data_scuffed2.pt")
+
+
+if __name__ == "__main__":
+    savefile = False
 
     data = load_data_avg_duplicates()
     t_tensor, features_tensor = interpolate_features(data[0], data[1])
     
-    # Remove redundant data
-    t_tensor_non_redundant, features_tensor_non_redundant = remove_redundant_data(t_tensor, features_tensor)
+    # Remove spikes
+    t_tensor_no_spikes, features_tensor_no_spikes = remove_spikes(t_tensor, features_tensor)
 
-    # Plot the data after removing redundant points
-    plot_data((t_tensor_non_redundant, features_tensor_non_redundant))
+    # Plot the data after removing spikes
+    plot_data((t_tensor_no_spikes, features_tensor_no_spikes))
     plt.show()
 
-    # train_data, val_data, test_data = simple_split(data, 3, 0)
-    # train_data, val_data, test_data = val_shift_split(data, 3, .2)
-
     if savefile:
-        # tf.saved_model.save(data, "real_data_scuffed1")
-        torch.save((t_tensor_non_redundant, features_tensor_non_redundant), "real_data_scuffed2_non_redundant.pt")
-        #torch.save(data, "real_data_scuffed2.pt")
-
+        # Save the data without spikes to a new file
+        torch.save((t_tensor_no_spikes, features_tensor_no_spikes), "real_data_scuffed2_no_spikes.pt")
 
     
     
