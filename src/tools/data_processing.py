@@ -30,13 +30,9 @@ def load_data(filename, shift=0, start=300):
     duplicates = data.duplicated(subset=['t'])
     if duplicates.any():
         print("Duplicates found in the time axis. Removing duplicates...")
-        #data = data.drop_duplicates(subset=['t'])
-
-        data = data.groupby('t').mean().reset_index()
+        data = data.drop_duplicates(subset=['t'], keep='last')
     else:
         print("No duplicates found in the time axis.")
-
-    # Defining tensors
     t_tensor = torch.tensor(data.iloc[start:, 1].values, dtype=torch.float32)
     features_tensor = torch.tensor(data.iloc[start:, 2+shift:27+shift:5].values, dtype=torch.float32)
     print(features_tensor.shape, t_tensor.shape)
