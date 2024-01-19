@@ -39,12 +39,15 @@ def gridsearch():
     feat2 = [1,2,4]
     feat3 = [1,2,4]
     
-
+    # automatic reduction factor
     feat_red = [1/5, 1/5, 1/5]
+
+    threshold = 0.01
 
     # list of autotuning features
     features = [feat1, feat2, feat3] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
-    
+    tuned_features = [0] * len(features)
+
     feat_diff = []
     feat_diff1 = []
     feat_diff2 = []
@@ -60,35 +63,62 @@ def gridsearch():
         
         # feat_diff.append((feature[2] - feature[0]) / 2)
 
-    # for iteration
     
-
-    for i in range(3):
+    
+    #gridsearch loop
+    for i in range(10):
+        # doing gridsearch
         for i1, f1 in enumerate(feat1):
             for i2, f2 in enumerate(feat2):
                 for i3, f3 in enumerate(feat3):
                     scores[i1, i2, i3] = main(f1, f2, f3)
-        #get best score
-        best_score = np.max(scores)
+        
+        #get best score indices
         best_indices = np.unravel_index(np.argmax(scores), scores.shape)
         
         # print(scores)
         # print(best_indices)
 
+
+        # autotuning features
         for i, feature in enumerate(features):
-            if feat_mid[i] == feature[best_indices[i]]:
-                feat_diff1[i] *= feat_red[i]
-                feat_diff2[i] *= feat_red[i]
-                # feat_diff[i] *= feat_red[i]
-            feat_mid[i] = feature[best_indices[i]]
-            features[i] = [feat_mid[i] - feat_diff1[i], feat_mid[i], feat_mid[i] + feat_diff2[i]]
+            if not tuned_features[i]: #if feature is not tuned yet
+                #if middle option is best
+                if best_indices[i] == 1:
+                    #checking if done tuning
+                    if calculate_score_diff(i, best_indices, scores) < threshold:
+                        #if done saving best value
+                        tuned_features[i] = feat_mid[i]
+                        continue #continue to next feature                        
+                    else: #if not done tuning: tunne more!
+                        #narrowing range of feature if middle was best
+                        feat_diff1[i] *= feat_red[i]
+                        feat_diff2[i] *= feat_red[i]
+                else:#if middle option is not best: redefine middle
+                    feat_mid[i] = feature[best_indices[i]]
+                #defining new range
+                features[i] = [feat_mid[i] - feat_diff1[i], feat_mid[i], feat_mid[i] + feat_diff2[i]]
 
         print("Best features: ", feat_mid)
         print("Now trying: ", features)
+        print("Tuned features:", tuned_features)
 
     pass
     
+def calculate_score_diff(feature_idx, best_indices, scores):
+    temp_indices = list(best_indices)
+    
+    # sc
+    temp_indices[feature_idx] += 1
+    score_high = scores[tuple(temp_indices)]
+
+    temp_indices[feature_idx] -= 2
+    score_low = scores[tuple(temp_indices)]
+
+    score_diff = abs(score_high - score_low)
+    return score_diff
+
 
 if __name__ == "__main__":
-    # gridsearch()
-    main()
+    gridsearch()
+    # main()
