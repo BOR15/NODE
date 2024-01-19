@@ -7,8 +7,9 @@ import numpy as np
 from time import perf_counter as time
 import matplotlib.pyplot as plt
 from logging.logsystem import saveplot, addcolumn, addlog, id
+from logging.Metrics import frechet_distance
 
-from tools.data_processing import get_batch, get_batch2, get_batch3
+from tools.toydata_processing import get_batch, get_batch2
 from tools.misc import check_cuda, tictoc
 from tools.plots import *
 
@@ -59,7 +60,7 @@ class ODEFunc(nn.Module):
 
     
     
-def main(num_neurons=50, num_epochs=300, learning_rate=0.01, loss_coefficient=1, batch_size=50, batch_dur_idx=20, batch_range_idx=500, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, lmbda=5e-3, regu=None,mert_batch_scuffed=False, mert_batch=False, intermediate_pred_freq=0, live_plot=False, savemodel=False, savepredict=False):
+def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batch_dur_idx=20, batch_range_idx=500, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, mert_batch=False, intermediate_pred_freq=0, live_plot=False, savemodel=False, savepredict=False):
     """
     Main function for training and evaluating a PyTorch model using ODE integration.
 
@@ -123,7 +124,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, loss_coefficient=1,
         # pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
         
         
-        if mert_batch_scuffed: #this right now forces the code to unparaledize, which is makes it really slow but maybe i can change odeint sourcecode so it works.
+        if mert_batch: #this right now forces the code to unparaledize, which is makes it really slow but maybe i can change odeint sourcecode so it works.
             #get batch
             s, t, features = get_batch2(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
             pred_y = []
@@ -132,25 +133,6 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, loss_coefficient=1,
                 #doing predict
                 pred_y.append(odeint(net, data[1][0], t[i], rtol=rel_tol, atol=abs_tol, method="dopri5")[-20:])
             pred_y = torch.stack(pred_y).reshape(20, 50, 5)
-
-        elif mert_batch:
-            #get batch
-            s, t, features = get_batch3(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
-            #doing predict
-            pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
-
-            pred_y_cut = torch.zeros_like(pred_y)[:20,:,:]
-            
-            # i think this is slower then the advanced indexing but im not sure
-            # for i in range(batch_size):
-            #     pred_y_cut[:,i,:] = pred_y[:,i,:][s[i]:s[i]+batch_dur_idx]
-            # pred_y = pred_y_cut
-
-            range_tensor = torch.arange(0, batch_dur_idx, device=device)
-            index_tensor = s[:, None] + range_tensor[None, :]
-            pred_y_cut = pred_y.gather(0, index_tensor[:, :, None].expand(-1, -1, pred_y.size(2)))
-            pred_y = pred_y_cut.transpose(0, 1)
-
         else:
             #get batch
             t, features = get_batch(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
@@ -158,18 +140,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, loss_coefficient=1,
             pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
 
         
-        # regularisation L1 and L2 implementation
-        l1, l2 = 0, 0
-        if regu == 'L2':
-            for p in net.parameters():
-                l2 = l2 + torch.pow(p,2).sum()
-            loss = loss + lmbda * l2
-          
-        if regu == 'L1':
-            for p in net.parameters():
-                l1 += torch.sum(torch.abs(p))
-            loss = loss + lmbda * l1 
-
+        loss = loss_function(pred_y, features)
         loss.backward()
         optimizer.step()
         
@@ -209,7 +180,10 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, loss_coefficient=1,
             print(f"Mean Squared Error Loss intermidiate: {evaluation_loss_intermidiate}")
             intermediate_prediction(data, predicted_intermidiate, evaluation_loss_intermidiate, num_feat, epoch)
 
-        
+    #Frechet distance similairity metric
+    Frechet_distance = frechet_distance(net, data[1][0], data[0])
+
+
     # Final predict
     with torch.no_grad():
         predicted = odeint(net, data[1][0], data[0])
@@ -232,7 +206,8 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, loss_coefficient=1,
         "val_freq" : val_freq,
         "mert_batch" : mert_batch,
         "loss_function" : loss_function,
-        "optimizer" : optimizer
+        "optimizer" : optimizer,
+        'frechet distance' : Frechet_distance
 
     }
     # saving model and predict
@@ -241,11 +216,11 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, loss_coefficient=1,
     if savepredict:
         torch.save(predicted, f"logging/Predictions/{id}.pt")
 
-
+    addlog('logging/log.csv', logdict)
 
     # Plotting 
     # TODO add saving for the plots.
-        #plot_training_vs_validation([train_losses, val_losses], val_freq, two_plots=True)
+        
     saveplot(plot_training(train_losses), "TrainingLoss", id)
     saveplot(plot_validation(val_losses), "ValidationLoss", id)
     saveplot(plot_actual_vs_predicted_full("true_y, pred_y, num_feat=2, toy=False, for_torch=True"), "FullPredictions", id)
@@ -255,8 +230,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, loss_coefficient=1,
     # plot_training_vs_validation([train_losses, val_losses], share_axis=True)
 
     # plt.show(block=True) #Ig we dont need this to save the graphs?
-    
-    return evaluation_loss
+
     
     
 

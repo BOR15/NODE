@@ -1,1 +1,1 @@
-id,
+id,num_neurons,num_epochs,learning_rate,batch_size,batch_dur_idx,batch_range_idx,rel_tol,abs_tol,val_freq,mert_batch,loss_function,optimizer,Frechet_distance
