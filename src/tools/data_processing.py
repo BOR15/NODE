@@ -71,8 +71,8 @@ def even_space_time_series(t_tensor, train_time=None, val_time=None):
     Output new tensor with evenly-spaced time-points.
     If training time and validation time are given, return  corresponding index in new time series for that point.
     '''
-    t_tensor_linspaced = np.linspace(t_tensor[0], t_tensor[-1], len(t_tensor))
-    
+    t_tensor_linspaced = torch.tensor(np.linspace(t_tensor[0], t_tensor[-1], len(t_tensor)))
+
     if train_time:
         train_index = [index for index, value in enumerate(torch.round(t_tensor)) if train_time == value][0]
     if val_time:
@@ -99,9 +99,9 @@ def interpolate_features(t_tensor, features_tensor, num_sample_points=1024):
 
     # Convert back to PyTorch tensors
     interpolated_features_tensor = torch.tensor(interpolated_features_np, dtype=torch.float32)
-    sampled_t_tensor = torch.tensor(np.linspace(t_np[0], t_np[-1], num=num_sample_points), dtype=torch.float32)
+    sampled_timepoints = torch.tensor(np.linspace(t_np[0], t_np[-1], num=num_sample_points), dtype=torch.float32)
 
-    return sampled_t_tensor, interpolated_features_tensor
+    return interpolated_features_tensor, sampled_timepoints
 
 def remove_spikes(t_tensor, features_tensor, spike_threshold=0.1):
     """
