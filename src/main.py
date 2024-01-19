@@ -1,6 +1,10 @@
+import numpy as np
+import itertools
+
+
 # from pytorch_models.Torch_base_model import main as torch_base_model
 from pytorch_models.TorchTest import main as torch_test_model
-import numpy as np
+
 # from pytorch_models.Torch_Toy_Model import main as torch_toy_model
 
 
@@ -42,7 +46,7 @@ def gridsearch():
     # automatic reduction factor
     feat_red = [1/5, 1/5, 1/5]
 
-    threshold = 0.01
+    threshold = 0.3 #threshold for stopping tuning
 
     # list of autotuning features
     features = [feat1, feat2, feat3] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
@@ -66,12 +70,27 @@ def gridsearch():
     
     
     #gridsearch loop
-    for i in range(10):
+    for ii in range(10):
         # doing gridsearch
-        for i1, f1 in enumerate(feat1):
-            for i2, f2 in enumerate(feat2):
-                for i3, f3 in enumerate(feat3):
-                    scores[i1, i2, i3] = main(f1, f2, f3)
+        # for i1, f1 in enumerate(feat1):
+        #     for i2, f2 in enumerate(feat2):
+        #         for i3, f3 in enumerate(feat3):
+        #             scores[i1, i2, i3] = main(f1, f2, f3)
+
+        # Preparing feature sets for iteration
+        feature_sets = []
+        for i, feature in enumerate(features):
+            feature_sets.append(feature if not tuned_features[i] else [tuned_features[i]])
+
+        print(ii, "Now trying: ", feature_sets)
+
+        #defining score grid of right shape
+        scores = np.zeros(tuple(len(f) for f in feature_sets))
+
+        #iterating over all combinations of features
+        for indices in itertools.product(*[range(len(f)) for f in feature_sets]):
+            selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
+            scores[indices] = main(*selected_features)
         
         #get best score indices
         best_indices = np.unravel_index(np.argmax(scores), scores.shape)
@@ -87,6 +106,7 @@ def gridsearch():
                 if best_indices[i] == 1:
                     #checking if done tuning
                     if calculate_score_diff(i, best_indices, scores) < threshold:
+                        print("DONE TUNING FEATURE", i, ":", feat_mid[i], "with score", scores[best_indices])
                         #if done saving best value
                         tuned_features[i] = feat_mid[i]
                         continue #continue to next feature                        
@@ -99,11 +119,34 @@ def gridsearch():
                 #defining new range
                 features[i] = [feat_mid[i] - feat_diff1[i], feat_mid[i], feat_mid[i] + feat_diff2[i]]
 
-        print("Best features: ", feat_mid)
-        print("Now trying: ", features)
-        print("Tuned features:", tuned_features)
+        print(ii, "Best features: ", feat_mid)
+        print(ii, "Tuned features:", tuned_features)
 
-    pass
+        if all(tuned_features):
+            print("All features tuned")
+            break
+    
+    #final tune
+    print("final tuning round")
+    
+    #full feature sets
+    feature_sets = []
+    for i, feature in enumerate(features):
+        feature_sets.append(feature)
+    
+    #defining score grid of right shape
+    scores = np.zeros(tuple(len(f) for f in feature_sets))
+
+    #iterating over all combinations of features one last time
+    for indices in itertools.product(*[range(len(f)) for f in feature_sets]):
+        selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
+        scores[indices] = main(*selected_features)
+
+    best_indices = np.unravel_index(np.argmax(scores), scores.shape)
+    final_features = [feature_sets[i][idx] for i, idx in enumerate(best_indices)]
+    print("Final features: ", final_features)
+
+    
     
 def calculate_score_diff(feature_idx, best_indices, scores):
     temp_indices = list(best_indices)
