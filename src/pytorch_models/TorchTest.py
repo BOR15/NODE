@@ -61,7 +61,13 @@ class ODEFunc(nn.Module):
 
     
     
-def main(num_neurons=50, num_epochs=300, learning_rate=0.01, loss_coefficient=1, batch_size=50, batch_dur_idx=20, batch_range_idx=500, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, lmbda=5e-3, regu=None,mert_batch_scuffed=False, mert_batch=False, intermediate_pred_freq=0, live_plot=False):
+def main(num_neurons=50, num_epochs=300, learning_rate=0.01, loss_coefficient=1,
+         batch_size=50, batch_dur_idx=20, batch_range_idx=500,
+         rel_tol=1e-7, abs_tol=1e-9, val_freq=5,
+         lmbda=5e-3, regu=None,
+         mert_batch_scuffed=False, mert_batch=False,
+         intermediate_pred_freq=0, live_intermediate_pred=False, live_plot=False):
+    
     """
     Main function for training and evaluating a PyTorch model using ODE integration.
 
@@ -93,7 +99,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, loss_coefficient=1,
     #laetitia_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/real_data_scuffed40h17_avg.pt"
     boris_path = "NODE/Input_Data/real_data_scuffed1.pt"
 
-    data = torch.load(berend_path)
+    data = torch.load("Input_Data/real_data_scuffed1.pt")
     num_feat = data[1].shape[1]
 
     #defining model, loss function and optimizer
@@ -210,7 +216,11 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, loss_coefficient=1,
                 predicted_intermidiate = odeint(net, data[1][0], data[0])
                 evaluation_loss_intermidiate = loss_function(predicted_intermidiate, data[1]).item()
             print(f"Mean Squared Error Loss intermidiate: {evaluation_loss_intermidiate}")
-            intermediate_prediction(data, predicted_intermidiate, evaluation_loss_intermidiate, num_feat, epoch)
+            # intermediate_prediction(data, predicted_intermidiate, evaluation_loss_intermidiate, num_feat, epoch)
+            plot_actual_vs_predicted_full(data, predicted_intermidiate, num_feat=num_feat, info=(epoch, evaluation_loss_intermidiate))
+            if live_intermediate_pred:
+                plt.show(block=False)
+                plt.pause(0.1)
 
         
     # Final predict
