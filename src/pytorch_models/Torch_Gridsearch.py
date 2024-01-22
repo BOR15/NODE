@@ -223,14 +223,10 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
     # Plotting 
     # TODO add saving for the plots.
         
-<<<<<<< HEAD
+
     saveplot(plot_training_vs_validation([train_losses, val_losses], sample_freq="?", two_plots=True), "Losses", id)
     saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, toy=False, for_torch=True), "FullPredictions", id)
-=======
-    saveplot(plot_training(train_losses), "TrainingLoss", id)
-    saveplot(plot_validation(val_losses), "ValidationLoss", id)
-    saveplot(plot_actual_vs_predicted_full("true_y, pred_y, num_feat=2, toy=False, for_torch=True"), "FullPredictions", id) #TODO add info for plot. and potentially some y limits
->>>>>>> 9bc508d08dc647b5ddfdb25558b8220ce1c0c49b
+
 
     # plot_data(data)
     # plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat)
