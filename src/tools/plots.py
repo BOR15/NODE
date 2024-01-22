@@ -27,36 +27,50 @@ def plot_data(data_tuple, toy=False):
     
 
 # plotting actual vs predicted values
-def plot_actual_vs_predicted_full(true_y, pred_y, num_feat=2, toy=False, for_torch=True):
-    
+def plot_actual_vs_predicted_full(true_y, pred_y, num_feat, min_y=None, max_y=None, lim_space=0.5, info=None, toy=False, for_torch=True):
     if for_torch:
         t = true_y[0].detach().numpy()
         true_y = true_y[1].detach().numpy()
         pred_y = pred_y.detach().numpy()
-
     else:
         t = true_y[0].numpy()
         true_y = true_y[1].numpy()
         pred_y = pred_y.numpy()
     
 
-    fig, axes = plt.subplots(nrows=int((num_feat+1)//2), ncols=2, figsize=(12, 8))
-    fig.suptitle('Actual vs Predicted Features Full')
+    if not min_y:
+        min_y = true_y.min() - lim_space
+    if not max_y:
+        max_y = true_y.max() + lim_space
+
+
+    total_plot_height = num_feat * 4 
+
+    fig, axes = plt.subplots(nrows=num_feat, ncols=1, figsize=(12, total_plot_height))
+    
+    if not info:
+        fig.suptitle('Actual vs Predicted Features Full')
+    else:
+        epoch, loss, *ect = info 
+        fig.suptitle(f'Actual vs Predicted Features, epoch = {epoch+1}, MSELoss = {loss}') #TODO add the info we want in the image here.
+
 
     if toy:
         feature_names = ['speed', 'angle', 'e_q_t', 'e_q_st']
     else:
         feature_names = ['Angle (Delta)', 'frequency (f)', 'Voltage (V)', 'Power (P)', 'Reactive power (Q)']
 
-    for i, ax in enumerate(axes.flatten()):
-        if i == 5:
-            break
+    for i, ax in enumerate(axes):  # Update the loop to iterate over subplots
         ax.plot(t, true_y[:,i], label='Actual ' + feature_names[i])
         ax.plot(t, pred_y[:,i], label='Predicted ' + feature_names[i], linestyle='--')
         ax.set_xlabel('Time (s)')
         ax.set_ylabel(feature_names[i])
+        ax.set_ylim(min_y, max_y)
         ax.legend()
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    
+
+
 
 # plotting phase space of speed vs angle for actual vs predicted values
 def plot_phase_space(true_y, pred_y):
@@ -71,6 +85,7 @@ def plot_phase_space(true_y, pred_y):
     plt.title('Phase Space: Speed vs Angle')
     plt.legend()
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    
 
 # plotting training vs validation loss over epochs at the end of training with optional two plots
 def plot_training_vs_validation(losses, sample_freq, two_plots=True):
@@ -156,6 +171,7 @@ def plot_validation(loss):
     plt.set_xlabel('Epoch')
     plt.set_ylabel('Loss')
     return plt
+
 # plotting intermediate predictions during training 
 def intermediate_prediction(tensor_data, predicted_intermidiate, evaluation_loss_intermidiate, num_feat, epoch):
 

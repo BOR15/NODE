@@ -180,8 +180,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
             print(f"Mean Squared Error Loss intermidiate: {evaluation_loss_intermidiate}")
             intermediate_prediction(data, predicted_intermidiate, evaluation_loss_intermidiate, num_feat, epoch)
 
-    #Frechet distance similairity metric
-    Frechet_distance = frechet_distance(net, data[1][0], data[0])
+    
 
 
     # Final predict
@@ -191,6 +190,8 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
     print(f"Mean Squared Error Loss: {evaluation_loss}")
 
 
+    #Frechet distance similairity metric
+    Frechet_distance = frechet_distance(net, data[1], predicted)
 
     id = id()
 
@@ -223,7 +224,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
         
     saveplot(plot_training(train_losses), "TrainingLoss", id)
     saveplot(plot_validation(val_losses), "ValidationLoss", id)
-    saveplot(plot_actual_vs_predicted_full("true_y, pred_y, num_feat=2, toy=False, for_torch=True"), "FullPredictions", id)
+    saveplot(plot_actual_vs_predicted_full("true_y, pred_y, num_feat=2, toy=False, for_torch=True"), "FullPredictions", id) #TODO add info for plot. and potentially some y limits
 
     # plot_data(data)
     # plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat)
