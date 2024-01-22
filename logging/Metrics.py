@@ -12,6 +12,7 @@ def frechet_distance(P, Q, metric='euclidean'):
 
     # Compute pairwise distances
     couplings = cdist(P.T, Q.T, metric= metric)
+    print(couplings)
     #might not need to transpose
     # couplings = cdist(P, Q, metric= metric)
 
@@ -54,5 +55,5 @@ P = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)]).T
 Q = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)]).T
 # P = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)])
 # Q = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)])
-# print(len(P))
-print(mean_frechet_distance(P, Q, width=5))
+print(P)
+print(frechet_distance(P, Q))
