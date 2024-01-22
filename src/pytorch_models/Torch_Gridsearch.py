@@ -195,6 +195,7 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
     id = id()
 
     logdict = {
+        "id" : id,
         "num_neurons" : num_neurons,
         "num_epochs" : num_epochs,
         "learning_rate" : learning_rate,
@@ -221,9 +222,8 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
     # Plotting 
     # TODO add saving for the plots.
         
-    saveplot(plot_training(train_losses), "TrainingLoss", id)
-    saveplot(plot_validation(val_losses), "ValidationLoss", id)
-    saveplot(plot_actual_vs_predicted_full("true_y, pred_y, num_feat=2, toy=False, for_torch=True"), "FullPredictions", id)
+    saveplot(plot_training_vs_validation([train_losses, val_losses], sample_freq="?", two_plots=True), "Losses", id)
+    saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, toy=False, for_torch=True), "FullPredictions", id)
 
     # plot_data(data)
     # plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat)
@@ -233,10 +233,6 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
 
     
     
-
-
-
-
 if __name__ == "__main__":
     # main() # this doesnt work, run from main.py
     pass

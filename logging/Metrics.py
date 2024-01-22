@@ -29,7 +29,7 @@ def frechet_distance(P, Q, metric='euclidean'):
 
 # Example usage
 P = np.array([[1, 2, 3], [4, 5, 6]])  # Replace with your data
-Q = np.array([[7, 8, 9], [10, 11, 12]])  # Replace with your data
+Q = np.array([[7, 8, 9, 10], [10, 11, 12, 13]])  # Replace with your data
 print(frechet_distance(P, Q))
 
 # print("Cosine Distance: ", frechet_distance(P, Q, metric='cosine')) # perhaps usefull for when we shift to the frequency domain

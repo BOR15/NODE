@@ -57,6 +57,7 @@ def plot_actual_vs_predicted_full(true_y, pred_y, num_feat=2, toy=False, for_tor
         ax.set_ylabel(feature_names[i])
         ax.legend()
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    return plt
 
 # plotting phase space of speed vs angle for actual vs predicted values
 def plot_phase_space(true_y, pred_y):
@@ -111,6 +112,7 @@ def plot_training_vs_validation(losses, sample_freq, two_plots=True):
         ax2.set_ylabel('Validation Loss', color='orange')
         ax2.tick_params(axis='y', labelcolor='orange')
         ax2.legend(loc='upper right')
+    return plt
 
 
 
