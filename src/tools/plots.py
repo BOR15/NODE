@@ -43,8 +43,6 @@ def plot_actual_vs_predicted_full(true_y, pred_y, num_feat, min_y=None, max_y=No
     if not max_y:
         max_y = true_y.max() + lim_space
 
-    print(min_y, max_y)
-
 
     total_plot_height = num_feat * 4 
 
@@ -53,7 +51,7 @@ def plot_actual_vs_predicted_full(true_y, pred_y, num_feat, min_y=None, max_y=No
     if not info:
         fig.suptitle('Actual vs Predicted Features Full')
     else:
-        epoch, loss, ect = info 
+        epoch, loss, *ect = info 
         fig.suptitle(f'Actual vs Predicted Features, epoch = {epoch+1}, MSELoss = {loss}') #TODO add the info we want in the image here.
 
 
