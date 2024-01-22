@@ -68,13 +68,8 @@ def plot_actual_vs_predicted_full(true_y, pred_y, num_feat, min_y=None, max_y=No
         ax.set_ylim(min_y, max_y)
         ax.legend()
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-<<<<<<< HEAD
     return plt
-=======
-    
 
-
->>>>>>> 9bc508d08dc647b5ddfdb25558b8220ce1c0c49b
 
 # plotting phase space of speed vs angle for actual vs predicted values
 def plot_phase_space(true_y, pred_y):
