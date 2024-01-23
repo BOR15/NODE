@@ -13,6 +13,7 @@ from tools.data_processing import get_batch, get_batch2, get_batch3
 from tools.misc import check_cuda, tictoc
 from tools.plots import *
 
+from time import perf_counter
 
 class ODEFunc(nn.Module):
     """
@@ -90,19 +91,24 @@ def main(num_neurons=50, num_epochs=300, epochs=[200, 250],
     def logging():
         # Final predict
         with torch.no_grad():
+            start_inference = perf_counter()
             predicted = odeint(net, data[1][0], data[0])
+            end_inference =  perf_counter()
             evaluation_loss = loss_function(predicted, data[1]).item()
         print(f"Mean Squared Error Loss: {evaluation_loss}")
 
+        inference_time = end_inference - start_inference
 
         #Frechet distance similairity metric
         Frechet_distance = frechet_distance(data[1], predicted) #TODO fix this
         
 
-        logi = logid()
+        logid = logid()
+
 
         logdict = {
-            "logid" : logi,
+            "logid" : logid,
+            'runid' : runid,
             "num_neurons" : num_neurons,
             "num_epochs" : num_epochs,
             "learning_rate" : learning_rate,
@@ -114,8 +120,11 @@ def main(num_neurons=50, num_epochs=300, epochs=[200, 250],
             "val_freq" : val_freq,
             "mert_batch" : mert_batch,
             "loss_function" : loss_function,
+            'regulation': regu,
             "optimizer" : optimizer,
-            'frechet distance' : Frechet_distance
+            'frechet distance' : Frechet_distance,
+            "inference_time" : inference_time,
+
 
         }
         # saving model and predict
@@ -168,6 +177,7 @@ def main(num_neurons=50, num_epochs=300, epochs=[200, 250],
         plt.show()
         plt.pause(0.1)
 
+    start_training = perf_counter()
     #training loop
     for epoch in range(num_epochs):
         
