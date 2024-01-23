@@ -31,10 +31,7 @@ def gridmain(bla=None, blaa=None, blaaa=None, epochs=None): #all hyperparameters
         epochs = epochs[:-1]
     score = []
 
-    if len(pd.read_csv('src/logging/log.csv')):
-        runid = 1
-    else:
-        runid = getnewrunid()
+    runid = getnewrunid()
 
     score.append(torch_gridsearch_model(num_epochs=num_epochs, epochs=epochs, dataset=1), runid)
     score.append(torch_gridsearch_model(num_epochs=num_epochs, epochs=epochs, dataset=2), runid)
