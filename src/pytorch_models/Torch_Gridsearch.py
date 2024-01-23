@@ -116,16 +116,17 @@ def main(num_neurons=50, num_epochs=300, epochs=[200, 250],
             "batch_size" : batch_size,
             "batch_dur_idx" : batch_dur_idx,
             "batch_range_idx" : batch_range_idx,
+            'lambda': lmbda,
             "rel_tol" : rel_tol,
             "abs_tol" : abs_tol,
             "val_freq" : val_freq,
             "mert_batch" : mert_batch,
             "loss_function" : loss_function,
-            'regulation': regu,
+            'regularization': regu,
             "optimizer" : optimizer,
             'frechet distance' : Frechet_distance,
             "inference_time" : inference_time,
-            'training time' : training_time
+            'training_time' : training_time
 
         }
         # saving model and predict
@@ -280,10 +281,10 @@ def main(num_neurons=50, num_epochs=300, epochs=[200, 250],
         #intermediate prediction
         if intermediate_pred_freq and epoch % intermediate_pred_freq == intermediate_pred_freq-1:
             with torch.no_grad():
-                predicted_intermidiate = odeint(net, data[1][0], data[0])
-                evaluation_loss_intermidiate = loss_function(predicted_intermidiate, data[1]).item()
-            print(f"Mean Squared Error Loss intermidiate: {evaluation_loss_intermidiate}")
-            plot_actual_vs_predicted_full(data, predicted_intermidiate, num_feat=num_feat, info=(epoch, evaluation_loss_intermidiate))
+                predicted_intermediate = odeint(net, data[1][0], data[0])
+                evaluation_loss_intermediate = loss_function(predicted_intermediate, data[1]).item()
+            print(f"Mean Squared Error Loss intermediate: {evaluation_loss_intermediate}")
+            plot_actual_vs_predicted_full(data, predicted_intermediate, num_feat=num_feat, info=(epoch, evaluation_loss_intermediate))
             if live_intermediate_pred:
                 plt.show(block=False)
                 plt.pause(0.1)
