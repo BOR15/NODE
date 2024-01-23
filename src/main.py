@@ -33,9 +33,9 @@ def gridmain(bla=None, blaa=None, blaaa=None, epochs=None): #all hyperparameters
 
     runid = getnewrunid()
 
-    score.append(torch_gridsearch_model(num_epochs=num_epochs, epochs=epochs, dataset=1), runid)
-    score.append(torch_gridsearch_model(num_epochs=num_epochs, epochs=epochs, dataset=2), runid)
-    score.append(torch_gridsearch_model(num_epochs=num_epochs, epochs=epochs, dataset=3), runid)
+    score.append(torch_gridsearch_model(1, runid, num_epochs=num_epochs, epochs=epochs))
+    score.append(torch_gridsearch_model(2, runid, num_epochs=num_epochs, epochs=epochs))
+    score.append(torch_gridsearch_model(3, runid, num_epochs=num_epochs, epochs=epochs))
 
     score = np.mean(np.array(score), axis=0)
     
@@ -169,7 +169,7 @@ def gridsearch():
     #iterating over all combinations of features one last time
     for indices in itertools.product(*[range(len(f)) for f in feature_sets]):
         selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
-        scores[indices] = main(*selected_features)
+        scores[indices] = gridmain(*selected_features, epochs)
 
     best_indices = np.unravel_index(np.argmax(scores), scores.shape)
     final_features = [feature_sets[i][idx] for i, idx in enumerate(best_indices)]

@@ -50,8 +50,8 @@ def getnewlogid():
     return len(pd.read_csv('src/logging/log.csv'))
 
 def getnewrunid():
-    if getnewlogid:
+    if getnewlogid():
         return pd.read_csv('src/logging/log.csv')["runid"][getnewlogid()-1] + 1
     else:
         return 1
-
+    
