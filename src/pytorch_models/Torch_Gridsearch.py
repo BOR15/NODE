@@ -124,7 +124,7 @@ def main(num_neurons=50, num_epochs=300, epochs=[200, 250],
             "optimizer" : optimizer,
             'frechet distance' : Frechet_distance,
             "inference_time" : inference_time,
-
+            'training time' : training_time
 
         }
         # saving model and predict
@@ -177,10 +177,13 @@ def main(num_neurons=50, num_epochs=300, epochs=[200, 250],
         plt.show()
         plt.pause(0.1)
 
-    start_training = perf_counter()
+    #start training time
+    training_time = 0
+
     #training loop
     for epoch in range(num_epochs):
-        
+
+        start_training = perf_counter()
 
         #training
         optimizer.zero_grad()
@@ -240,7 +243,11 @@ def main(num_neurons=50, num_epochs=300, epochs=[200, 250],
         
         loss.backward()
         optimizer.step()
-        
+
+        end_training = perf_counter()
+
+        training_time += end_training - start_training
+
         #save loss
         train_losses_cache.append(loss.item())
         
