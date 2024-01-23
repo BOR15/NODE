@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from tools.logsystem import saveplot, addcolumn, addlog, logid
 from tools.Metrics import frechet_distance
 
-from tools.toydata_processing import get_batch, get_batch2
+from tools.data_processing import get_batch, get_batch2, get_batch3
 from tools.misc import check_cuda, tictoc
 from tools.plots import *
 
@@ -60,7 +60,14 @@ class ODEFunc(nn.Module):
 
     
     
-def main(num_neurons=50, num_epochs=300, epochs=[200, 250], learning_rate=0.01, batch_size=50, batch_dur_idx=20, batch_range_idx=500, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, mert_batch=False, intermediate_pred_freq=0, live_plot=False, savemodel=False, savepredict=False):
+def main(num_neurons=50, num_epochs=300, epochs=[200, 250], 
+         learning_rate=0.01, loss_coefficient=1,
+         batch_size=50, batch_dur_idx=20, batch_range_idx=500, 
+         rel_tol=1e-7, abs_tol=1e-9, val_freq=5, 
+         lmbda=5e-3, regu=None,
+         mert_batch_scuffed=False, mert_batch=False,
+         intermediate_pred_freq=0, live_intermediate_pred=False, live_plot=False, 
+         savemodel=False, savepredict=False):
     """
     Main function for training and evaluating a PyTorch model using ODE integration.
 
@@ -117,16 +124,13 @@ def main(num_neurons=50, num_epochs=300, epochs=[200, 250], learning_rate=0.01, 
         if savepredict:
             torch.save(predicted, f"logging/Predictions/{id}.pt")
 
-        addlog('logging/log.csv', logdict)
+        # addlog('logging/log.csv', logdict) #TODO FIX THIS 
 
-        # Plotting 
-        # TODO add saving for the plots.
-            
+        # # Plotting   
+        # saveplot(plot_training_vs_validation([train_losses, val_losses], sample_freq=val_freq, two_plots=True), "Losses", id)
+        # saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, toy=False, for_torch=True), "FullPredictions", id) #TODO add args for subtitle
 
-        saveplot(plot_training_vs_validation([train_losses, val_losses], sample_freq="?", two_plots=True), "Losses", id)
-        saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, toy=False, for_torch=True), "FullPredictions", id)
-
-        scores = [1, 1]  ##TODO add more scores here
+        scores = [1, 2, 3]  ##TODO add more scores here
         return scores
         
 
@@ -174,7 +178,7 @@ def main(num_neurons=50, num_epochs=300, epochs=[200, 250], learning_rate=0.01, 
         # pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
         
         
-        if mert_batch: #this right now forces the code to unparaledize, which is makes it really slow but maybe i can change odeint sourcecode so it works.
+        if mert_batch_scuffed: #this right now forces the code to unparaledize, which is makes it really slow but maybe i can change odeint sourcecode so it works.
             #get batch
             s, t, features = get_batch2(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
             pred_y = []
@@ -183,6 +187,25 @@ def main(num_neurons=50, num_epochs=300, epochs=[200, 250], learning_rate=0.01, 
                 #doing predict
                 pred_y.append(odeint(net, data[1][0], t[i], rtol=rel_tol, atol=abs_tol, method="dopri5")[-20:])
             pred_y = torch.stack(pred_y).reshape(20, 50, 5)
+        elif mert_batch:
+            #get batch
+            s, t, features = get_batch3(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
+            #doing predict
+            pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
+
+            pred_y_cut = torch.zeros_like(pred_y)[:20,:,:]
+            
+            # i think this is slower then the advanced indexing but im not sure
+            # for i in range(batch_size):
+            #     pred_y_cut[:,i,:] = pred_y[:,i,:][s[i]:s[i]+batch_dur_idx]
+            # pred_y = pred_y_cut
+
+            range_tensor = torch.arange(0, batch_dur_idx, device=device)
+            index_tensor = s[:, None] + range_tensor[None, :]
+            pred_y_cut = pred_y.gather(0, index_tensor[:, :, None].expand(-1, -1, pred_y.size(2)))
+            pred_y = pred_y_cut.transpose(0, 1)
+            
+
         else:
             #get batch
             t, features = get_batch(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
@@ -190,7 +213,21 @@ def main(num_neurons=50, num_epochs=300, epochs=[200, 250], learning_rate=0.01, 
             pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
 
         
-        loss = loss_function(pred_y, features)
+        loss = loss_coefficient * loss_function(pred_y, features)
+        
+        # regularisation L1 and L2 implementation
+        l1, l2 = 0, 0
+        if regu == 'L2':
+            for p in net.parameters():
+                l2 = l2 + torch.pow(p,2).sum()
+            loss = loss + lmbda * l2
+          
+        if regu == 'L1':
+            for p in net.parameters():
+                l1 += torch.sum(torch.abs(p))
+            loss = loss + lmbda * l1 
+        
+        
         loss.backward()
         optimizer.step()
         
@@ -228,17 +265,22 @@ def main(num_neurons=50, num_epochs=300, epochs=[200, 250], learning_rate=0.01, 
                 predicted_intermidiate = odeint(net, data[1][0], data[0])
                 evaluation_loss_intermidiate = loss_function(predicted_intermidiate, data[1]).item()
             print(f"Mean Squared Error Loss intermidiate: {evaluation_loss_intermidiate}")
-            intermediate_prediction(data, predicted_intermidiate, evaluation_loss_intermidiate, num_feat, epoch)
+            plot_actual_vs_predicted_full(data, predicted_intermidiate, num_feat=num_feat, info=(epoch, evaluation_loss_intermidiate))
+            if live_intermediate_pred:
+                plt.show(block=False)
+                plt.pause(0.1)
+
 
         #logging at non final epochs
         if epoch+1 in epochs:
-            print(epoch+1, "TESTINGF")
             scores.append(logging())
 
     
     scores.append(logging())
     scores = np.array(scores)  #dim 0 is epochs, dim 1 is scores
-    # average them? take the highest? then return
+    # average them? take the highest? then return: for now ill average
+    scores = np.mean(scores, axis=0)
+    return scores
 
     
 

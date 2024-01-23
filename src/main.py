@@ -11,19 +11,36 @@ from pytorch_models.Torch_Gridsearch import main as torch_gridsearch_model
 # from tensorflow_models.Tensor_base_model import main as tensor_base_model
 # from tensorflow_models.TensorTest import main as tensor_test_model
 
-
-#run everything from here
-def main(bla=None, blaa=None, blaaa=None): #all hyperparameters get passed here as arguments
-    
+def main():
     # torch_test_model(num_epochs=200, num_neurons=60, learning_rate=0.01, loss_coefficient=1000, batch_range_idx=600, intermediate_pred_freq=100, mert_batch=True)
     # torch_test_model(num_epochs=20, intermediate_pred_freq=10)
-    torch_gridsearch_model(num_epochs=40, epochs=[20,30])
     # torch_base_model()
 
     # torch_toy_model(num_epochs=30, learning_rate=0.0003) #, intermediate_pred_freq=300)
     # torch_toy_model(num_epochs=150, learning_rate=0.01, batch_range_idx=300, mert_batch=False, intermediate_pred_freq=40)
+    pass
+
+#run everything from here
+def gridmain(bla=None, blaa=None, blaaa=None): #all hyperparameters get passed here as arguments
+    score = []
     
-    return np.random.rand()
+    score.append(torch_gridsearch_model(num_epochs=40, epochs=[20,30]))
+    score.append(torch_gridsearch_model(num_epochs=40, epochs=[20,30]))
+    score.append(torch_gridsearch_model(num_epochs=40, epochs=[20,30]))
+
+    score = np.mean(np.array(score), axis=0)
+    
+    accuracy, loss, time = score
+
+    loss = 1/(1+loss) #inverse loss so that higher is better and between 0 and 1
+    time = 1/(1+time) #inverse time so that higher is better and between 0 and 1
+
+    final_score = accuracy * loss * time  #kind of like an and
+    #or this?
+    # final_score = accuracy + loss + time  #kind of like an or
+
+    # return np.random.rand()
+    return final_score
 
 
 def gridsearch():
@@ -91,7 +108,7 @@ def gridsearch():
         #iterating over all combinations of features
         for indices in itertools.product(*[range(len(f)) for f in feature_sets]):
             selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
-            scores[indices] = main(*selected_features)
+            scores[indices] = gridmain(*selected_features)
         
         #get best score indices
         best_indices = np.unravel_index(np.argmax(scores), scores.shape)
@@ -165,4 +182,5 @@ def calculate_score_diff(feature_idx, best_indices, scores):
 
 if __name__ == "__main__":
     # gridsearch()
-    main()
+    gridmain()
+    #main()
