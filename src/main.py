@@ -1,6 +1,7 @@
 import numpy as np
 import itertools
-
+import pandas as pd
+from tools.logsystem import getnewrunid
 
 # from pytorch_models.Torch_base_model import main as torch_base_model
 from pytorch_models.TorchTest import main as torch_test_model
@@ -23,10 +24,15 @@ def main():
 #run everything from here
 def gridmain(bla=None, blaa=None, blaaa=None): #all hyperparameters get passed here as arguments
     score = []
-    
-    score.append(torch_gridsearch_model(num_epochs=40, epochs=[20,30]))
-    score.append(torch_gridsearch_model(num_epochs=40, epochs=[20,30]))
-    score.append(torch_gridsearch_model(num_epochs=40, epochs=[20,30]))
+
+    if len(pd.read_csv('logging/log.csv')):
+        runid = 1
+    else:
+        runid = getnewrunid()
+
+    score.append(torch_gridsearch_model(num_epochs=40, epochs=[20,30], dataset=1))
+    score.append(torch_gridsearch_model(num_epochs=40, epochs=[20,30], dataset=2))
+    score.append(torch_gridsearch_model(num_epochs=40, epochs=[20,30], dataset=3))
 
     score = np.mean(np.array(score), axis=0)
     

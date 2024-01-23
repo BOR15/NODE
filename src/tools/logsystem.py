@@ -51,3 +51,5 @@ def getnewlogid():
 
 def getnewrunid():
     return pd.read_csv('logging/log.csv')["runid"][getnewlogid()-1] + 1
+
+print(len(pd.read_csv('logging/log.csv')))
