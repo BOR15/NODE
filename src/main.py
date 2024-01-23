@@ -74,7 +74,6 @@ def gridsearch():
     feat1 = [1,2,4]
     feat2 = [1,2,4]
     feat3 = [1,2,4]
-
     
     # automatic reduction factor
     feat_red = [1/5, 1/5, 1/5]
