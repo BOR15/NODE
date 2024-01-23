@@ -39,17 +39,19 @@ def addcolumn(csv_file, name, default):
     
 
 def saveplot(plt, foldername):
-    df = pd.read_csv('logging/log.csv')
+    df = pd.read_csv('src/logging/log.csv')
     number = str(len(df))
-    filename = f"logging/{foldername}/{number}.png"
+    filename = f"src/logging/{foldername}/{number}.png"
     # Save the plot
     plt.savefig(filename)
 
 
 def getnewlogid():
-    return len(pd.read_csv('logging/log.csv'))
+    return len(pd.read_csv('src/logging/log.csv'))
 
 def getnewrunid():
-    return pd.read_csv('logging/log.csv')["runid"][getnewlogid()-1] + 1
+    if getnewlogid:
+        return pd.read_csv('src/logging/log.csv')["runid"][getnewlogid()-1] + 1
+    else:
+        return 1
 
-print(len(pd.read_csv('logging/log.csv')))
