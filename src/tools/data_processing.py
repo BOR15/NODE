@@ -459,7 +459,11 @@ def plot_data(data_tuple):
 #         torch.save(data, "real_data_scuffed2.pt")
 
 
-def save_clean_raw_data(filepath: str, shift: int, start: int, file_suffix: str):
+def save_clean_raw_data(filepath: str, shift: int, start: int, file_suffix: str, normalization=False) -> str:
+    '''
+    Removes bad start of signal and saves as file.
+    If normalization=True, then also save a version with normalized data and another with standardized data.
+    '''
     full_filename = "clean_raw_data_" + file_suffix + ".pt"
 
     # Load the data and remove duplicates
@@ -470,13 +474,24 @@ def save_clean_raw_data(filepath: str, shift: int, start: int, file_suffix: str)
 
     t_tensor, features_tensor = data_clean
 
+    if normalization:
+        mean0_filename = "clean_mean0_data_" + file_suffix + ".pt"
+        normalized_filename = "clean_normalized_data_" + file_suffix + ".pt"
+
+        torch.save((t_tensor, normalize_data_mean_0(features_tensor)), mean0_filename)
+        torch.save((t_tensor, normalize_data(features_tensor)), normalized_filename)
+
     # save the data
     torch.save((t_tensor, features_tensor), full_filename)
 
     return full_filename
 
 
-def save_interpolated_data(filepath: str, num_samples: int, file_suffix: str):
+def save_interpolated_data(filepath: str, num_samples: int, file_suffix: str) -> None:
+    '''
+    Interpolates features of data with given number of samples num_samples and creates two files:
+    one with normalized data and the other with standardized data.
+    '''
     mean0_filename = "mean0_interpolated_" + file_suffix + "_" + str(num_samples) + "_samples.pt"
     normalized_filename =  "normalized_interpolated_" + file_suffix + "_" + str(num_samples) + "_samples.pt"
 
@@ -521,7 +536,7 @@ def main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[st
 
     raw_file_names = []
     for shift, start, suffix in zipped_arguments:
-        raw_filename = save_clean_raw_data(data_path, shift, start, suffix)
+        raw_filename = save_clean_raw_data(data_path, shift, start, suffix, normalization=True)
         raw_file_names.append(raw_filename)
     
     raw_file_paths = []
