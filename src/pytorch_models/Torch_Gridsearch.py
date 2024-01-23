@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 from time import perf_counter as time
 import matplotlib.pyplot as plt
-from tools.logsystem import saveplot, addcolumn, addlog, logid
+from tools.logsystem import saveplot, addcolumn, addlog, getnewlogid, getnewrunid
 from tools.Metrics import frechet_distance
 
 from tools.data_processing import get_batch, get_batch2, get_batch3
@@ -103,7 +103,7 @@ def main(num_neurons=50, num_epochs=300, epochs=[200, 250],
         Frechet_distance = frechet_distance(data[1], predicted) #TODO fix this
         
 
-        logid = logid()
+        logid = getnewlogid()
 
 
         logdict = {
@@ -283,6 +283,8 @@ def main(num_neurons=50, num_epochs=300, epochs=[200, 250],
 
         #logging at non final epochs
         if epoch+1 in epochs:
+            if epoch+1 == epochs[0]:
+                runid = getnewrunid()
             scores.append(logging())
 
     
