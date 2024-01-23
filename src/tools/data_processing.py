@@ -22,6 +22,7 @@ boris_path = "NODE/Input_Data/Raw_data/Dynamics40h17.csv"
 berend_scufed = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\real_data_scuffed2.pt"
 boris_scufed = "real_data_scuffed2.pt"
 
+
 def load_data(filename, shift=0, start=300):
     '''
     Loads the data from a CSV file.
@@ -43,50 +44,62 @@ def load_data(filename, shift=0, start=300):
     features_tensor = torch.tensor(data.iloc[start:, 2+shift:27+shift:5].values, dtype=torch.float32)
     print(features_tensor.shape, t_tensor.shape)
     print(features_tensor[0], t_tensor[0])
-    features_tensor = normalize_data_mean_0(features_tensor)
+    # features_tensor = normalize_data_mean_0(features_tensor)
     return t_tensor, features_tensor
 
 
-def load_data_avg_duplicates(filename= berend_path, shift=0, start=300):
-    '''
-    Loads the data from a CSV file. 
-    Replaces duplicate time points by their average value.
-    Normalizes the features with mean 0 and std 1.
-    Returns two tensors: time and features.
-    '''
-    # Import data
-    data = pd.read_csv(filename, delimiter=',')
+# def load_data_avg_duplicates(filename, shift=0, start=300):
+#     '''
+#     Loads the data from a CSV file. 
+#     Replaces duplicate time points by their average value.
+#     Normalizes the features with mean 0 and std 1.
+#     Returns two tensors: time and features.
+#     '''
+#     # Import data
+#     data = pd.read_csv(filename, delimiter=',')
 
-    # Check for duplicates
-    duplicates = data.duplicated(subset=['t'])
-    if duplicates.any():
-        print("Duplicates found in the time axis. Averaging duplicates...")
-        data = data.groupby('t', as_index=False).mean()
-    else:
-        print("No duplicates found in the time axis.")
+#     # Check for duplicates
+#     duplicates = data.duplicated(subset=['t'])
+#     if duplicates.any():
+#         print("Duplicates found in the time axis. Averaging duplicates...")
+#         data = data.groupby('t', as_index=False).mean()
+#     else:
+#         print("No duplicates found in the time axis.")
 
-    # Defining tensors
-    t_tensor = torch.tensor(data.iloc[start:, 1].values, dtype=torch.float32)
-    features_tensor = torch.tensor(data.iloc[start:, 2+shift:27+shift:5].values, dtype=torch.float32)
-    print(features_tensor.shape, t_tensor.shape)
-    print(features_tensor[0], t_tensor[0])
-    features_tensor = normalize_data_mean_0(features_tensor)
-    return t_tensor, features_tensor
+#     # Defining tensors
+#     t_tensor = torch.tensor(data.iloc[start:, 1].values, dtype=torch.float32)
+#     features_tensor = torch.tensor(data.iloc[start:, 2+shift:27+shift:5].values, dtype=torch.float32)
+#     print(features_tensor.shape, t_tensor.shape)
+#     print(features_tensor[0], t_tensor[0])
+
+#     features_tensor = normalize_data_mean_0(features_tensor)
+#     return t_tensor, features_tensor
 
 
-def even_space_time_series(t_tensor, train_time=None, val_time=None):
+def linspace_time_series(t_tensor):
     '''
     Output new tensor with evenly-spaced time-points.
-    If training time and validation time are given, return  corresponding index in new time series for that point.
     '''
     t_tensor_linspaced = torch.tensor(np.linspace(t_tensor[0], t_tensor[-1], len(t_tensor)))
+    return t_tensor_linspaced
 
-    if train_time:
-        train_index = [index for index, value in enumerate(torch.round(t_tensor)) if train_time == value][0]
-    if val_time:
-        val_index = [index for index, value in enumerate(torch.round(t_tensor)) if (val_time + train_time) == value][0]
 
-    return t_tensor_linspaced, train_index, val_index
+def get_split_indexes(filepath, train_dur, val_dur=None):
+    '''Return indexes in time series corresponding to train (and val) time(s).'''
+    t_tensor, features = torch.load(filepath)
+
+    #Round times to 1 decimal point
+    train_time = round(train_dur * 10) / 10  
+    time_rounded = torch.round(t_tensor * 10) / 10
+
+    train_index = [index for index, value in enumerate(time_rounded) if train_time == value][0]
+
+    # Validation time is not used at the moment
+    if val_dur:
+        val_time = round((train_dur + val_dur) * 10) / 10
+        val_index = [index for index, value in enumerate(time_rounded) if val_time == value][0]
+
+    return train_index, val_index
 
 
 #added the following to interpolate the features for a smoother graph
@@ -109,7 +122,8 @@ def interpolate_features(t_tensor, features_tensor, num_sample_points=1024):
     interpolated_features_tensor = torch.tensor(interpolated_features_np, dtype=torch.float32)
     sampled_timepoints = torch.tensor(np.linspace(t_np[0], t_np[-1], num=num_sample_points), dtype=torch.float32)
 
-    return interpolated_features_tensor, sampled_timepoints
+    return sampled_timepoints, interpolated_features_tensor
+
 
 def remove_spikes(t_tensor, features_tensor, spike_threshold=0.1):
     """
@@ -178,12 +192,17 @@ def normalize_data_mean_0(features_tensor, for_torch=True):
 
 
 def get_timestep(t_tensor):
-    '''Returns the duration of the input time tensor.'''
+    '''Returns the minimum timestep between each point.'''
     timestep = torch.min(t_tensor[1:] - t_tensor[:-1])
     return timestep
 
 
 def simple_split(data_tuple, train_dur, val_dur=0, timestep=None):
+    '''
+    Create a data split based on smallest timestep: number of datapoints in training and validation is simply 
+    training/validation time divided by smallest timestep.
+    This method won't work if the sampling on time is not evenly spaced through the entire data. 
+    '''
     t_tensor, features_tensor = data_tuple
     
     if not timestep:
@@ -202,6 +221,9 @@ def simple_split(data_tuple, train_dur, val_dur=0, timestep=None):
 
 
 def val_shift_split(data_tuple, train_dur, val_shift, timestep=None):
+    '''
+    Splitting the data the same way as the function above but slightly different but idk why.
+    '''
     t_tensor, features_tensor = data_tuple
 
     if not timestep:
@@ -216,6 +238,30 @@ def val_shift_split(data_tuple, train_dur, val_shift, timestep=None):
     test_data = (t_tensor[split_train:], features_tensor[split_train:])
 
     print(f"training size: {train_data[0].shape[0]}, validation size: {val_data[0].shape[0]} starting at {shift_val}, test size: {test_data[0].shape[0]}")
+
+    return train_data, val_data, test_data
+
+
+# This function is not used at the moment
+def data_split(filepath, train_dur, val_dur):
+    '''
+    Splits the data based on measured timepoints rather than number of data points. 
+    Uses original time series from data to make split.
+    How to deal with linspaced time series?
+    '''
+    t_tensor, features_tensor = torch.load(filepath)
+
+    #Round times to 1 decimal point
+    train_time = round(train_dur * 10) / 10  
+    val_time = round((train_dur + val_dur) * 10) / 10
+    time_rounded = torch.round(t_tensor * 10) / 10  
+
+    train_idx = [index for index, value in enumerate(time_rounded) if train_time == value][0]
+    val_idx = [index for index, value in enumerate(time_rounded) if val_time == value][0]
+
+    train_data = (t_tensor[:train_idx], features_tensor[:train_idx])
+    val_data = (t_tensor[train_idx:val_idx], features_tensor[train_idx:val_idx])
+    test_data = (t_tensor[val_idx:], features_tensor[val_idx:])
 
     return train_data, val_data, test_data
 
@@ -245,6 +291,7 @@ def get_batch(data_tuple, batch_size, batch_range_idx=None, batch_range_time=Non
     batch_y = torch.stack([features_tensor[s + i] for i in range(batch_dur_idx)], dim=0)  # (T, M, D)
     return batch_t.to(device), batch_y.to(device)
 
+
 #SCUFFED VERSION of merts idea (unless i look at source code of odeint and change it)
 def get_batch2(data_tuple, batch_size, batch_range_idx=None, batch_range_time=None, batch_dur_idx=None, batch_dur_time=None, timestep=None, device=torch.device("cpu")):
     #maybe later improve:  when using time do math using time then convert to index to reduce rounding errors
@@ -271,6 +318,7 @@ def get_batch2(data_tuple, batch_size, batch_range_idx=None, batch_range_time=No
     batch_t = [t_tensor[0:s[i]+batch_dur_idx] for i in range(batch_size)] # (T)
     batch_y = torch.stack([features_tensor[s + i] for i in range(batch_dur_idx)], dim=0)  # (T, M, D)
     return s, batch_t, batch_y.to(device)
+
 
 #Merts idea but actually this time
 def get_batch3(data_tuple, batch_size, batch_range_idx=None, batch_range_time=None, batch_dur_idx=None, batch_dur_time=None, timestep=None, device=torch.device("cpu")):
@@ -378,6 +426,10 @@ def plot_data(data_tuple):
 #         #torch.save((t_tensor_non_redundant, features_tensor_non_redundant), "real_data_scuffed2_non_redundant.pt")
 
 #         torch.save(data, "real_data_scuffed2.pt")
+
+
+
+
 
 
 if __name__ == "__main__":
