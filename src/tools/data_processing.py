@@ -43,8 +43,8 @@ def load_data(filename, shift=0):
     t_tensor = torch.tensor(data.iloc[:, 1].values, dtype=torch.float32)
     features_tensor = torch.tensor(data.iloc[:, 2+shift : 27+shift : 5].values, dtype=torch.float32)
 
-    print(features_tensor.shape, t_tensor.shape)
-    print(features_tensor[0], t_tensor[0])
+    print("Time tensor shape:", t_tensor.shape, "; Features tensor shape:", features_tensor.shape)
+    print("Time tensor: ", t_tensor[0], "; Features tensor: ", features_tensor[0])
 
     return t_tensor, features_tensor
 
@@ -82,10 +82,10 @@ def clean_start(data: tuple[torch.Tensor, torch.Tensor], start_idx: int):
     t_tensor, features_tensor = data
 
     time_clean = t_tensor[start_idx:]
-    time_clean -= time_clean[0]
+    time_aligned = time_clean - time_clean[0]
     features_clean = features_tensor[start_idx:]
 
-    return time_clean, features_clean
+    return time_aligned, features_clean
 
 
 def linspace_time_series(t_tensor):
@@ -185,7 +185,7 @@ def normalize_data(features_tensor):
     It has been found that normalising the data between 0 and 1 is the best for neural networks.
     '''
     min_vals = torch.min(features_tensor, dim=0)[0]
-    print(min_vals)
+    print("The minimum values are", min_vals)
     max_vals = torch.max(features_tensor, dim=0)[0]
     features_tensor = (features_tensor - min_vals) / (max_vals - min_vals)
     return features_tensor
@@ -459,28 +459,8 @@ def plot_data(data_tuple):
 #         torch.save(data, "real_data_scuffed2.pt")
 
 
-g1_start = 179  # 15h23 sw_g1
-g2_start = 177  # 15h23 ne_g2
-g8_start = 181  # 15h23 sw_g8
-
-shortest_data_len = 806  # len of data
-
-g1_shift = 3
-g2_shift = 0
-g8_shift = 4
-
-shifts = [g1_shift, g2_shift, g8_shift]
-starts = [g1_start, g2_start, g8_start]
-suffixes = ['g1', 'g2', 'g8']
-
-data_15h23_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/Raw_Data/Dynamics15h23.csv"
-raw_files = []
-processed_files = []
-
-
 def save_clean_raw_data(filepath: str, shift: int, start: int, file_suffix: str):
     full_filename = "clean_raw_data_" + file_suffix + ".pt"
-    raw_files.append(full_filename)
 
     # Load the data and remove duplicates
     data = load_data(filepath, shift)
@@ -493,12 +473,12 @@ def save_clean_raw_data(filepath: str, shift: int, start: int, file_suffix: str)
     # save the data
     torch.save((t_tensor, features_tensor), full_filename)
 
-    return raw_files
+    return full_filename
 
 
 def save_interpolated_data(filepath: str, num_samples: int, file_suffix: str):
-    mean0_filename = "mean0_interpolated_data_" + file_suffix + ".pt"
-    normalized_filename =  "normalized_interpolated_data_" + file_suffix + ".pt"
+    mean0_filename = "mean0_interpolated_" + file_suffix + "_" + str(num_samples) + "_samples.pt"
+    normalized_filename =  "normalized_interpolated_" + file_suffix + "_" + str(num_samples) + "_samples.pt"
 
     data = torch.load(filepath)
 
@@ -506,30 +486,77 @@ def save_interpolated_data(filepath: str, num_samples: int, file_suffix: str):
     t_tensor, features_tensor = interpolate_features(data, num_samples)
 
     # Normalize features
+    features_tensor_mean0 = normalize_data_mean_0(features_tensor)
     features_tensor_normalized = normalize_data(features_tensor)
-    features_tensor_normalized = normalize_data_mean_0(features_tensor)
 
     # save the data
-    torch.save((t_tensor, features_tensor_normalized), mean0_filename)
+    torch.save((t_tensor, features_tensor_mean0), mean0_filename)
     torch.save((t_tensor, features_tensor_normalized), normalized_filename)
 
 
+g1_start = 179  # 15h23 sw_g1
+g2_start = 177  # 15h23 ne_g2
+g8_start = 181  # 15h23 sw_g8
+
+g1_shift = 3
+g2_shift = 0
+g8_shift = 4
+
+shifts = [g1_shift, g2_shift, g8_shift]
+starts = [g1_start, g2_start, g8_start]
+suffixes = ['g1', 'g2', 'g8']
+
+shortest_data_len = 806  # len of data
+num_samples_interpolation = [400, 1600, 2400]
+
+data_15h23_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/Raw_Data/Dynamics15h23.csv"
+raw_path_root = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/"
+
+
+def main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[str], path_root: str, num_samples_interpolation: list[int]) -> None:
+    '''
+    This function creates all the necessary input_data files. 
+    '''
+    zipped_arguments = zip(shifts, starts, suffixes)
+
+    raw_file_names = []
+    for shift, start, suffix in zipped_arguments:
+        raw_filename = save_clean_raw_data(data_path, shift, start, suffix)
+        raw_file_names.append(raw_filename)
+    
+    raw_file_paths = []
+    for file_name in raw_file_names:
+        raw_file_paths.append(path_root + file_name)
+    
+    for path in raw_file_paths:
+        for num in num_samples_interpolation:
+            for suffix in suffixes:
+                save_interpolated_data(path, num, suffix)
+
+
 if __name__ == "__main__":
-    '''
-    Save file of raw data with only dropping of duplicates and cutting of start. 
-    '''
     savefile = True
-
-    # Load the data and remove duplicates
-    data = load_data(data_15h23_path, g1_shift)
-
-    # Cut the start of the data
-    data_clean = clean_start(data, g1_start)
-
-    t_tensor, features_tensor = data_clean
-
+    
     if savefile:
-        torch.save((t_tensor, features_tensor), "clean_raw_data_g1.pt")
+        main(data_15h23_path, shifts, starts, suffixes, raw_path_root, num_samples_interpolation)
+
+
+# if __name__ == "__main__":
+#     '''
+#     Save file of raw data with only dropping of duplicates and cutting of start. 
+#     '''
+#     savefile = False
+
+#     # Load the data and remove duplicates
+#     data = load_data(data_15h23_path, g1_shift)
+
+#     # Cut the start of the data
+#     data_clean = clean_start(data, g1_start)
+
+#     t_tensor, features_tensor = data_clean
+
+#     if savefile:
+#         torch.save((t_tensor, features_tensor), "clean_raw_data_g1.pt")
 
 
 # if __name__ == "__main__":
@@ -550,29 +577,28 @@ if __name__ == "__main__":
 #     # plt.show()
 
 #     if savefile:
-#         # Save the data without spikes to a new file
 #         torch.save((t_tensor, features_tensor_normalized), "real_data_.pt")
 
     
-if __name__ == "__main__":
-    '''
-    Save file of interpolated preprocessed data, taking clean_raw_data as input. 
-    '''
-    data = torch.load(filepath)
+# if __name__ == "__main__":
+#     '''
+#     Save file of interpolated preprocessed data, taking clean_raw_data as input. 
+#     '''
+#     savefile = False
+#     data = torch.load(filepath)
 
-    # Interpolation for 500, 1500, and 3000 points
-    t_tensor, features_tensor = interpolate_features(data, 400)
-    # t_tensor, features_tensor = interpolate_features(data, 1600)
-    # t_tensor, features_tensor = interpolate_features(data, 2400)
+#     # Interpolation for 500, 1500, and 3000 points
+#     t_tensor, features_tensor = interpolate_features(data, 400)
+#     # t_tensor, features_tensor = interpolate_features(data, 1600)
+#     # t_tensor, features_tensor = interpolate_features(data, 2400)
 
-    # Normalize features
-    features_tensor_normalized = normalize_data(features_tensor)
-    features_tensor_normalized = normalize_data_mean_0(features_tensor)
+#     # Normalize features
+#     features_tensor_normalized = normalize_data(features_tensor)
+#     features_tensor_normalized = normalize_data_mean_0(features_tensor)
 
-    # # Plot the data
-    # plot_data((t_tensor, features_tensor))
-    # plt.show()
+#     # # Plot the data
+#     # plot_data((t_tensor, features_tensor))
+#     # plt.show()
 
-    if savefile:
-        # Save the data without spikes to a new file
-        torch.save((t_tensor, features_tensor_normalized), "real_data_scuffed2_no_spikes.pt")
+#     if savefile:
+#         torch.save((t_tensor, features_tensor_normalized), "real_data_.pt")
