@@ -23,11 +23,10 @@ berend_scufed = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\real_data_scuf
 boris_scufed = "real_data_scuffed2.pt"
 
 
-def load_data(filename, shift=0, start=300):
+def load_data(filename, shift=0):
     '''
     Loads the data from a CSV file.
     Drops duplicates in the time axis, keeping the last one only. 
-    Normalizes the features with mean 0 and std 1.
     Returns two tensors: time and features.
     '''
     # Import data
@@ -40,11 +39,13 @@ def load_data(filename, shift=0, start=300):
         data = data.drop_duplicates(subset=['t'], keep='last')
     else:
         print("No duplicates found in the time axis.")
-    t_tensor = torch.tensor(data.iloc[start:, 1].values, dtype=torch.float32)
-    features_tensor = torch.tensor(data.iloc[start:, 2+shift:27+shift:5].values, dtype=torch.float32)
+
+    t_tensor = torch.tensor(data.iloc[:, 1].values, dtype=torch.float32)
+    features_tensor = torch.tensor(data.iloc[:, 2+shift:27+shift:5].values, dtype=torch.float32)
+
     print(features_tensor.shape, t_tensor.shape)
     print(features_tensor[0], t_tensor[0])
-    # features_tensor = normalize_data_mean_0(features_tensor)
+
     return t_tensor, features_tensor
 
 
@@ -76,6 +77,17 @@ def load_data(filename, shift=0, start=300):
 #     return t_tensor, features_tensor
 
 
+def clean_start(data: tuple[torch.Tensor, torch.Tensor], start_idx: int):
+    '''Cuts off start of signal up to given index and realigns time tensor from 0.'''
+    t_tensor, features_tensor = data
+
+    time_clean = t_tensor[start_idx:]
+    time_clean -= time_clean[0]
+    features_clean = features_tensor[start_idx:]
+
+    return time_clean, features_clean
+
+
 def linspace_time_series(t_tensor):
     '''
     Output new tensor with evenly-spaced time-points.
@@ -88,7 +100,7 @@ def get_split_indexes(filepath, train_dur, val_dur=None):
     '''Return indexes in time series corresponding to train (and val) time(s).'''
     t_tensor, features = torch.load(filepath)
 
-    #Round times to 1 decimal point
+    # Round times to 1 decimal point
     train_time = round(train_dur * 10) / 10  
     time_rounded = torch.round(t_tensor * 10) / 10
 
@@ -103,11 +115,13 @@ def get_split_indexes(filepath, train_dur, val_dur=None):
 
 
 #added the following to interpolate the features for a smoother graph
-def interpolate_features(t_tensor, features_tensor, num_sample_points=1024):
+def interpolate_features(data, num_sample_points=1024):
     """
     Linearly interpolate missing values in the features_tensor based on the time points in t_tensor.
     Sample `num_sample_points` evenly spaced points from the interpolated result.
     """
+    t_tensor, features_tensor = data
+
     # Convert tensors to numpy arrays for interpolation
     t_np = t_tensor.numpy()
     features_np = features_tensor.numpy()
@@ -197,73 +211,90 @@ def get_timestep(t_tensor):
     return timestep
 
 
-def simple_split(data_tuple, train_dur, val_dur=0, timestep=None):
-    '''
-    Create a data split based on smallest timestep: number of datapoints in training and validation is simply 
-    training/validation time divided by smallest timestep.
-    This method won't work if the sampling on time is not evenly spaced through the entire data. 
-    '''
-    t_tensor, features_tensor = data_tuple
+def random_sampling(data: tuple[torch.Tensor, torch.Tensor], num_samples: int):
+    '''Sample given number of samples uniformly in data.'''
+    t_tensor, features_tensor = data
+
+    if num_samples > len(t_tensor):
+        raise ValueError("The number of samples cannot be larger than the number of datapoints.")
     
-    if not timestep:
-        timestep = get_timestep(t_tensor)
+    # Generate random indices
+    indices = torch.randperm(len(t_tensor))[:num_samples]
+
+    # Sample from the tensors
+    sampled_t_tensor = t_tensor[indices]
+    sampled_features_tensor = features_tensor[indices]
+
+    return sampled_t_tensor, sampled_features_tensor
+
+
+# def simple_split(data_tuple, train_dur, val_dur=0, timestep=None):
+#     '''
+#     Create a data split based on smallest timestep: number of datapoints in training and validation is simply 
+#     training/validation time divided by smallest timestep.
+#     This method won't work if the sampling on time is not evenly spaced through the entire data. 
+#     '''
+#     t_tensor, features_tensor = data_tuple
     
-    split_train = int(train_dur / timestep)
-    split_val = int((val_dur + train_dur) / timestep)
+#     if not timestep:
+#         timestep = get_timestep(t_tensor)
+    
+#     split_train = int(train_dur / timestep)
+#     split_val = int((val_dur + train_dur) / timestep)
 
-    train_data = (t_tensor[:split_train], features_tensor[:split_train])
-    val_data = (t_tensor[split_train:split_val], features_tensor[split_train:split_val])
-    test_data = (t_tensor[split_val:], features_tensor[split_val:])
+#     train_data = (t_tensor[:split_train], features_tensor[:split_train])
+#     val_data = (t_tensor[split_train:split_val], features_tensor[split_train:split_val])
+#     test_data = (t_tensor[split_val:], features_tensor[split_val:])
 
-    print(f"training size: {train_data[0].shape[0]}, validation size: {val_data[0].shape[0]}, test size: {test_data[0].shape[0]}")
+#     print(f"training size: {train_data[0].shape[0]}, validation size: {val_data[0].shape[0]}, test size: {test_data[0].shape[0]}")
 
-    return train_data, val_data, test_data
-
-
-def val_shift_split(data_tuple, train_dur, val_shift, timestep=None):
-    '''
-    Splitting the data the same way as the function above but slightly different but idk why.
-    '''
-    t_tensor, features_tensor = data_tuple
-
-    if not timestep:
-        timestep = get_timestep(t_tensor)
-
-    #time to index
-    split_train = int(train_dur / timestep)  
-    shift_val = int(val_shift  / timestep)
-
-    train_data = (t_tensor[:split_train], features_tensor[:split_train])
-    val_data = (t_tensor[shift_val:split_train + shift_val], features_tensor[shift_val:split_train + shift_val])
-    test_data = (t_tensor[split_train:], features_tensor[split_train:])
-
-    print(f"training size: {train_data[0].shape[0]}, validation size: {val_data[0].shape[0]} starting at {shift_val}, test size: {test_data[0].shape[0]}")
-
-    return train_data, val_data, test_data
+#     return train_data, val_data, test_data
 
 
-# This function is not used at the moment
-def data_split(filepath, train_dur, val_dur):
-    '''
-    Splits the data based on measured timepoints rather than number of data points. 
-    Uses original time series from data to make split.
-    How to deal with linspaced time series?
-    '''
-    t_tensor, features_tensor = torch.load(filepath)
+# def val_shift_split(data_tuple, train_dur, val_shift, timestep=None):
+#     '''
+#     Splitting the data the same way as the function above but slightly different but idk why.
+#     '''
+#     t_tensor, features_tensor = data_tuple
 
-    #Round times to 1 decimal point
-    train_time = round(train_dur * 10) / 10  
-    val_time = round((train_dur + val_dur) * 10) / 10
-    time_rounded = torch.round(t_tensor * 10) / 10  
+#     if not timestep:
+#         timestep = get_timestep(t_tensor)
 
-    train_idx = [index for index, value in enumerate(time_rounded) if train_time == value][0]
-    val_idx = [index for index, value in enumerate(time_rounded) if val_time == value][0]
+#     #time to index
+#     split_train = int(train_dur / timestep)  
+#     shift_val = int(val_shift  / timestep)
 
-    train_data = (t_tensor[:train_idx], features_tensor[:train_idx])
-    val_data = (t_tensor[train_idx:val_idx], features_tensor[train_idx:val_idx])
-    test_data = (t_tensor[val_idx:], features_tensor[val_idx:])
+#     train_data = (t_tensor[:split_train], features_tensor[:split_train])
+#     val_data = (t_tensor[shift_val:split_train + shift_val], features_tensor[shift_val:split_train + shift_val])
+#     test_data = (t_tensor[split_train:], features_tensor[split_train:])
 
-    return train_data, val_data, test_data
+#     print(f"training size: {train_data[0].shape[0]}, validation size: {val_data[0].shape[0]} starting at {shift_val}, test size: {test_data[0].shape[0]}")
+
+#     return train_data, val_data, test_data
+
+
+# # This function is not used at the moment
+# def data_split(filepath, train_dur, val_dur):
+#     '''
+#     Splits the data based on measured timepoints rather than number of data points. 
+#     Uses original time series from data to make split.
+#     How to deal with linspaced time series?
+#     '''
+#     t_tensor, features_tensor = torch.load(filepath)
+
+#     #Round times to 1 decimal point
+#     train_time = round(train_dur * 10) / 10  
+#     val_time = round((train_dur + val_dur) * 10) / 10
+#     time_rounded = torch.round(t_tensor * 10) / 10  
+
+#     train_idx = [index for index, value in enumerate(time_rounded) if train_time == value][0]
+#     val_idx = [index for index, value in enumerate(time_rounded) if val_time == value][0]
+
+#     train_data = (t_tensor[:train_idx], features_tensor[:train_idx])
+#     val_data = (t_tensor[train_idx:val_idx], features_tensor[train_idx:val_idx])
+#     test_data = (t_tensor[val_idx:], features_tensor[val_idx:])
+
+#     return train_data, val_data, test_data
 
 
 def get_batch(data_tuple, batch_size, batch_range_idx=None, batch_range_time=None, batch_dur_idx=None, batch_dur_time=None, timestep=None, device=torch.device("cpu")):
@@ -376,6 +407,7 @@ def plot_interpolated_data(data_tuple):
     t_tensor, features_tensor = interpolate_features(data_tuple[0], data_tuple[1])
     plot_data((t_tensor, features_tensor))
 
+
 # plotting input data
 def plot_data(data_tuple):
     time_points = data_tuple[0].numpy()  
@@ -433,21 +465,64 @@ def plot_data(data_tuple):
 
 
 if __name__ == "__main__":
+    '''
+    Save file of raw data with only dropping of duplicates and cutting of start. 
+    '''
     savefile = False
 
-    data = load_data_avg_duplicates()
-    t_tensor, features_tensor = interpolate_features(data[0], data[1])
-    
-    # Remove spikes
-    t_tensor_no_spikes, features_tensor_no_spikes = remove_spikes(t_tensor, features_tensor)
+    # Load the data and remove duplicates
+    data = load_data()
 
-    # Plot the data after removing spikes
-    plot_data((t_tensor_no_spikes, features_tensor_no_spikes))
-    plt.show()
+    # Cut the start of the data
+    data_clean = clean_start(data, _)
+
+    t_tensor, features_tensor = data_clean
+
+    if savefile:
+        torch.save((t_tensor, features_tensor), "clean_raw_data_.pt")
+
+
+if __name__ == "__main__":
+    '''
+    Save file of randomly sampled preprocessed data, taking clean_raw_data as input. 
+    '''
+    data = torch.load(filepath)
+
+    # Random sampling
+    t_tensor, features_tensor = random_sampling(data, num_samples)
+
+    # Normalize features
+    features_tensor_normalized = normalize_data(features_tensor)
+    features_tensor_normalized = normalize_data_mean_0(features_tensor)
+
+    # # Plot the data
+    # plot_data((t_tensor, features_tensor))
+    # plt.show()
 
     if savefile:
         # Save the data without spikes to a new file
-        torch.save((t_tensor_no_spikes, features_tensor_no_spikes), "real_data_scuffed2_no_spikes.pt")
+        torch.save((t_tensor, features_tensor_normalized), "real_data_scuffed2_no_spikes.pt")
 
     
-    
+if __name__ == "__main__":
+    '''
+    Save file of interpolated preprocessed data, taking clean_raw_data as input. 
+    '''
+    data = torch.load(filepath)
+
+    # Interpolation for 500, 1500, and 3000 points
+    t_tensor, features_tensor = interpolate_features(data, 500)
+    t_tensor, features_tensor = interpolate_features(data, 1500)
+    t_tensor, features_tensor = interpolate_features(data, 3000)
+
+    # Normalize features
+    features_tensor_normalized = normalize_data(features_tensor)
+    features_tensor_normalized = normalize_data_mean_0(features_tensor)
+
+    # # Plot the data
+    # plot_data((t_tensor, features_tensor))
+    # plt.show()
+
+    if savefile:
+        # Save the data without spikes to a new file
+        torch.save((t_tensor, features_tensor_normalized), "real_data_scuffed2_no_spikes.pt")
