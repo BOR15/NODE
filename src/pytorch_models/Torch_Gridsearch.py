@@ -60,7 +60,7 @@ class ODEFunc(nn.Module):
 
     
     
-def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batch_dur_idx=20, batch_range_idx=500, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, mert_batch=False, intermediate_pred_freq=0, live_plot=False, savemodel=False, savepredict=False):
+def main(num_neurons=50, num_epochs=300, epochs=[200, 250], learning_rate=0.01, batch_size=50, batch_dur_idx=20, batch_range_idx=500, rel_tol=1e-7, abs_tol=1e-9, val_freq=5, mert_batch=False, intermediate_pred_freq=0, live_plot=False, savemodel=False, savepredict=False):
     """
     Main function for training and evaluating a PyTorch model using ODE integration.
 
@@ -78,7 +78,57 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
     Returns:
         None
     """
+    scores = []
 
+    def logging():
+        # Final predict
+        with torch.no_grad():
+            predicted = odeint(net, data[1][0], data[0])
+            evaluation_loss = loss_function(predicted, data[1]).item()
+        print(f"Mean Squared Error Loss: {evaluation_loss}")
+
+
+        #Frechet distance similairity metric
+        Frechet_distance = frechet_distance(net, data[1], predicted) #TODO fix this
+        
+
+        logid = logid()
+
+        logdict = {
+            "logid" : logid,
+            "num_neurons" : num_neurons,
+            "num_epochs" : num_epochs,
+            "learning_rate" : learning_rate,
+            "batch_size" : batch_size,
+            "batch_dur_idx" : batch_dur_idx,
+            "batch_range_idx" : batch_range_idx,
+            "rel_tol" : rel_tol,
+            "abs_tol" : abs_tol,
+            "val_freq" : val_freq,
+            "mert_batch" : mert_batch,
+            "loss_function" : loss_function,
+            "optimizer" : optimizer,
+            'frechet distance' : Frechet_distance
+
+        }
+        # saving model and predict
+        if savemodel:
+            torch.save(net,  f"logging/Models/{id}.pth")
+        if savepredict:
+            torch.save(predicted, f"logging/Predictions/{id}.pt")
+
+        addlog('logging/log.csv', logdict)
+
+        # Plotting 
+        # TODO add saving for the plots.
+            
+
+        saveplot(plot_training_vs_validation([train_losses, val_losses], sample_freq="?", two_plots=True), "Losses", id)
+        saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, toy=False, for_torch=True), "FullPredictions", id)
+
+        scores = [1, 1]  ##TODO add more scores here
+        return scores
+        
 
 
     #MT
@@ -180,52 +230,62 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
             print(f"Mean Squared Error Loss intermidiate: {evaluation_loss_intermidiate}")
             intermediate_prediction(data, predicted_intermidiate, evaluation_loss_intermidiate, num_feat, epoch)
 
+        #logging at non final epochs
+        if epoch+1 in epochs:
+            print(epoch+1, "TESTINGF")
+            scores.append(logging())
+
+    
+    scores.append(logging())
+    scores = np.array(scores)  #dim 0 is epochs, dim 1 is scores
+    # average them? take the highest? then return
+
     
 
 
-    # Final predict
-    with torch.no_grad():
-        predicted = odeint(net, data[1][0], data[0])
-        evaluation_loss = loss_function(predicted, data[1]).item()
-    print(f"Mean Squared Error Loss: {evaluation_loss}")
+    # # Final predict
+    # with torch.no_grad():
+    #     predicted = odeint(net, data[1][0], data[0])
+    #     evaluation_loss = loss_function(predicted, data[1]).item()
+    # print(f"Mean Squared Error Loss: {evaluation_loss}")
 
 
-    #Frechet distance similairity metric
-    Frechet_distance = frechet_distance(net, data[1], predicted)
+    # #Frechet distance similairity metric
+    # Frechet_distance = frechet_distance(net, data[1], predicted)
 
-    logid = logid()
+    # logid = logid()
 
-    logdict = {
-        "logid" : logid,
-        "num_neurons" : num_neurons,
-        "num_epochs" : num_epochs,
-        "learning_rate" : learning_rate,
-        "batch_size" : batch_size,
-        "batch_dur_idx" : batch_dur_idx,
-        "batch_range_idx" : batch_range_idx,
-        "rel_tol" : rel_tol,
-        "abs_tol" : abs_tol,
-        "val_freq" : val_freq,
-        "mert_batch" : mert_batch,
-        "loss_function" : loss_function,
-        "optimizer" : optimizer,
-        'frechet distance' : Frechet_distance
+    # logdict = {
+    #     "logid" : logid,
+    #     "num_neurons" : num_neurons,
+    #     "num_epochs" : num_epochs,
+    #     "learning_rate" : learning_rate,
+    #     "batch_size" : batch_size,
+    #     "batch_dur_idx" : batch_dur_idx,
+    #     "batch_range_idx" : batch_range_idx,
+    #     "rel_tol" : rel_tol,
+    #     "abs_tol" : abs_tol,
+    #     "val_freq" : val_freq,
+    #     "mert_batch" : mert_batch,
+    #     "loss_function" : loss_function,
+    #     "optimizer" : optimizer,
+    #     'frechet distance' : Frechet_distance
 
-    }
-    # saving model and predict
-    if savemodel:
-        torch.save(net,  f"logging/Models/{id}.pth")
-    if savepredict:
-        torch.save(predicted, f"logging/Predictions/{id}.pt")
+    # }
+    # # saving model and predict
+    # if savemodel:
+    #     torch.save(net,  f"logging/Models/{id}.pth")
+    # if savepredict:
+    #     torch.save(predicted, f"logging/Predictions/{id}.pt")
 
-    addlog('logging/log.csv', logdict)
+    # addlog('logging/log.csv', logdict)
 
-    # Plotting 
-    # TODO add saving for the plots.
+    # # Plotting 
+    # # TODO add saving for the plots.
         
 
-    saveplot(plot_training_vs_validation([train_losses, val_losses], sample_freq="?", two_plots=True), "Losses", id)
-    saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, toy=False, for_torch=True), "FullPredictions", id)
+    # saveplot(plot_training_vs_validation([train_losses, val_losses], sample_freq="?", two_plots=True), "Losses", id)
+    # saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, toy=False, for_torch=True), "FullPredictions", id)
 
 
     # plot_data(data)

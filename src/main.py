@@ -4,7 +4,7 @@ import itertools
 
 # from pytorch_models.Torch_base_model import main as torch_base_model
 from pytorch_models.TorchTest import main as torch_test_model
-
+from pytorch_models.Torch_Gridsearch import main as torch_gridsearch_model
 # from pytorch_models.Torch_Toy_Model import main as torch_toy_model
 
 
@@ -16,7 +16,8 @@ from pytorch_models.TorchTest import main as torch_test_model
 def main(bla=None, blaa=None, blaaa=None): #all hyperparameters get passed here as arguments
     
     # torch_test_model(num_epochs=200, num_neurons=60, learning_rate=0.01, loss_coefficient=1000, batch_range_idx=600, intermediate_pred_freq=100, mert_batch=True)
-    torch_test_model(num_epochs=20, intermediate_pred_freq=10)
+    # torch_test_model(num_epochs=20, intermediate_pred_freq=10)
+    torch_gridsearch_model(num_epochs=40, epochs=[20,30])
     # torch_base_model()
 
     # torch_toy_model(num_epochs=30, learning_rate=0.0003) #, intermediate_pred_freq=300)
