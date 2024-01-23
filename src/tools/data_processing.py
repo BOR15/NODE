@@ -41,7 +41,7 @@ def load_data(filename, shift=0):
         print("No duplicates found in the time axis.")
 
     t_tensor = torch.tensor(data.iloc[:, 1].values, dtype=torch.float32)
-    features_tensor = torch.tensor(data.iloc[:, 2+shift:27+shift:5].values, dtype=torch.float32)
+    features_tensor = torch.tensor(data.iloc[:, 2+shift : 27+shift : 5].values, dtype=torch.float32)
 
     print(features_tensor.shape, t_tensor.shape)
     print(features_tensor[0], t_tensor[0])
@@ -114,7 +114,6 @@ def get_split_indexes(filepath, train_dur, val_dur=None):
     return train_index, val_index
 
 
-#added the following to interpolate the features for a smoother graph
 def interpolate_features(data, num_sample_points=1024):
     """
     Linearly interpolate missing values in the features_tensor based on the time points in t_tensor.
@@ -460,48 +459,99 @@ def plot_data(data_tuple):
 #         torch.save(data, "real_data_scuffed2.pt")
 
 
+g1_start = 179  # 15h23 sw_g1
+g2_start = 177  # 15h23 ne_g2
+g8_start = 181  # 15h23 sw_g8
+
+shortest_data_len = 806  # len of data
+
+g1_shift = 3
+g2_shift = 0
+g8_shift = 4
+
+shifts = [g1_shift, g2_shift, g8_shift]
+starts = [g1_start, g2_start, g8_start]
+suffixes = ['g1', 'g2', 'g8']
+
+data_15h23_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/Raw_Data/Dynamics15h23.csv"
+raw_files = []
+processed_files = []
 
 
+def save_clean_raw_data(filepath: str, shift: int, start: int, file_suffix: str):
+    full_filename = "clean_raw_data_" + file_suffix + ".pt"
+    raw_files.append(full_filename)
+
+    # Load the data and remove duplicates
+    data = load_data(filepath, shift)
+
+    # Cut the start of the data
+    data_clean = clean_start(data, start)
+
+    t_tensor, features_tensor = data_clean
+
+    # save the data
+    torch.save((t_tensor, features_tensor), full_filename)
+
+    return raw_files
+
+
+def save_interpolated_data(filepath: str, num_samples: int, file_suffix: str):
+    mean0_filename = "mean0_interpolated_data_" + file_suffix + ".pt"
+    normalized_filename =  "normalized_interpolated_data_" + file_suffix + ".pt"
+
+    data = torch.load(filepath)
+
+    # Interpolate features
+    t_tensor, features_tensor = interpolate_features(data, num_samples)
+
+    # Normalize features
+    features_tensor_normalized = normalize_data(features_tensor)
+    features_tensor_normalized = normalize_data_mean_0(features_tensor)
+
+    # save the data
+    torch.save((t_tensor, features_tensor_normalized), mean0_filename)
+    torch.save((t_tensor, features_tensor_normalized), normalized_filename)
 
 
 if __name__ == "__main__":
     '''
     Save file of raw data with only dropping of duplicates and cutting of start. 
     '''
-    savefile = False
+    savefile = True
 
     # Load the data and remove duplicates
-    data = load_data()
+    data = load_data(data_15h23_path, g1_shift)
 
     # Cut the start of the data
-    data_clean = clean_start(data, _)
+    data_clean = clean_start(data, g1_start)
 
     t_tensor, features_tensor = data_clean
 
     if savefile:
-        torch.save((t_tensor, features_tensor), "clean_raw_data_.pt")
+        torch.save((t_tensor, features_tensor), "clean_raw_data_g1.pt")
 
 
-if __name__ == "__main__":
-    '''
-    Save file of randomly sampled preprocessed data, taking clean_raw_data as input. 
-    '''
-    data = torch.load(filepath)
+# if __name__ == "__main__":
+#     '''
+#     Save file of randomly sampled preprocessed data, taking clean_raw_data as input. 
+#     '''
+#     data = torch.load(filepath)
 
-    # Random sampling
-    t_tensor, features_tensor = random_sampling(data, num_samples)
+#     # Random sampling
+#     t_tensor, features_tensor = random_sampling(data, data_len)
 
-    # Normalize features
-    features_tensor_normalized = normalize_data(features_tensor)
-    features_tensor_normalized = normalize_data_mean_0(features_tensor)
+#     # Normalize features
+#     features_tensor_normalized = normalize_data(features_tensor)
+#     features_tensor_normalized = normalize_data_mean_0(features_tensor)
 
-    # # Plot the data
-    # plot_data((t_tensor, features_tensor))
-    # plt.show()
+#     # # Plot the data
+#     # plot_data((t_tensor, features_tensor))
+#     # plt.show()
 
-    if savefile:
-        # Save the data without spikes to a new file
-        torch.save((t_tensor, features_tensor_normalized), "real_data_scuffed2_no_spikes.pt")
+#     if savefile:
+#         # Save the data without spikes to a new file
+#         torch.save((t_tensor, features_tensor_normalized), "real_data_.pt")
 
     
 if __name__ == "__main__":
@@ -511,9 +561,9 @@ if __name__ == "__main__":
     data = torch.load(filepath)
 
     # Interpolation for 500, 1500, and 3000 points
-    t_tensor, features_tensor = interpolate_features(data, 500)
-    t_tensor, features_tensor = interpolate_features(data, 1500)
-    t_tensor, features_tensor = interpolate_features(data, 3000)
+    t_tensor, features_tensor = interpolate_features(data, 400)
+    # t_tensor, features_tensor = interpolate_features(data, 1600)
+    # t_tensor, features_tensor = interpolate_features(data, 2400)
 
     # Normalize features
     features_tensor_normalized = normalize_data(features_tensor)
