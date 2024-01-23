@@ -13,8 +13,8 @@ from pytorch_models.Torch_Gridsearch import main as torch_gridsearch_model
 # from tensorflow_models.TensorTest import main as tensor_test_model
 
 def main():
-    # torch_test_model(num_epochs=200, num_neurons=60, learning_rate=0.01, loss_coefficient=1000, batch_range_idx=600, intermediate_pred_freq=100, mert_batch=True)
-    torch_test_model(num_epochs=20, intermediate_pred_freq=10, batch_range_idx=func(time))
+    # torch_test_model(num_epochs=200, num_neurons=60, learning_rate=0.01, loss_coef=1000, batch_range_idx=600, intermediate_pred_freq=100, mert_batch=True)
+    torch_test_model(num_epochs=20, intermediate_pred_freq=10)
     # torch_base_model()
 
     # torch_toy_model(num_epochs=30, learning_rate=0.0003) #, intermediate_pred_freq=300)
