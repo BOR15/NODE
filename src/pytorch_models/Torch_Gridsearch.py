@@ -61,11 +61,11 @@ class ODEFunc(nn.Module):
 
     
     
-def main(num_neurons=50, num_epochs=300, epochs=[200, 250], 
+def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250], 
          learning_rate=0.01, loss_coefficient=1,
          batch_size=50, batch_dur_idx=20, batch_range_idx=500, 
          rel_tol=1e-7, abs_tol=1e-9, val_freq=5, 
-         lmbda=5e-3, dataset=1, regu=None,
+         lmbda=5e-3, regu=None,
          mert_batch_scuffed=False, mert_batch=False,
          intermediate_pred_freq=0, live_intermediate_pred=False, live_plot=False, 
          savemodel=False, savepredict=False):

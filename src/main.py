@@ -30,9 +30,9 @@ def gridmain(bla=None, blaa=None, blaaa=None): #all hyperparameters get passed h
     else:
         runid = getnewrunid()
 
-    score.append(torch_gridsearch_model(num_epochs=40, epochs=[20,30], dataset=1))
-    score.append(torch_gridsearch_model(num_epochs=40, epochs=[20,30], dataset=2))
-    score.append(torch_gridsearch_model(num_epochs=40, epochs=[20,30], dataset=3))
+    score.append(torch_gridsearch_model(num_epochs=40, epochs=[20,30], dataset=1), runid)
+    score.append(torch_gridsearch_model(num_epochs=40, epochs=[20,30], dataset=2), runid)
+    score.append(torch_gridsearch_model(num_epochs=40, epochs=[20,30], dataset=3), runid)
 
     score = np.mean(np.array(score), axis=0)
     
