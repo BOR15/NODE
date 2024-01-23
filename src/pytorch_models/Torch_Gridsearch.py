@@ -89,13 +89,13 @@ def main(num_neurons=50, num_epochs=300, epochs=[200, 250], learning_rate=0.01, 
 
 
         #Frechet distance similairity metric
-        Frechet_distance = frechet_distance(net, data[1], predicted) #TODO fix this
+        Frechet_distance = frechet_distance(data[1], predicted) #TODO fix this
         
 
-        logid = logid()
+        logi = logid()
 
         logdict = {
-            "logid" : logid,
+            "logid" : logi,
             "num_neurons" : num_neurons,
             "num_epochs" : num_epochs,
             "learning_rate" : learning_rate,
@@ -144,7 +144,7 @@ def main(num_neurons=50, num_epochs=300, epochs=[200, 250], learning_rate=0.01, 
     laetitia_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/real_data_scuffed40h17_avg.pt"
     boris_path = "NODE/Input_Data/real_data_scuffed1.pt"
 
-    data = torch.load("NODE/Input_Data/real_data_scuffed1.pt")
+    data = torch.load("Input_Data/real_data_scuffed1.pt")  #this is the actual correct path for final submission (i think)
     num_feat = data[1].shape[1]
 
     #defining model, loss function and optimizer
