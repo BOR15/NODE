@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from tools.data_processing import get_batch, get_batch2, get_batch3
 from tools.misc import check_cuda, tictoc
 from tools.plots import *
+from tools.logsystem import *
 
 
 class ODEFunc(nn.Module):

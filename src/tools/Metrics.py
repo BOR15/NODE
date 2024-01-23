@@ -12,7 +12,7 @@ def frechet_distance(P, Q, metric='euclidean'):
 
     # Compute pairwise distances
     couplings = cdist(P.T, Q.T, metric= metric)
-    print(couplings)
+    # print(couplings)
     #might not need to transpose
     # couplings = cdist(P, Q, metric= metric)
 
@@ -31,29 +31,31 @@ def frechet_distance(P, Q, metric='euclidean'):
 
     return couplings[m-1, n-1]
 
-# Example usage
-P = np.array([[1, 2, 3], [4, 5, 6]])  # Replace with your data
-Q = np.array([[7, 8, 9, 10], [10, 11, 12, 13]])  # Replace with your data
-print(frechet_distance(P, Q))
 
-# print("Cosine Distance: ", frechet_distance(P, Q, metric='cosine')) # perhaps usefull for when we shift to the frequency domain
-# print("Canberra Distance: ", frechet_distance(P, Q, metric='canberra')) # Maybe usefull for near zero or zero magnitude signals
-# print("Chebyshev Distance: ", frechet_distance(P, Q, metric='chebyshev')) # takes the maximum deviation
-# print("Manhattan Distance: ", frechet_distance(P, Q, metric='cityblock')) # might be more usefull than euclidean when we want to
-# focus more on small deviations
-def mean_frechet_distance(P, Q, width):
-    "compartmentalizes the Frechet distance and takes the mean to give a more smooth result"
-    return np.mean([frechet_distance(P[t: t + width], Q) for t in range(len(P)- width + 1)])
+if __name__ == '__main__':
+    # Example usage
+    P = np.array([[1, 2, 3], [4, 5, 6]])  # Replace with your data
+    Q = np.array([[7, 8, 9, 10], [10, 11, 12, 13]])  # Replace with your data
+    print(frechet_distance(P, Q))
 
-np.random.seed(0)
+    # print("Cosine Distance: ", frechet_distance(P, Q, metric='cosine')) # perhaps usefull for when we shift to the frequency domain
+    # print("Canberra Distance: ", frechet_distance(P, Q, metric='canberra')) # Maybe usefull for near zero or zero magnitude signals
+    # print("Chebyshev Distance: ", frechet_distance(P, Q, metric='chebyshev')) # takes the maximum deviation
+    # print("Manhattan Distance: ", frechet_distance(P, Q, metric='cityblock')) # might be more usefull than euclidean when we want to
+    # focus more on small deviations
+    def mean_frechet_distance(P, Q, width):
+        "compartmentalizes the Frechet distance and takes the mean to give a more smooth result"
+        return np.mean([frechet_distance(P[t: t + width], Q) for t in range(len(P)- width + 1)])
 
-# Generate a base line for P and Q
-base_line = np.linspace(0, 10, 20)
+    np.random.seed(0)
 
-# Create P and Q as similar lines with small random variations
-P = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)]).T
-Q = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)]).T
-# P = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)])
-# Q = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)])
-print(P)
-print(frechet_distance(P, Q))
+    # Generate a base line for P and Q
+    base_line = np.linspace(0, 10, 20)
+
+    # Create P and Q as similar lines with small random variations
+    P = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)]).T
+    Q = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)]).T
+    # P = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)])
+    # Q = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)])
+    print(P)
+    print(frechet_distance(P, Q))

@@ -52,7 +52,7 @@ def plot_actual_vs_predicted_full(true_y, pred_y, num_feat, min_y=None, max_y=No
         fig.suptitle('Actual vs Predicted Features Full')
     else:
         epoch, loss, *ect = info 
-        fig.suptitle(f'Actual vs Predicted Features, epoch = {epoch+1}, MSELoss = {loss}') #TODO add the info we want in the image here.
+        fig.suptitle(f'Actual vs Predicted Features, epoch = {epoch+1}, Loss = {loss}') #TODO add the info we want in the image here.
 
 
     if toy:
