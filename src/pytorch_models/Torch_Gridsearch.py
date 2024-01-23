@@ -6,8 +6,8 @@ import pandas as pd
 import numpy as np
 from time import perf_counter as time
 import matplotlib.pyplot as plt
-from logging.logsystem import saveplot, addcolumn, addlog, id
-from logging.Metrics import frechet_distance
+from tools.logsystem import saveplot, addcolumn, addlog, logid
+from tools.Metrics import frechet_distance
 
 from tools.toydata_processing import get_batch, get_batch2
 from tools.misc import check_cuda, tictoc
@@ -193,10 +193,10 @@ def main(num_neurons=50, num_epochs=300, learning_rate=0.01, batch_size=50, batc
     #Frechet distance similairity metric
     Frechet_distance = frechet_distance(net, data[1], predicted)
 
-    id = id()
+    logid = logid()
 
     logdict = {
-        "id" : id,
+        "logid" : logid,
         "num_neurons" : num_neurons,
         "num_epochs" : num_epochs,
         "learning_rate" : learning_rate,
