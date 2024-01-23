@@ -46,8 +46,8 @@ def saveplot(plt, foldername):
     plt.savefig(filename)
 
 
-def logid():
+def getnewlogid():
     return len(pd.read_csv('logging/log.csv'))
 
-def runid():
-    return pd.read_csv('logging/log.csv')["runid"][logid()-1] + 1
+def getnewrunid():
+    return pd.read_csv('logging/log.csv')["runid"][getnewlogid()-1] + 1
