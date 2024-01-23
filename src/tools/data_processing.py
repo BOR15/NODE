@@ -23,6 +23,12 @@ berend_scufed = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\real_data_scuf
 boris_scufed = "real_data_scuffed2.pt"
 
 def load_data(filename, shift=0, start=300):
+    '''
+    Loads the data from a CSV file.
+    Drops duplicates in the time axis, keeping the last one only. 
+    Normalizes the features with mean 0 and std 1.
+    Returns two tensors: time and features.
+    '''
     # Import data
     data = pd.read_csv(filename, delimiter=',')
 
@@ -43,8 +49,10 @@ def load_data(filename, shift=0, start=300):
 
 def load_data_avg_duplicates(filename= berend_path, shift=0, start=300):
     '''
-    Averages the duplicate time points rather than deleting them.
-    Also fixes time points to be evenly spaced.
+    Loads the data from a CSV file. 
+    Replaces duplicate time points by their average value.
+    Normalizes the features with mean 0 and std 1.
+    Returns two tensors: time and features.
     '''
     # Import data
     data = pd.read_csv(filename, delimiter=',')
@@ -76,7 +84,7 @@ def even_space_time_series(t_tensor, train_time=None, val_time=None):
     if train_time:
         train_index = [index for index, value in enumerate(torch.round(t_tensor)) if train_time == value][0]
     if val_time:
-        val_index = [index for index, value in enumerate(torch.round(t_tensor)) if val_time == value][0]
+        val_index = [index for index, value in enumerate(torch.round(t_tensor)) if (val_time + train_time) == value][0]
 
     return t_tensor_linspaced, train_index, val_index
 
@@ -145,8 +153,10 @@ def remove_spikes(t_tensor, features_tensor, spike_threshold=0.1):
 
 
 def normalize_data(features_tensor):
-    #normalizing features between 0 and 1
-    #It has been found that normalising the data between 0 and 1 is the best for neural networks
+    '''
+    Normalizes features between 0 and 1.
+    It has been found that normalising the data between 0 and 1 is the best for neural networks.
+    '''
     min_vals = torch.min(features_tensor, dim=0)[0]
     print(min_vals)
     max_vals = torch.max(features_tensor, dim=0)[0]
@@ -155,7 +165,7 @@ def normalize_data(features_tensor):
 
 
 def normalize_data_mean_0(features_tensor, for_torch=True):
-    #normalizing features with mean 0 and std 1
+    '''Normalizes features with mean 0 and std 1.'''
     if for_torch:
         mean_vals = torch.mean(features_tensor, dim=0)
         std_vals = torch.std(features_tensor, dim=0)
@@ -168,11 +178,9 @@ def normalize_data_mean_0(features_tensor, for_torch=True):
 
 
 def get_timestep(t_tensor):
+    '''Returns the duration of the input time tensor.'''
     timestep = torch.min(t_tensor[1:] - t_tensor[:-1])
     return timestep
-
-
-# Try fixing the time points
 
 
 def simple_split(data_tuple, train_dur, val_dur=0, timestep=None):
@@ -210,6 +218,7 @@ def val_shift_split(data_tuple, train_dur, val_shift, timestep=None):
     print(f"training size: {train_data[0].shape[0]}, validation size: {val_data[0].shape[0]} starting at {shift_val}, test size: {test_data[0].shape[0]}")
 
     return train_data, val_data, test_data
+
 
 def get_batch(data_tuple, batch_size, batch_range_idx=None, batch_range_time=None, batch_dur_idx=None, batch_dur_time=None, timestep=None, device=torch.device("cpu")):
     #maybe later improve:  when using time do math using time then convert to index to reduce rounding errors
