@@ -22,17 +22,23 @@ def main():
     pass
 
 #run everything from here
-def gridmain(bla=None, blaa=None, blaaa=None): #all hyperparameters get passed here as arguments
+def gridmain(bla=None, blaa=None, blaaa=None, epochs=None): #all hyperparameters get passed here as arguments
+    if not epochs:
+        print("Epochs not received properly")
+        return None
+    else:
+        num_epochs = epochs[-1]
+        epochs = epochs[:-1]
     score = []
 
-    if len(pd.read_csv('logging/log.csv')):
+    if len(pd.read_csv('src/logging/log.csv')):
         runid = 1
     else:
         runid = getnewrunid()
 
-    score.append(torch_gridsearch_model(num_epochs=40, epochs=[20,30], dataset=1), runid)
-    score.append(torch_gridsearch_model(num_epochs=40, epochs=[20,30], dataset=2), runid)
-    score.append(torch_gridsearch_model(num_epochs=40, epochs=[20,30], dataset=3), runid)
+    score.append(torch_gridsearch_model(num_epochs=num_epochs, epochs=epochs, dataset=1), runid)
+    score.append(torch_gridsearch_model(num_epochs=num_epochs, epochs=epochs, dataset=2), runid)
+    score.append(torch_gridsearch_model(num_epochs=num_epochs, epochs=epochs, dataset=3), runid)
 
     score = np.mean(np.array(score), axis=0)
     
@@ -61,12 +67,14 @@ def gridsearch():
     
     scores = np.zeros((3,) * N)
 
+    #epochs
+    epochs = [20, 30]
 
     # for initializations 
     feat1 = [1,2,4]
     feat2 = [1,2,4]
     feat3 = [1,2,4]
-    time
+
     
     # automatic reduction factor
     feat_red = [1/5, 1/5, 1/5]
@@ -115,7 +123,7 @@ def gridsearch():
         #iterating over all combinations of features
         for indices in itertools.product(*[range(len(f)) for f in feature_sets]):
             selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
-            scores[indices] = gridmain(*selected_features)
+            scores[indices] = gridmain(*selected_features, epochs)  ##THIS COMMENT IS HERE BECAUSE I KEEP SCROLLLING PAST THIS LINE 
         
         #get best score indices
         best_indices = np.unravel_index(np.argmax(scores), scores.shape)
@@ -188,6 +196,6 @@ def calculate_score_diff(feature_idx, best_indices, scores):
 
 
 if __name__ == "__main__":
-    # gridsearch()
-    gridmain()
+    gridsearch()
+    # gridmain()
     #main()
