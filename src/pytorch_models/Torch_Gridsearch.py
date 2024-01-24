@@ -125,8 +125,8 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
             "mert_batch" : mert_batch,
             "loss_function" : loss_function,
             'regularization': regu,
-            "optimizer" : optimizer,
-            'frechet distance' : frechet_distance,
+            "optimizer" : "Adam",
+            'Frechet_distance' : frechet_d,
             "inference_time" : inference_time,
             'training_time' : training_time
 
@@ -137,11 +137,11 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
         if savepredict:
             torch.save(predicted, f"logging/Predictions/{id}.pt")
 
-        # addlog('src/logging/log.csv', logdict) #TODO FIX THIS 
+        addlog('src/logging/log.csv', logdict) #TODO FIX THIS 
 
         # # Plotting   
-        # saveplot(plot_training_vs_validation([train_losses, val_losses], sample_freq=val_freq, two_plots=True), "Losses", id)
-        # saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, toy=False, for_torch=True), "FullPredictions", id) #TODO add args for subtitle
+        saveplot(plot_training_vs_validation([train_losses, val_losses], sample_freq=val_freq, two_plots=True), "Losses")
+        saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, toy=False, for_torch=True), "FullPredictions") #TODO add args for subtitle
 
         scores = [frechet_d, steady_state, time]  ##TODO add more scores here
         return scores
