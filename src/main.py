@@ -118,7 +118,7 @@ def gridsearch():
 
         #printing feature sets and total number of combinations
         print(ii, "Now trying: ", feature_sets)
-        print(math.prod([len(feature) for feature in feature_sets]))
+        print("Number of hyperparameter sets", math.prod([len(feature) for feature in feature_sets]))
 
         #defining score grid of right shape
         scores = np.zeros(tuple(len(f) for f in feature_sets))
@@ -148,7 +148,7 @@ def gridsearch():
                 if best_indices[i] == 1:
                     #checking if done tuning
                     if calculate_score_diff(i, best_indices, scores) < threshold:
-                        print("DONE TUNING FEATURE", i, ":", feat_mid[i], "with score", scores[best_indices])
+                        print("DONE TUNING FEATURE", i, ": Value;", feat_mid[i], "with score", scores[best_indices])
                         #if done saving best value
                         tuned_features[i] = feat_mid[i]
                         continue #continue to next feature                        
@@ -186,7 +186,7 @@ def gridsearch():
     #iterating over all combinations of features one last time
     for indices in itertools.product(*[range(len(f)) for f in feature_sets]):
         selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
-        scores[indices] = gridmain(*selected_features, epochs=epochs)
+        scores[indices] = gridmain(*selected_features, epochs=epochs) ##THIS COMMENT IS HERE BECAUSE I KEEP SCROLLLING PAST THIS LINE 
 
     best_indices = np.unravel_index(np.argmax(scores), scores.shape)
     final_features = [feature_sets[i][idx] for i, idx in enumerate(best_indices)]

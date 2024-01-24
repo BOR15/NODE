@@ -37,7 +37,5 @@ Metrics for evaluation not training below
 def simple_steady_state_error(y_true, y_pred):
     return torch.abs(y_true[-1] - y_pred[-1])
 
-#calculates steady state error based on average of last n elements
-def average_steady_state_error(y_true, y_pred, n=10):
-    return torch.mean(torch.abs(y_true[-n:] - y_pred[-n:]))
+
 

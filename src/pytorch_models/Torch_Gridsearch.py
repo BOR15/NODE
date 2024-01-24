@@ -100,8 +100,8 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
         inference_time = end_inference - start_inference
 
         #Frechet distance similairity metric
-        frechet_distance = frechet_distance(data[1], predicted) #TODO fix this
-        steady_state = average_steady_state_error(data[1], predicted, int(len(data[0]*0.05))) 
+        frechet_d = frechet_distance(data[1], predicted) #TODO fix this
+        steady_state = average_steady_state_error(data[1], predicted, int(len(data[0]*0.05))).item()
         time = inference_time + training_time
         
         logid = getnewlogid()
@@ -137,13 +137,13 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
         if savepredict:
             torch.save(predicted, f"logging/Predictions/{id}.pt")
 
-        # addlog('logging/log.csv', logdict) #TODO FIX THIS 
+        # addlog('src/logging/log.csv', logdict) #TODO FIX THIS 
 
         # # Plotting   
         # saveplot(plot_training_vs_validation([train_losses, val_losses], sample_freq=val_freq, two_plots=True), "Losses", id)
         # saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, toy=False, for_torch=True), "FullPredictions", id) #TODO add args for subtitle
 
-        scores = [frechet_distance, steady_state, time]  ##TODO add more scores here
+        scores = [frechet_d, steady_state, time]  ##TODO add more scores here
         return scores
         
 
@@ -302,14 +302,20 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
 
     
     scores.append(logging())
-    
+    scores_without_t = [score[:-1] for score in scores]
+
+    for i, score in enumerate(scores_without_t):
+        scores_without_t[i] = 1 / ((1+score[0]) * (1+score[1]))
+
+    best_idx = np.argmax(scores_without_t)
     
 
-    scores = np.array(scores)  #dim 0 is epochs, dim 1 is scores
-    # average them? take the highest? then return: for now ill average
+    best_score = scores[best_idx]  #dim 0 is epochs, dim 1 is scores
+    
+    print(best_score)
 
-    scores = np.mean(scores, axis=0)
-    return scores
+    
+    return best_score
 
     
 

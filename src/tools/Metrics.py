@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 from scipy.spatial.distance import cdist
 
 def frechet_distance(P, Q, metric='euclidean'):
@@ -31,6 +32,10 @@ def frechet_distance(P, Q, metric='euclidean'):
 
     return couplings[m-1, n-1]
 
+
+#calculates steady state error based on average of last n elements
+def average_steady_state_error(y_true, y_pred, n=10):
+    return torch.mean(torch.abs(y_true[-n:] - y_pred[-n:]))
 
 if __name__ == '__main__':
     # Example usage
