@@ -7,7 +7,7 @@ import numpy as np
 from time import perf_counter as time
 import matplotlib.pyplot as plt
 from tools.logsystem import saveplot, addcolumn, addlog, getnewlogid, getnewrunid
-from tools.Metrics import frechet_distance
+from tools.Metrics import frechet_distance, average_steady_state_error
 
 from tools.data_processing import get_batch, get_batch2, get_batch3
 from tools.misc import check_cuda, tictoc
@@ -100,9 +100,10 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
         inference_time = end_inference - start_inference
 
         #Frechet distance similairity metric
-        Frechet_distance = frechet_distance(data[1], predicted) #TODO fix this
+        frechet_distance = frechet_distance(data[1], predicted) #TODO fix this
+        steady_state = average_steady_state_error(data[1], predicted, int(len(data[0]*0.05))) 
+        time = inference_time + training_time
         
-
         logid = getnewlogid()
 
 
@@ -125,7 +126,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
             "loss_function" : loss_function,
             'regularization': regu,
             "optimizer" : optimizer,
-            'frechet distance' : Frechet_distance,
+            'frechet distance' : frechet_distance,
             "inference_time" : inference_time,
             'training_time' : training_time
 
@@ -142,7 +143,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
         # saveplot(plot_training_vs_validation([train_losses, val_losses], sample_freq=val_freq, two_plots=True), "Losses", id)
         # saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, toy=False, for_torch=True), "FullPredictions", id) #TODO add args for subtitle
 
-        scores = [1, 2, 3]  ##TODO add more scores here
+        scores = [frechet_distance, steady_state, time]  ##TODO add more scores here
         return scores
         
 
@@ -155,7 +156,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
     # use cuda? No
     # device = check_cuda(use_cuda=False) ##Uncomment this if you want to use cuda or just to print what device is used
     device = torch.device("cpu")
-    
+
     #import preprocessed data
     berend_path = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\real_data_scuffed1.pt"
     laetitia_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/real_data_scuffed40h17_avg.pt"
@@ -301,8 +302,12 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
 
     
     scores.append(logging())
+    
+    
+
     scores = np.array(scores)  #dim 0 is epochs, dim 1 is scores
     # average them? take the highest? then return: for now ill average
+
     scores = np.mean(scores, axis=0)
     return scores
 
