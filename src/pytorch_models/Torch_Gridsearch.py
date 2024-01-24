@@ -153,7 +153,8 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
     val_losses = []
 
     # use cuda? No
-    device = check_cuda(use_cuda=False)
+    # device = check_cuda(use_cuda=False) ##Uncomment this if you want to use cuda or just to print what device is used
+    device = torch.device("cpu")
     
     #import preprocessed data
     berend_path = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\real_data_scuffed1.pt"
@@ -276,7 +277,8 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
                 plt.pause(0.3)  # Pause to update the plot
         
         else:
-            print(f"Epoch {epoch+1}: loss = {loss.item()}")
+            # print(f"Epoch {epoch+1}: loss = {loss.item()}")  ##Uncomment this if you want to see the training loss every epoch
+            pass
 
         
         #intermediate prediction

@@ -1,4 +1,5 @@
 import numpy as np
+import math
 import itertools
 import pandas as pd
 from tools.logsystem import getnewrunid
@@ -22,7 +23,7 @@ def main():
     pass
 
 #run everything from here
-def gridmain(bla=None, blaa=None, blaaa=None, epochs=None): #all hyperparameters get passed here as arguments
+def gridmain(bla, blaa, blaaa, blaaaa=None, epochs=None): #all hyperparameters get passed here as arguments
     if not epochs:
         print("Epochs not received properly")
         return None
@@ -59,27 +60,36 @@ def gridsearch():
     
     """
     
-    #number of features
-    N = 3
+    #number of iterations for automatic tuning
+    iterations = 1
     
-    scores = np.zeros((3,) * N)
-
     #epochs
-    epochs = [20, 30]
+    epochs = [10, 20]
 
-    # for initializations 
+    feature_names = ["feat1", "feat2", "feat3"]
+
+    # initial values autotuning features
     feat1 = [1,2,4]
-    feat2 = [1,2,4]
+    feat2 = [217,220,227]
     feat3 = [1,2,4]
-    
+
+    # list of autotuning features
+    features = [feat1, feat2] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
+    is_int = [0, 1]
+
+    #initial values non autotuning features
+    feat4 = ["options", "go", "here"]
+
+    #list of all features
+    all_features = [*features, feat4]
+    # is_int.extend([0] * (len(all_features) - len(features)))
+
     # automatic reduction factor
     feat_red = [1/5, 1/5, 1/5]
 
     threshold = 0.3 #threshold for stopping tuning
 
-    # list of autotuning features
-    features = [feat1, feat2, feat3] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
-    tuned_features = [0] * len(features)
+    tuned_features = [0] * len(all_features)
 
     feat_diff = []
     feat_diff1 = []
@@ -99,19 +109,15 @@ def gridsearch():
     
     
     #gridsearch loop
-    for ii in range(10):
-        # doing gridsearch
-        # for i1, f1 in enumerate(feat1):
-        #     for i2, f2 in enumerate(feat2):
-        #         for i3, f3 in enumerate(feat3):
-        #             scores[i1, i2, i3] = main(f1, f2, f3)
-
+    for ii in range(iterations):
         # Preparing feature sets for iteration
         feature_sets = []
-        for i, feature in enumerate(features):
+        for i, feature in enumerate(all_features):
             feature_sets.append(feature if not tuned_features[i] else [tuned_features[i]])
 
+        #printing feature sets and total number of combinations
         print(ii, "Now trying: ", feature_sets)
+        print(math.prod([len(feature) for feature in feature_sets]))
 
         #defining score grid of right shape
         scores = np.zeros(tuple(len(f) for f in feature_sets))
@@ -119,13 +125,19 @@ def gridsearch():
         #iterating over all combinations of features
         for indices in itertools.product(*[range(len(f)) for f in feature_sets]):
             selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
-            scores[indices] = gridmain(*selected_features, epochs)  ##THIS COMMENT IS HERE BECAUSE I KEEP SCROLLLING PAST THIS LINE 
+            print("features: ", feature_names)
+            print("values:   ", selected_features)
+            scores[indices] = gridmain(*selected_features, epochs=epochs)  ##THIS COMMENT IS HERE BECAUSE I KEEP SCROLLLING PAST THIS LINE 
         
         #get best score indices
         best_indices = np.unravel_index(np.argmax(scores), scores.shape)
         
         # print(scores)
         # print(best_indices)
+
+        #printing best features
+        best_features = [feature_sets[i][idx] for i, idx in enumerate(best_indices)]
+        print(ii, "Best features: ", best_features)
 
 
         # autotuning features
@@ -147,8 +159,12 @@ def gridsearch():
                     feat_mid[i] = feature[best_indices[i]]
                 #defining new range
                 features[i] = [feat_mid[i] - feat_diff1[i], feat_mid[i], feat_mid[i] + feat_diff2[i]]
+                if is_int[i]:
+                    features[i] = [round(x) for x in features[i]]
+        
+        #updating all_features to match autotuned features
+        all_features = [*features, feat4]
 
-        print(ii, "Best features: ", feat_mid)
         print(ii, "Tuned features:", tuned_features)
 
         if all(tuned_features):
@@ -160,7 +176,7 @@ def gridsearch():
     
     #full feature sets
     feature_sets = []
-    for i, feature in enumerate(features):
+    for i, feature in enumerate(all_features):
         feature_sets.append(feature)
     
     #defining score grid of right shape
@@ -169,7 +185,7 @@ def gridsearch():
     #iterating over all combinations of features one last time
     for indices in itertools.product(*[range(len(f)) for f in feature_sets]):
         selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
-        scores[indices] = gridmain(*selected_features, epochs)
+        scores[indices] = gridmain(*selected_features, epochs=epochs)
 
     best_indices = np.unravel_index(np.argmax(scores), scores.shape)
     final_features = [feature_sets[i][idx] for i, idx in enumerate(best_indices)]
