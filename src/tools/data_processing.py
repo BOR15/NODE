@@ -114,7 +114,7 @@ def get_split_indexes(filepath, train_dur, val_dur=None):
     return train_index, val_index
 
 
-def interpolate_features(data, num_sample_points=1024):
+def interpolate_features(data, num_sample_points=1024, interpolation_kind='linear'):
     """
     Linearly interpolate missing values in the features_tensor based on the time points in t_tensor.
     Sample `num_sample_points` evenly spaced points from the interpolated result.
@@ -126,7 +126,7 @@ def interpolate_features(data, num_sample_points=1024):
     features_np = features_tensor.numpy()
 
     # Create an interpolation function for each feature column
-    interpolators = [interp1d(t_np, feature_column, kind='linear', fill_value="extrapolate") for feature_column in features_np.T]
+    interpolators = [interp1d(t_np, feature_column, kind=interpolation_kind, fill_value="extrapolate") for feature_column in features_np.T]
 
     # Interpolate missing values
     interpolated_features_np = np.array([interp(np.linspace(t_np[0], t_np[-1], num=num_sample_points)) for interp in interpolators]).T
@@ -487,7 +487,7 @@ def save_clean_raw_data(filepath: str, shift: int, start: int, file_suffix: str,
     return full_filename
 
 
-def save_interpolated_data(filepath: str, num_samples: int, file_suffix: str) -> None:
+def save_interpolated_data(filepath: str, num_samples: int, file_suffix: str, interpolation_kind: str) -> None:
     '''
     Interpolates features of data with given number of samples num_samples and creates two files:
     one with normalized data and the other with standardized data.
@@ -498,7 +498,7 @@ def save_interpolated_data(filepath: str, num_samples: int, file_suffix: str) ->
     data = torch.load(filepath)
 
     # Interpolate features
-    t_tensor, features_tensor = interpolate_features(data, num_samples)
+    t_tensor, features_tensor = interpolate_features(data, num_samples, interpolation_kind)
 
     # Normalize features
     features_tensor_mean0 = normalize_data_mean_0(features_tensor)
@@ -507,6 +507,35 @@ def save_interpolated_data(filepath: str, num_samples: int, file_suffix: str) ->
     # save the data
     torch.save((t_tensor, features_tensor_mean0), mean0_filename)
     torch.save((t_tensor, features_tensor_normalized), normalized_filename)
+
+
+def save_stretched_time_data(filepath: str, shift: int, start: int, file_suffix: str, normalization=False) -> None:
+    '''
+    Creates time tensor as linespaced tensor of same length as original time tensor. 
+    Removes bad start of signal and saves time tensor and features tensor as file.
+    If normalization=True, then save a version with normalized data and another with standardized data.
+    '''
+    full_filename = "stretched_data_" + file_suffix + ".pt"
+
+    # Load the data and remove duplicates
+    data = load_data(filepath, shift)
+
+    # Cut the start of the data
+    data_clean = clean_start(data, start)
+
+    t_tensor, features_tensor = data_clean
+    t_tensor_linspaced = torch.tensor(np.linspace(t_tensor[0], t_tensor[-1], len(t_tensor)))
+
+    if normalization:
+        mean0_filename = "stretched_mean0_data_" + file_suffix + ".pt"
+        normalized_filename = "stretched_normalized_data_" + file_suffix + ".pt"
+
+        torch.save((t_tensor_linspaced, normalize_data_mean_0(features_tensor)), mean0_filename)
+        torch.save((t_tensor_linspaced, normalize_data(features_tensor)), normalized_filename)
+
+    # save the unnormalized data
+    # torch.save((t_tensor_linspaced, features_tensor), full_filename)
+    # return full_filename
 
 
 g1_start = 179  # 15h23 sw_g1
@@ -522,13 +551,14 @@ starts = [g1_start, g2_start, g8_start]
 suffixes = ['g1', 'g2', 'g8']
 
 shortest_data_len = 806  # len of data
-num_samples_interpolation = [400, 1600, 2400]
+interpolation_type = 'quadratic'
+num_samples_interpolation = [100, 400, 1200]
 
 data_15h23_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/Raw_Data/Dynamics15h23.csv"
 raw_path_root = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/"
 
 
-def main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[str], path_root: str, num_samples_interpolation: list[int]) -> None:
+def main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[str], path_root: str, interpolation: str, num_samples_interpolation: list[int]) -> None:
     '''
     This function creates all the necessary input_data files. 
     '''
@@ -536,6 +566,7 @@ def main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[st
 
     raw_file_names = []
     for shift, start, suffix in zipped_arguments:
+        save_stretched_time_data(data_path, shift, start, suffix, normalization=True)
         raw_filename = save_clean_raw_data(data_path, shift, start, suffix, normalization=True)
         raw_file_names.append(raw_filename)
     
@@ -546,14 +577,14 @@ def main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[st
     for path in raw_file_paths:
         for num in num_samples_interpolation:
             for suffix in suffixes:
-                save_interpolated_data(path, num, suffix)
+                save_interpolated_data(path, num, suffix, interpolation)
 
 
 if __name__ == "__main__":
     savefile = True
     
     if savefile:
-        main(data_15h23_path, shifts, starts, suffixes, raw_path_root, num_samples_interpolation)
+        main(data_15h23_path, shifts, starts, suffixes, raw_path_root, interpolation_type, num_samples_interpolation)
 
 
 # if __name__ == "__main__":

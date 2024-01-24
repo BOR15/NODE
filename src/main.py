@@ -108,7 +108,6 @@ def gridsearch():
         # feat_diff.append((feature[2] - feature[0]) / 2)
 
     
-    
     #gridsearch loop
     for ii in range(iterations):
         # Preparing feature sets for iteration

@@ -235,15 +235,16 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
         
         # regularisation L1 and L2 implementation
         l1, l2 = 0, 0
-        if regu == 'L2':
-            for p in net.parameters():
-                l2 = l2 + torch.pow(p,2).sum()
-            loss = loss + lmbda * l2
           
         if regu == 'L1':
             for p in net.parameters():
                 l1 += torch.sum(torch.abs(p))
             loss = loss + lmbda * l1 
+
+        if regu == 'L2':
+            for p in net.parameters():
+                l2 = l2 + torch.pow(p,2).sum()
+            loss = loss + lmbda * l2
         
         
         loss.backward()
@@ -314,7 +315,6 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
     
     print(best_score)
 
-    
     return best_score
 
     
