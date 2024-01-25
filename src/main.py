@@ -25,7 +25,7 @@ def main():
 
 
 #run everything from here
-def gridmain(datasets, learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol,
+def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol,
              abs_tol, val_freq, regu, ODEmethod, epochs=None): #all hyperparameters get passed here as arguments
     if not epochs:
         print("Epochs not received properly")
