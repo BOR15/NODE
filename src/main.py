@@ -92,9 +92,7 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
         return None
 
 
-    dataset1 = "clean_mean0_data_g1.pt"
-    dataset2 = "clean_mean0_data_g2.pt"
-    dataset3 = "clean_mean0_data_g8.pt"
+    
     datasets = [dataset1, dataset2, dataset3]
 
     for dataset in datasets:
