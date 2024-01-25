@@ -9,6 +9,7 @@ def frechet_distance(P, Q, metric='euclidean'):
     P and Q are represented as matrices with each column corresponding to a point.
     # """
     if len(P[1]) != len(Q):
+        print("P =", P, "Q =", Q)
         raise ValueError("Points in polygonal lines P and Q must have the same dimension.")
     # print(P)
     t = P[0].T

@@ -22,8 +22,14 @@ def main():
     # torch_toy_model(num_epochs=150, learning_rate=0.01, batch_range_idx=300, mert_batch=False, intermediate_pred_freq=40)
     pass
 
+dataset1 = "clean_mean0_data_g1.pt"
+dataset2 = "clean_mean0_data_g2.pt"
+dataset3 = "clean_mean0_data_g8.pt"
+datasets = [dataset1, dataset2, dataset3]
+
 #run everything from here
-def gridmain(bla, blaa, blaaa, blaaaa=None, epochs=None): #all hyperparameters get passed here as arguments
+def gridmain(datasets, learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol,
+             abs_tol, val_freq, regu, ODEmethod, epochs=None): #all hyperparameters get passed here as arguments
     if not epochs:
         print("Epochs not received properly")
         return None
@@ -34,9 +40,25 @@ def gridmain(bla, blaa, blaaa, blaaaa=None, epochs=None): #all hyperparameters g
 
     runid = getnewrunid()
 
-    score.append(torch_gridsearch_model(1, runid, num_epochs=num_epochs, epochs=epochs))
-    score.append(torch_gridsearch_model(2, runid, num_epochs=num_epochs, epochs=epochs))
-    score.append(torch_gridsearch_model(3, runid, num_epochs=num_epochs, epochs=epochs))
+    for dataset in datasets:
+        score.append(torch_gridsearch_model(dataset, runid, num_epochs=num_epochs, epochs=epochs, learning_rate=learning_rate,
+                                            num_neurons=num_neurons, batch_size=batch_size, batch_dur_idx=batch_dur_idx,
+                                            batch_range_idx=batch_range_idx, lmbda=lmbda, loss_coefficient=loss_coefficient,
+                                            rel_tol=rel_tol, abs_tol=abs_tol, val_freq=val_freq, regu=regu, ODEmethod=ODEmethod))
+
+
+    # score.append(torch_gridsearch_model(1, runid, num_epochs=num_epochs, epochs=epochs, learning_rate = learning_rate, num_neurons = num_neurons,
+    #                                     batch_size=batch_size, batch_dur_idx=batch_dur_idx, batch_range_idx=batch_range_idx, lmbda=lmbda,
+    #                                     loss_coefficient=loss_coefficient, rel_tol=rel_tol, abs_tol=abs_tol, val_freq=val_freq, regu=regu,
+    #                                     ODEmethod=ODEmethod))
+    # score.append(torch_gridsearch_model(2, runid, num_epochs=num_epochs, epochs=epochs, learning_rate = learning_rate, num_neurons = num_neurons,
+    #                                     batch_size=batch_size, batch_dur_idx=batch_dur_idx, batch_range_idx=batch_range_idx, lmbda=lmbda,
+    #                                     loss_coefficient=loss_coefficient, rel_tol=rel_tol, abs_tol=abs_tol, val_freq=val_freq, regu=regu,
+    #                                     ODEmethod=ODEmethod))
+    # score.append(torch_gridsearch_model(3, runid, num_epochs=num_epochs, epochs=epochs, learning_rate = learning_rate, num_neurons = num_neurons,
+    #                                     batch_size=batch_size, batch_dur_idx=batch_dur_idx, batch_range_idx=batch_range_idx, lmbda=lmbda,
+    #                                     loss_coefficient=loss_coefficient, rel_tol=rel_tol, abs_tol=abs_tol, val_freq=val_freq, regu=regu,
+    #                                     ODEmethod=ODEmethod))
 
     score = np.mean(np.array(score), axis=0)
     
@@ -70,22 +92,36 @@ def gridsearch():
     #epochs
     epochs = [10, 20]
 
-    feature_names = ["feat1", "feat2", "feat3"]
+    feature_names = ['learning_rate']
 
     # initial values autotuning features
-    feat1 = [1,2,4]
-    feat2 = [217,220,227]
-    feat3 = [1,2,4]
+    learning_rate = [0.001, 0.0001, 0.00001]
+
+
 
     # list of autotuning features
-    features = [feat1, feat2, feat3] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
+    features = [learning_rate] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
     is_int = [0, 1]
 
     #initial values non autotuning features
-    feat4 = ["options", "go", "here"]
+    num_neurons = [50]
+    batch_size = [40, 50, 60]
+    batch_dur_idx = [10, 20, 30]
+    batch_range_idx = [400, 500, 600]
+    lmbda = [5e-3]
+    loss_coefficient = [1]
+    rel_tol = 1e-7
+    abs_tol = 1e-9
+    val_freq = 5,
+    regu = [None]
+
+
+    ODEmethod = ['dropi5']
+
+    non_auto = [num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol, abs_tol, val_freq, regu, ODEmethod]
 
     #list of all features
-    all_features = [*features, feat4]
+    all_features = [*features, *non_auto]
     # is_int.extend([0] * (len(all_features) - len(features)))
 
     # automatic reduction factor
