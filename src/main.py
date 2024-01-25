@@ -170,7 +170,7 @@ def gridsearch():
     feature_names = ['learning_rate']
 
     # initial values autotuning features
-    learning_rate = [0.1, 0.01, 0.001, 0.0001, 0.00001]
+    learning_rate = [0.1, 0.001, 0.00001]
 
 
 
@@ -204,7 +204,7 @@ def gridsearch():
     # is_int.extend([0] * (len(all_features) - len(features)))
 
     # automatic reduction factor
-    feat_red = [1/5, 1/5, 1/5]
+    feat_red = [1/10, 1/10, 1/10]
 
     threshold = 0 #threshold for stopping tuning
 
