@@ -10,14 +10,16 @@ def frechet_distance(P, Q, metric='euclidean'):
     # """
     if len(P[1]) != len(Q):
         raise ValueError("Points in polygonal lines P and Q must have the same dimension.")
-
-    t = P[0]
+    print(P)
+    t = P[0].T
     y_true= P[1]
     d = 0
-    print(y_true.shape)
+    print(y_true[:,0].reshape(-1, 1).shape)
     for i in range(5):
-        true_P = np.concatenate((t, y_true[:,i].reshape(-1, 1)), axis=1)
-        pred_Q = np.concatenate((t, Q[:,i].reshape(-1, 1)), axis=1)
+        # print(t.reshape(-1, 1).shape)
+        true_P = torch.stack((t, y_true[:, 1]), dim=1)
+        # print(true_P.shape)
+        pred_Q = torch.stack((t, Q[:, 1]), dim=1)
 
 
 
