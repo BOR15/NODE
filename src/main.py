@@ -43,17 +43,17 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
             dataset2 = "clean_mean0_data_g2.pt"
             dataset3 = "clean_mean0_data_g8.pt"
         elif interpolation_density == 100:
-            dataset1 = "mean0_interpolated_g1_100.pt"
-            dataset2 = "mean0_interpolated_g2_100.pt"
-            dataset3 = "mean0_interpolated_g8_100.pt"
+            dataset1 = "mean0_interpolated_g1_100_samples.pt"
+            dataset2 = "mean0_interpolated_g2_100_samples.pt"
+            dataset3 = "mean0_interpolated_g8_100_samples.pt"
         elif interpolation_density == 400:
-            dataset1 = "mean0_interpolated_g1_400.pt"
-            dataset2 = "mean0_interpolated_g2_400.pt"
-            dataset3 = "mean0_interpolated_g8_400.pt"
+            dataset1 = "mean0_interpolated_g1_400_samples.pt"
+            dataset2 = "mean0_interpolated_g2_400_samples.pt"
+            dataset3 = "mean0_interpolated_g8_400_samples.pt"
         elif interpolation_density == 1200:
-            dataset1 = "mean0_interpolated_g1_1200.pt"
-            dataset2 = "mean0_interpolated_g2_1200.pt"
-            dataset3 = "mean0_interpolated_g8_1200.pt"
+            dataset1 = "mean0_interpolated_g1_1200_samples.pt"
+            dataset2 = "mean0_interpolated_g2_1200_samples.pt"
+            dataset3 = "mean0_interpolated_g8_1200_samples.pt"
         elif interpolation_density == "stretch":
             dataset1 = "streched_mean0_data_g1.pt"
             dataset2 = "streched_mean0_data_g2.pt"
@@ -68,17 +68,17 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
             dataset2 = "clean_normalized_data_g2.pt"
             dataset3 = "clean_normalized_data_g8.pt"
         elif interpolation_density == 100:
-            dataset1 = "normalized_interpolated_g1_100.pt"
-            dataset2 = "normalized_interpolated_g2_100.pt"
-            dataset3 = "normalized_interpolated_g8_100.pt"
+            dataset1 = "normalized_interpolated_g1_100_samples.pt"
+            dataset2 = "normalized_interpolated_g2_100_samples.pt"
+            dataset3 = "normalized_interpolated_g8_100_samples.pt"
         elif interpolation_density == 400:
-            dataset1 = "normalized_interpolated_g1_400.pt"
-            dataset2 = "normalized_interpolated_g2_400.pt"
-            dataset3 = "normalized_interpolated_g8_400.pt"
+            dataset1 = "normalized_interpolated_g1_400_samples.pt"
+            dataset2 = "normalized_interpolated_g2_400_samples.pt"
+            dataset3 = "normalized_interpolated_g8_400_samples.pt"
         elif interpolation_density == 1200:
-            dataset1 = "normalized_interpolated_g1_1200.pt"
-            dataset2 = "normalized_interpolated_g2_1200.pt"
-            dataset3 = "normalized_interpolated_g8_1200.pt"
+            dataset1 = "normalized_interpolated_g1_1200_samples.pt"
+            dataset2 = "normalized_interpolated_g2_1200_samples.pt"
+            dataset3 = "normalized_interpolated_g8_1200_samples.pt"
         elif interpolation_density == "stretch":
             dataset1 = "streched_normalized_data_g1.pt"
             dataset2 = "streched_normalized_data_g2.pt"
@@ -90,6 +90,22 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
     else:
         print("Normalization not recognized")
         return None
+
+    if interpolation_density == None:
+        batch_dur_idx /= 18*800
+        batch_range_idx /= 18*800
+    elif interpolation_density == 100:
+        batch_dur_idx /= 18*100
+        batch_range_idx /= 18*100
+    elif interpolation_density == 400:
+        batch_dur_idx /= 18*400
+        batch_range_idx /= 18*400
+    elif interpolation_density == 1200:
+        batch_dur_idx /= 18*1200
+        batch_range_idx /= 18*1200
+    elif interpolation_density == "stretch":
+        batch_dur_idx /= 18*800
+        batch_range_idx /= 18*800
 
 
     
@@ -119,10 +135,14 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
     
     frechet, time = score
 
-    frechet_coeff = 1
+    if normalization == "mean0std1":
+        frechet_coeff = 5
+    elif normalization == "norm0_1":
+        frechet_coeff = 15
+
     time_coeff = 1
-    frechet_pwr = 2
-    time_pwr = 2
+    frechet_pwr = 2.5
+    time_pwr = 2.5
     frechet = 1 / (1 + (frechet_coeff * frechet)**frechet_pwr) #inverse fretchet distance so that higher is better and between 0 and 1
     time = 1 / (1 + (time_coeff * time)**time_pwr) #inverse time so that higher is better and between 0 and 1
 
