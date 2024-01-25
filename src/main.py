@@ -110,13 +110,13 @@ def gridsearch():
     batch_range_idx = [400, 500, 600]
     lmbda = [5e-3]
     loss_coefficient = [1]
-    rel_tol = 1e-7
-    abs_tol = 1e-9
-    val_freq = 5,
+    rel_tol = [1e-7]
+    abs_tol = [1e-9]
+    val_freq = [5]
     regu = [None]
 
 
-    ODEmethod = ['dropi5']
+    ODEmethod = ['dopri5']
 
     non_auto = [num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol, abs_tol, val_freq, regu, ODEmethod]
 
@@ -202,7 +202,7 @@ def gridsearch():
                     features[i] = [round(x) for x in features[i]]
         
         #updating all_features to match autotuned features
-        all_features = [*features, feat4]
+        all_features = [*features, *non_auto]
 
         print(ii, "Tuned features:", tuned_features)
 
