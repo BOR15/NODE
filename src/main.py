@@ -40,13 +40,16 @@ def gridmain(bla, blaa, blaaa, blaaaa=None, epochs=None): #all hyperparameters g
 
     score = np.mean(np.array(score), axis=0)
     
-    fretchet_distance, steady_state, time = score
+    frechet, time = score
 
-    fretchet_distance = 1/(1+fretchet_distance) #inverse fretchet distance so that higher is better and between 0 and 1
-    steady_state = 1/(1+steady_state) #inverse loss so that higher is better and between 0 and 1
-    time = 1/(1+time) #inverse time so that higher is better and between 0 and 1
+    frechet_coeff = 1
+    time_coeff = 1
+    frechet_pwr = 2
+    time_pwr = 2
+    frechet = 1 / (1 + (frechet_coeff * frechet)**frechet_pwr) #inverse fretchet distance so that higher is better and between 0 and 1
+    time = 1 / (1 + (time_coeff * time)**time_pwr) #inverse time so that higher is better and between 0 and 1
 
-    final_score = fretchet_distance * steady_state * time  #kind of like an and
+    final_score = frechet * time  #kind of like an and
     #or this?
     # final_score = accuracy + loss + time  #kind of like an or
 

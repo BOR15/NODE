@@ -304,20 +304,15 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
 
     
     scores.append(logging())
-        #scores_without_t = [score[:-1] for score in scores]
+    scores_without_t = [score[:-1] for score in scores]
 
-    for i, score in enumerate(scores):
-        #scores[i] = 1 / ((1+score[0]) * (1+score[1]))
-        frechet_coeff = 1
-        time_coeff = 1
-        frechet_pwr = 2
-        time_pwr = 2
-        scores[i] = 1 / ((1 + frechet_coeff*score[0])**frechet_pwr * (1 + time_coeff*score[1])**time_pwr)
-    best_idx = np.argmax(scores)
+
+    best_idx = np.argmin(scores_without_t)
     best_score = scores[best_idx]  #dim 0 is epochs, dim 1 is scores
     
-    print(best_score)
+    # print(best_score)
 
+    ########argmin frechet distance
     return best_score
 
     
