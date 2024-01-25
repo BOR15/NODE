@@ -26,7 +26,7 @@ def main():
 
 #run everything from here
 def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol,
-             abs_tol, val_freq, regu, ODEmethod, epochs=None): #all hyperparameters get passed here as arguments
+             abs_tol, val_freq, regu, ODEmethod, normalization, interpolation_density, epochs=None): #all hyperparameters get passed here as arguments
     if not epochs:
         print("Epochs not received properly")
         return None
@@ -36,6 +36,61 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
     score = []
 
     runid = getnewrunid()
+
+    if normalization == "mean0std1":
+        if interpolation_density == None:
+            dataset1 = "clean_mean0_data_g1.pt"
+            dataset2 = "clean_mean0_data_g2.pt"
+            dataset3 = "clean_mean0_data_g8.pt"
+        elif interpolation_density == 100:
+            dataset1 = "mean0_interpolated_g1_100.pt"
+            dataset2 = "mean0_interpolated_g2_100.pt"
+            dataset3 = "mean0_interpolated_g8_100.pt"
+        elif interpolation_density == 400:
+            dataset1 = "mean0_interpolated_g1_400.pt"
+            dataset2 = "mean0_interpolated_g2_400.pt"
+            dataset3 = "mean0_interpolated_g8_400.pt"
+        elif interpolation_density == 1200:
+            dataset1 = "mean0_interpolated_g1_1200.pt"
+            dataset2 = "mean0_interpolated_g2_1200.pt"
+            dataset3 = "mean0_interpolated_g8_1200.pt"
+        elif interpolation_density == "stretch":
+            dataset1 = "streched_mean0_data_g1.pt"
+            dataset2 = "streched_mean0_data_g2.pt"
+            dataset3 = "streched_mean0_data_g8.pt"
+        else:
+            print("Interpolation density not recognized")
+            return None
+        
+    elif normalization == "norm0_1":
+        if interpolation_density == None:
+            dataset1 = "clean_normalized_data_g1.pt"
+            dataset2 = "clean_normalized_data_g2.pt"
+            dataset3 = "clean_normalized_data_g8.pt"
+        elif interpolation_density == 100:
+            dataset1 = "normalized_interpolated_g1_100.pt"
+            dataset2 = "normalized_interpolated_g2_100.pt"
+            dataset3 = "normalized_interpolated_g8_100.pt"
+        elif interpolation_density == 400:
+            dataset1 = "normalized_interpolated_g1_400.pt"
+            dataset2 = "normalized_interpolated_g2_400.pt"
+            dataset3 = "normalized_interpolated_g8_400.pt"
+        elif interpolation_density == 1200:
+            dataset1 = "normalized_interpolated_g1_1200.pt"
+            dataset2 = "normalized_interpolated_g2_1200.pt"
+            dataset3 = "normalized_interpolated_g8_1200.pt"
+        elif interpolation_density == "stretch":
+            dataset1 = "streched_normalized_data_g1.pt"
+            dataset2 = "streched_normalized_data_g2.pt"
+            dataset3 = "streched_normalized_data_g8.pt"
+        else:
+            print("Interpolation density not recognized")
+            return None
+        
+    else:
+        print("Normalization not recognized")
+        return None
+
 
     dataset1 = "clean_mean0_data_g1.pt"
     dataset2 = "clean_mean0_data_g2.pt"
@@ -116,11 +171,15 @@ def gridsearch():
     abs_tol = [1e-9]
     val_freq = [5]
     regu = [None]
+    
+    #Dataset things
+    normalization = ["mean0std1", "norm0_1"] #["mean0std1", "norm0_1"]
+    interpolation_density = [None, 100, 400, "stretch"] #[None, 100, 400, 1200, "stretch"]
 
 
     ODEmethod = ['dopri5']
 
-    non_auto = [num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol, abs_tol, val_freq, regu, ODEmethod]
+    non_auto = [num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol, abs_tol, val_freq, regu, ODEmethod, normalization, interpolation_density]
 
     #list of all features
     all_features = [*features, *non_auto]
