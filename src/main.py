@@ -185,7 +185,7 @@ def gridsearch():
 
     # list of autotuning features
     features = [learning_rate] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
-    is_int = [0, 1]
+    is_int = [0]
 
     #initial values non autotuning features
     num_neurons = [10, 25, 50]
