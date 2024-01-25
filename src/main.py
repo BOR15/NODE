@@ -152,6 +152,7 @@ def gridsearch():
         # Preparing feature sets for iteration
         feature_sets = []
         for i, feature in enumerate(all_features):
+            print(tuned_features[i])  # should be 0???
             feature_sets.append(feature if not tuned_features[i] else [tuned_features[i]])
 
         #printing feature sets and total number of combinations
