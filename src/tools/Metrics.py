@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from scipy.spatial.distance import cdist
 
-def frechet_distance(P, Q, metric='euclidean'):
+def frechet_distance(P, Q, metric='euclidean', clipping=False):
     """
     Compute discrete Fréchet distance between polygonal curves P and Q.
 
@@ -29,11 +29,12 @@ def frechet_distance(P, Q, metric='euclidean'):
 
         m, n = couplings.shape
 
-        # Clip the values in the coupling matrix at the average value of all distances
-        avg =0
-        for i in range(m):
-            avg += np.mean(couplings[i, :])
-        couplings = np.clip(couplings, a_min=None, a_max=avg/m)
+        if clipping:
+            # Clip the values in the coupling matrix at the average value of all distances
+            avg =0
+            for i in range(m):
+                avg += np.mean(couplings[i, :])
+            couplings = np.clip(couplings, a_min=None, a_max=avg/m)
 
         # Update couplings matrix; This loop is not needed because our pred and true data are always the same length.
         # for i in range(1, m):
