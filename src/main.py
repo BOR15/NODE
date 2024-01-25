@@ -55,9 +55,9 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
             dataset2 = "mean0_interpolated_g2_1200_samples.pt"
             dataset3 = "mean0_interpolated_g8_1200_samples.pt"
         elif interpolation_density == "stretch":
-            dataset1 = "streched_mean0_data_g1.pt"
-            dataset2 = "streched_mean0_data_g2.pt"
-            dataset3 = "streched_mean0_data_g8.pt"
+            dataset1 = "stretched_mean0_data_g1.pt"
+            dataset2 = "stretched_mean0_data_g2.pt"
+            dataset3 = "stretched_mean0_data_g8.pt"
         else:
             print("Interpolation density not recognized")
             return None
@@ -80,9 +80,9 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
             dataset2 = "normalized_interpolated_g2_1200_samples.pt"
             dataset3 = "normalized_interpolated_g8_1200_samples.pt"
         elif interpolation_density == "stretch":
-            dataset1 = "streched_normalized_data_g1.pt"
-            dataset2 = "streched_normalized_data_g2.pt"
-            dataset3 = "streched_normalized_data_g8.pt"
+            dataset1 = "stretched_normalized_data_g1.pt"
+            dataset2 = "stretched_normalized_data_g2.pt"
+            dataset3 = "stretched_normalized_data_g8.pt"
         else:
             print("Interpolation density not recognized")
             return None
