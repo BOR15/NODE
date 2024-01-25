@@ -78,7 +78,7 @@ def gridsearch():
     feat3 = [1,2,4]
 
     # list of autotuning features
-    features = [feat1, feat2] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
+    features = [feat1, feat2, feat3] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
     is_int = [0, 1]
 
     #initial values non autotuning features

@@ -65,7 +65,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
          learning_rate=0.01, loss_coefficient=1,
          batch_size=50, batch_dur_idx=20, batch_range_idx=500, 
          rel_tol=1e-7, abs_tol=1e-9, val_freq=5, 
-         lmbda=5e-3, regu=None,
+         lmbda=5e-3, ODEmethod="dopri5", interpolation_type="quadratic", num_samples_interpolation=400, regu=None,
          mert_batch_scuffed=False, mert_batch=False,
          intermediate_pred_freq=0, live_intermediate_pred=False, live_plot=False, 
          savemodel=False, savepredict=False):
@@ -119,12 +119,15 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
             "batch_dur_idx" : batch_dur_idx,
             "batch_range_idx" : batch_range_idx,
             'lambda': lmbda,
+            "ODEmethod" : ODEmethod,
             "rel_tol" : rel_tol,
             "abs_tol" : abs_tol,
             "val_freq" : val_freq,
             "mert_batch" : mert_batch,
             "loss_function" : loss_function,
             'regularization': regu,
+            "interpolation_type" : interpolation_type,
+            "num_samples" : num_samples_interpolation,
             "optimizer" : "Adam",
             'Frechet_distance' : frechet_d,
             "inference_time" : inference_time,
@@ -203,13 +206,13 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
             #loop through minibatches
             for i in range(batch_size):
                 #doing predict
-                pred_y.append(odeint(net, data[1][0], t[i], rtol=rel_tol, atol=abs_tol, method="dopri5")[-20:])
+                pred_y.append(odeint(net, data[1][0], t[i], rtol=rel_tol, atol=abs_tol, method=ODEmethod)[-20:])
             pred_y = torch.stack(pred_y).reshape(20, 50, 5)
         elif mert_batch:
             #get batch
             s, t, features = get_batch3(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
             #doing predict
-            pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
+            pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method=ODEmethod)
 
             pred_y_cut = torch.zeros_like(pred_y)[:20,:,:]
             
@@ -228,7 +231,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
             #get batch
             t, features = get_batch(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
             #doing predict
-            pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
+            pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method=ODEmethod)
 
         
         loss = loss_coefficient * loss_function(pred_y, features)
