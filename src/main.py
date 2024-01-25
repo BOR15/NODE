@@ -111,10 +111,12 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
     batch_dur_idx = int(batch_dur_idx)
     batch_range_idx = int(batch_range_idx)
 
-    if batch_dur_idx < 1:
-        batch_dur_idx = 1
-    if batch_range_idx < 1:
-        batch_range_idx = 1
+    if batch_dur_idx < 3:
+        batch_dur_idx = 3
+    if batch_range_idx < batch_size:
+        batch_range_idx = batch_size
+
+    print("batch_dur_idx: ", batch_dur_idx, "batch_range_idx: ", batch_range_idx)
     
     datasets = [dataset1, dataset2, dataset3]
 
@@ -172,7 +174,7 @@ def gridsearch():
     iterations = 100000000
     
     #epochs
-    epochs =  [10,20,50,100,150,200,300,400,500]
+    epochs =  [10,20,50,100,150,200]
 
     feature_names = ['learning_rate']
 
@@ -186,8 +188,8 @@ def gridsearch():
     is_int = [0, 1]
 
     #initial values non autotuning features
-    num_neurons = [5, 10, 20, 35, 50]
-    batch_size =  [20, 60, 70, 100]
+    num_neurons = [10, 25, 50]
+    batch_size =  [5, 10, 25, 50] 
     batch_dur_idx = [0.1, 0.3, 0.5]
     batch_range_idx = [2,5,10]
     lmbda = [5e-3]
@@ -195,7 +197,7 @@ def gridsearch():
     rel_tol = [1e-7]
     abs_tol = [1e-9]
     val_freq = [5]
-    regu = [None, 'L1', 'L2']
+    regu = [None, 'L2']
     
     #Dataset things
     normalization = ["mean0std1", "norm0_1"] #["mean0std1", "norm0_1"]
