@@ -18,9 +18,9 @@ def frechet_distance(P, Q, metric='euclidean'):
     # print(y_true[:,0].reshape(-1, 1).shape)
     for i in range(5):
         # print(t.reshape(-1, 1).shape)
-        true_P = torch.stack((t, y_true[:, 1]), dim=1)
+        true_P = torch.stack((t, y_true[:, i]), dim=1)
         # print(true_P.shape)
-        pred_Q = torch.stack((t, Q[:, 1]), dim=1)
+        pred_Q = torch.stack((t, Q[:, i]), dim=1)
 
         # Compute pairwise distances
         couplings = cdist(true_P.T, pred_Q.T, metric= metric)
@@ -40,8 +40,9 @@ def frechet_distance(P, Q, metric='euclidean'):
             for i in range(1, m):
                 carried_coupling = min(couplings[i-1, j-1], couplings[i, j-1], couplings[i-1, j])
                 couplings[i, j] = max(carried_coupling, couplings[i, j])
+        print('couple= ', couplings[i, j])
         d += couplings[m-1,n-1]
-
+        print('d= ', d)
     return d/5
 
 
