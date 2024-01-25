@@ -22,10 +22,7 @@ def main():
     # torch_toy_model(num_epochs=150, learning_rate=0.01, batch_range_idx=300, mert_batch=False, intermediate_pred_freq=40)
     pass
 
-dataset1 = "clean_mean0_data_g1.pt"
-dataset2 = "clean_mean0_data_g2.pt"
-dataset3 = "clean_mean0_data_g8.pt"
-datasets = [dataset1, dataset2, dataset3]
+
 
 #run everything from here
 def gridmain(datasets, learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol,
@@ -39,6 +36,11 @@ def gridmain(datasets, learning_rate, num_neurons, batch_size, batch_dur_idx, ba
     score = []
 
     runid = getnewrunid()
+
+    dataset1 = "clean_mean0_data_g1.pt"
+    dataset2 = "clean_mean0_data_g2.pt"
+    dataset3 = "clean_mean0_data_g8.pt"
+    datasets = [dataset1, dataset2, dataset3]
 
     for dataset in datasets:
         score.append(torch_gridsearch_model(dataset, runid, num_epochs=num_epochs, epochs=epochs, learning_rate=learning_rate,
