@@ -40,7 +40,7 @@ def addcolumn(csv_file, name, default):
 
 def saveplot(plt, foldername):
     df = pd.read_csv('src/logging/log.csv')
-    number = str(len(df))
+    number = str(len(df)) -1
     filename = f"src/logging/{foldername}/{number}.png"
     # Save the plot
     plt.savefig(filename)
