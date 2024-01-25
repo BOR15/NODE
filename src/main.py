@@ -183,11 +183,11 @@ def gridsearch():
 
     # list of autotuning features
     features = [learning_rate] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
-    is_int = [0, 1]
+    is_int = [0]
 
     #initial values non autotuning features
-    num_neurons = [5, 10, 20, 35, 50]
-    batch_size =  [20, 60, 70, 100]
+    num_neurons = [10, 20, 35, 50]
+    batch_size =  [20, 65, 100]
     batch_dur_idx = [0.1, 0.3, 0.5]
     batch_range_idx = [2,5,10]
     lmbda = [5e-3]
@@ -195,7 +195,7 @@ def gridsearch():
     rel_tol = [1e-7]
     abs_tol = [1e-9]
     val_freq = [5]
-    regu = [None, 'L1', 'L2']
+    regu = [None, 'L2']
     
     #Dataset things
     normalization = ["mean0std1", "norm0_1"] #["mean0std1", "norm0_1"]
