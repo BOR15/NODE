@@ -92,20 +92,21 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
         return None
 
     if interpolation_density == None:
-        batch_dur_idx /= 18*800
-        batch_range_idx /= 18*800
+        batch_dur_idx /= 18/800
+        batch_range_idx /= 18/800
     elif interpolation_density == 100:
-        batch_dur_idx /= 18*100
-        batch_range_idx /= 18*100
+        batch_dur_idx /= 18/100
+        batch_range_idx /= 18/100
     elif interpolation_density == 400:
-        batch_dur_idx /= 18*400
-        batch_range_idx /= 18*400
+        batch_dur_idx /= 18/400
+        batch_range_idx /= 18/400
     elif interpolation_density == 1200:
-        batch_dur_idx /= 18*1200
-        batch_range_idx /= 18*1200
+        batch_dur_idx /= 18/1200
+        batch_range_idx /= 18/1200
     elif interpolation_density == "stretch":
-        batch_dur_idx /= 18*800
-        batch_range_idx /= 18*800
+        batch_dur_idx /= 18/800
+        batch_range_idx /= 18/800
+    
     
     batch_dur_idx = int(batch_dur_idx)
     batch_range_idx = int(batch_range_idx)
