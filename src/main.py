@@ -108,7 +108,7 @@ def gridsearch():
     #initial values non autotuning features
     num_neurons = [50]
     batch_size = [40, 50, 60]
-    batch_dur_idx = [10, 20, 30]
+    batch_dur_idx = [10, 20]
     batch_range_idx = [400, 500, 600]
     lmbda = [5e-3]
     loss_coefficient = [1]
