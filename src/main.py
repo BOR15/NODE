@@ -165,12 +165,12 @@ def gridsearch():
     iterations = 100000000
     
     #epochs
-    epochs = [50, 100, 150, 200]
+    epochs =  [10,20,50,100,150,200,300,400,500]
 
     feature_names = ['learning_rate']
 
     # initial values autotuning features
-    learning_rate = [0.001, 0.0001, 0.00001]
+    learning_rate = [0.1, 0.01, 0.001, 0.0001, 0.00001]
 
 
 
@@ -179,16 +179,16 @@ def gridsearch():
     is_int = [0, 1]
 
     #initial values non autotuning features
-    num_neurons = [50]
-    batch_size = [40, 50, 60]
-    batch_dur_idx = [10, 12]
-    batch_range_idx = [490, 500, 510]
+    num_neurons = [5, 10, 20, 35, 50]
+    batch_size =  [20, 60, 70, 100]
+    batch_dur_idx = [0.1, 0.3, 0.5]
+    batch_range_idx = [2,5,10]
     lmbda = [5e-3]
-    loss_coefficient = [1]
+    loss_coefficient = [1, 10]
     rel_tol = [1e-7]
     abs_tol = [1e-9]
     val_freq = [5]
-    regu = [None]
+    regu = [None, 'L1', 'L2']
     
     #Dataset things
     normalization = ["mean0std1", "norm0_1"] #["mean0std1", "norm0_1"]
