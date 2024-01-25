@@ -101,7 +101,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
 
         #Frechet distance similairity metric
         frechet_d = frechet_distance(data, predicted) #TODO fix this
-        steady_state = average_steady_state_error(data[1], predicted, int(len(data[0]*0.05))).item()
+        #steady_state = average_steady_state_error(data[1], predicted, int(len(data[0]*0.05))).item()
         time = inference_time + training_time
         
         logid = getnewlogid()
@@ -143,7 +143,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
         saveplot(plot_training_vs_validation([train_losses, val_losses], sample_freq=val_freq, two_plots=True), "Losses")
         saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, toy=False, for_torch=True), "FullPredictions") #TODO add args for subtitle
 
-        scores = [frechet_d, steady_state, time]  ##TODO add more scores here
+        scores = [frechet_d,  time]  ##TODO add more scores here
         return scores
         
 
@@ -295,6 +295,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
                 plt.pause(0.1)
 
 
+
         #logging at non final epochs
         if epoch+1 in epochs:
             if epoch+1 == epochs[0]:
@@ -303,14 +304,16 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
 
     
     scores.append(logging())
-    scores_without_t = [score[:-1] for score in scores]
+        #scores_without_t = [score[:-1] for score in scores]
 
-    for i, score in enumerate(scores_without_t):
-        scores_without_t[i] = 1 / ((1+score[0]) * (1+score[1]))
-
-    best_idx = np.argmax(scores_without_t)
-    
-
+    for i, score in enumerate(scores):
+        #scores[i] = 1 / ((1+score[0]) * (1+score[1]))
+        frechet_coeff = 1
+        time_coeff = 1
+        frechet_pwr = 2
+        time_pwr = 2
+        scores[i] = 1 / ((1 + frechet_coeff*score[0])**frechet_pwr * (1 + time_coeff*score[1])**time_pwr)
+    best_idx = np.argmax(scores)
     best_score = scores[best_idx]  #dim 0 is epochs, dim 1 is scores
     
     print(best_score)
