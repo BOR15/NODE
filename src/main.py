@@ -92,7 +92,7 @@ def gridsearch():
     iterations = 1
     
     #epochs
-    epochs = [10, 20]
+    epochs = [50, 100, 150, 200]
 
     feature_names = ['learning_rate']
 
@@ -108,8 +108,8 @@ def gridsearch():
     #initial values non autotuning features
     num_neurons = [50]
     batch_size = [40, 50, 60]
-    batch_dur_idx = [10, 20]
-    batch_range_idx = [400, 500, 600]
+    batch_dur_idx = [10, 12]
+    batch_range_idx = [490, 500, 510]
     lmbda = [5e-3]
     loss_coefficient = [1]
     rel_tol = [1e-7]
