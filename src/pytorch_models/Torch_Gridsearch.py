@@ -88,7 +88,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
     """
     scores = []
 
-    def logging():
+    def logging(where=None):
         # Final predict
         with torch.no_grad():
             start_inference = perf_counter()
@@ -106,13 +106,17 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
         
         logid = getnewlogid()
 
+        if not where:
+            num_epochs_actual = num_epochs
+        else:
+            num_epochs_actual = where
 
         logdict = {
             "logid" : logid,
             'runid' : runid,
             'dataset' : dataset,
             "num_neurons" : num_neurons,
-            "num_epochs" : num_epochs,
+            "num_epochs" : num_epochs_actual,
             "learning_rate" : learning_rate,
             "loss_coefficient": loss_coefficient,
             "batch_size" : batch_size,
@@ -303,7 +307,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
         if epoch+1 in epochs:
             if epoch+1 == epochs[0]:
                 runid = getnewrunid()
-            scores.append(logging())
+            scores.append(logging(epoch+1))
 
     
     scores.append(logging())
