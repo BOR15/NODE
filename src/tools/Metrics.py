@@ -46,9 +46,9 @@ def frechet_distance(P, Q, metric='euclidean', clipping=False):
             for i in range(1, m):
                 carried_coupling = min(couplings[i-1, j-1], couplings[i, j-1], couplings[i-1, j])
                 couplings[i, j] = max(carried_coupling, couplings[i, j])
-        print('couple= ', couplings[i, j])
+        #print('couple= ', couplings[i, j])
         d += couplings[m-1,n-1]
-        print('d= ', d)
+        #print('d= ', d)
     return d/5
 
 
