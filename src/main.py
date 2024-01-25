@@ -111,7 +111,10 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
     batch_dur_idx = int(batch_dur_idx)
     batch_range_idx = int(batch_range_idx)
 
-
+    if batch_dur_idx < 1:
+        batch_dur_idx = 1
+    if batch_range_idx < 1:
+        batch_range_idx = 1
     
     datasets = [dataset1, dataset2, dataset3]
 
