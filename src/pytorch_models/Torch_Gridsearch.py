@@ -114,6 +114,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
         logdict = {
             "logid" : logid,
             'runid' : runid,
+            'val_loss' : val_loss,
             'dataset' : dataset,
             "num_neurons" : num_neurons,
             "num_epochs" : num_epochs_actual,
