@@ -100,7 +100,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
         inference_time = end_inference - start_inference
 
         #Frechet distance similairity metric
-        frechet_d = frechet_distance(data, predicted) #TODO fix this
+        frechet_d = frechet_distance(data, predicted, clipping=True) #TODO fix this
         #steady_state = average_steady_state_error(data[1], predicted, int(len(data[0]*0.05))).item()
         time = inference_time + training_time
         
