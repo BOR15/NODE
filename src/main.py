@@ -162,7 +162,7 @@ def gridsearch():
     """
     
     #number of iterations for automatic tuning
-    iterations = 1
+    iterations = 100000000
     
     #epochs
     epochs = [50, 100, 150, 200]
@@ -206,7 +206,7 @@ def gridsearch():
     # automatic reduction factor
     feat_red = [1/5, 1/5, 1/5]
 
-    threshold = 0.3 #threshold for stopping tuning
+    threshold = 0 #threshold for stopping tuning
 
     tuned_features = [0] * len(all_features)
 
