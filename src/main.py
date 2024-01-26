@@ -71,6 +71,10 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
             dataset1 = "normalized_interpolated_g1_100_samples.pt"
             dataset2 = "normalized_interpolated_g2_100_samples.pt"
             dataset3 = "normalized_interpolated_g8_100_samples.pt"
+        elif interpolation_density == 200:
+            dataset1 = "normalized_interpolated_g1_200_samples.pt"
+            dataset2 = "normalized_interpolated_g2_200_samples.pt"
+            dataset3 = "normalized_interpolated_g8_200_samples.pt"
         elif interpolation_density == 400:
             dataset1 = "normalized_interpolated_g1_400_samples.pt"
             dataset2 = "normalized_interpolated_g2_400_samples.pt"
@@ -97,6 +101,9 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
     elif interpolation_density == 100:
         batch_dur_idx /= 18/100
         batch_range_idx /= 18/100
+    elif interpolation_density == 200:
+        batch_dur_idx /= 18/200
+        batch_range_idx /= 18/200
     elif interpolation_density == 400:
         batch_dur_idx /= 18/400
         batch_range_idx /= 18/400
