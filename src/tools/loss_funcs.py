@@ -6,9 +6,6 @@ currently everything just uses MSE loss, but this is where we can define custom 
 definedly should try some more loss functions so to be expanded on 
 """
 
-# MAELoss = nn.L1Loss()
-# MSELoss = nn.MSELoss()
-
 def mean_third_power_error(y_true, y_pred):
     return torch.mean(abs(y_true - y_pred) ** 3)
 

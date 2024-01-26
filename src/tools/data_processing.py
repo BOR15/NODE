@@ -491,8 +491,8 @@ interpolation_samples = [200]
 downsample_num = 190
 normalization_in = ["mean0std1"]  # options are 'mean0std1' and 'normalize'
 
-data_15h23_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/Raw_Data/Dynamics15h23.csv"
-raw_path_root = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/"
+data_15h23_path = ''
+raw_path_root = ''
 
 
 def main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[str], path_root: str = "", 

@@ -57,35 +57,4 @@ def average_steady_state_error(y_true, y_pred, n=10):
     return torch.mean(torch.abs(y_true[-n:] - y_pred[-n:]))
 
 if __name__ == '__main__':
-    # Example usage
-    # P = np.array([[1, 2, 3], [4, 5, 6]])  # Replace with your data
-    # Q = np.array([[7, 8, 9, 10], [10, 11, 12, 13]])  # Replace with your data
-    Q = np.arange(50).reshape(10, 5)
-    a = np.arange(10).reshape(-1, 1)
-    b = np.arange(50, 100).reshape(10, 5)
-    P = [a,b]
-    print(P[1])
-    print(P)
-    print(frechet_distance(P, Q))
-
-    # print("Cosine Distance: ", frechet_distance(P, Q, metric='cosine')) # perhaps usefull for when we shift to the frequency domain
-    # print("Canberra Distance: ", frechet_distance(P, Q, metric='canberra')) # Maybe usefull for near zero or zero magnitude signals
-    # print("Chebyshev Distance: ", frechet_distance(P, Q, metric='chebyshev')) # takes the maximum deviation
-    # print("Manhattan Distance: ", frechet_distance(P, Q, metric='cityblock')) # might be more usefull than euclidean when we want to
-    # focus more on small deviations
-    # def mean_frechet_distance(P, Q, width):
-    #     "compartmentalizes the Frechet distance and takes the mean to give a more smooth result"
-    #     return np.mean([frechet_distance(P[t: t + width], Q) for t in range(len(P)- width + 1)])
-    #
-    # np.random.seed(0)
-    #
-    # # Generate a base line for P and Q
-    # base_line = np.linspace(0, 10, 20)
-    #
-    # # Create P and Q as similar lines with small random variations
-    # P = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)]).T
-    # Q = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)]).T
-    # # P = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)])
-    # # Q = np.array([base_line, base_line + np.random.uniform(-0.5, 0.5, 20)])
-    # print(P)
-    # print(frechet_distance(P, Q))
+    pass
