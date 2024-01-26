@@ -165,7 +165,7 @@ def gridsearch():
     """
     
     #number of iterations for automatic tuning
-    iterations = 100000000
+    iterations = 1
     
     #epochs
     epochs =  [10,20,50,100,150,200]
@@ -194,8 +194,8 @@ def gridsearch():
     regu = ["l2","l1"]
     
     #Dataset things
-    normalization = ["norm0_1"] #["mean0std1", "norm0_1"]
-    interpolation_density = [200] #[None, 100, 400, "stretch"]
+    normalization = ["norm0_1", "mean0std1"] #["mean0std1", "norm0_1"]
+    interpolation_density = [100] #[None, 100, 400, "stretch"]
 
 
     ODEmethod = ['dopri5']
