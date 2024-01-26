@@ -528,7 +528,7 @@ if __name__ == "__main__":
     savefile = True
     
     if savefile:
-        main(data_15h23_path, shifts, starts, suffixes, raw_path_root, interpolation_type, num_samples_interpolation)
+        main(data_15h23_path, shifts, starts, suffixes, raw_path_root, interpolation_type, num_samples_interpolation=[200])
 
 
 # if __name__ == "__main__":
