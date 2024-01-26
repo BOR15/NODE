@@ -173,16 +173,16 @@ def gridsearch():
     feature_names = []
 
     # initial values autotuning features
-    
+    learning_rate = [0.1, 0.001, 0.00001]
 
 
 
     # list of autotuning features
-    features = [] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
+    features = [learning_rate] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
     is_int = [0]
 
     #initial values non autotuning features
-    learning_rate = [0.01] #[0.1, 0.001, 0.00001]
+    
     num_neurons = [25] #[10, 25, 50]
     batch_size =  [10] #[5, 10, 25, 50] 
     batch_dur_idx = [0.5] #[0.1, 0.3, 0.5]
@@ -195,13 +195,13 @@ def gridsearch():
     regu = [None]
     
     #Dataset things
-    normalization = ["norm0_1"] #["mean0std1", "norm0_1"]
+    normalization = ["mean0std1"] #["mean0std1", "norm0_1"]
     interpolation_density = [200] #[None, 100, 400, "stretch"]
 
 
     ODEmethod = ['dopri5']
 
-    non_auto = [learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol, abs_tol, val_freq, regu, ODEmethod, normalization, interpolation_density]
+    non_auto = [num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol, abs_tol, val_freq, regu, ODEmethod, normalization, interpolation_density]
 
     #list of all features
     all_features = [*features, *non_auto]
@@ -223,8 +223,8 @@ def gridsearch():
     for feature in features:
         feat_mid.append(feature[1])
         
-        feat_diff2.append(feature[2]-feature[1])
-        feat_diff1.append(feature[1]-feature[0])
+        feat_diff2.append(feature[2]/feature[1])
+        feat_diff1.append(feature[1]/feature[0])
 
         
         # feat_diff.append((feature[2] - feature[0]) / 2)
@@ -281,7 +281,7 @@ def gridsearch():
                 else:#if middle option is not best: redefine middle
                     feat_mid[i] = feature[best_indices[i]]
                 #defining new range
-                features[i] = [feat_mid[i] - feat_diff1[i], feat_mid[i], feat_mid[i] + feat_diff2[i]]
+                features[i] = [feat_mid[i] * feat_diff1[i], feat_mid[i], feat_mid[i] / feat_diff2[i]]
                 if is_int[i]:
                     features[i] = [round(x) for x in features[i]]
         
