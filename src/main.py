@@ -196,7 +196,7 @@ def gridsearch():
     
     #Dataset things
     normalization = ["mean0std1"] #["mean0std1", "norm0_1"]
-    interpolation_density = [200] #[None, 100, 400, "stretch"]
+    interpolation_density = [400] #[None, 100, 400, "stretch"]
 
 
     ODEmethod = ['dopri5']
