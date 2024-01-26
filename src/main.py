@@ -163,37 +163,38 @@ def gridsearch():
     #epochs
     epochs =  [10,20,50,100,150,200]
 
-    feature_names = ['learning_rate']
+    feature_names = []
 
     # initial values autotuning features
-    learning_rate = [0.1, 0.001, 0.00001]
+    
 
 
 
     # list of autotuning features
-    features = [learning_rate] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
+    features = [] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
     is_int = [0]
 
     #initial values non autotuning features
-    num_neurons = [10, 25, 50]
-    batch_size =  [5, 10, 25, 50] 
-    batch_dur_idx = [0.1, 0.3, 0.5]
-    batch_range_idx = [2,5,10]
+    learning_rate = [0.01] #[0.1, 0.001, 0.00001]
+    num_neurons = [25] #[10, 25, 50]
+    batch_size =  [10] #[5, 10, 25, 50] 
+    batch_dur_idx = [0.5] #[0.1, 0.3, 0.5]
+    batch_range_idx = [4] #[2,5,10]
     lmbda = [5e-3]
-    loss_coefficient = [1, 10]
+    loss_coefficient = [100] #[1, 10]
     rel_tol = [1e-7]
     abs_tol = [1e-9]
     val_freq = [5]
-    regu = [None, 'L2']
+    regu = [None]
     
     #Dataset things
-    normalization = ["mean0std1", "norm0_1"] #["mean0std1", "norm0_1"]
-    interpolation_density = [None, 100, 400, "stretch"] #[None, 100, 400, 1200, "stretch"]
+    normalization = ["norm0_1"] #["mean0std1", "norm0_1"]
+    interpolation_density = [200] #[None, 100, 400, "stretch"]
 
 
     ODEmethod = ['dopri5']
 
-    non_auto = [num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol, abs_tol, val_freq, regu, ODEmethod, normalization, interpolation_density]
+    non_auto = [learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol, abs_tol, val_freq, regu, ODEmethod, normalization, interpolation_density]
 
     #list of all features
     all_features = [*features, *non_auto]

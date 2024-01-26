@@ -34,6 +34,8 @@ class ODEFunc(nn.Module):
         self.net = nn.Sequential(
             nn.Linear(N_feat, N_neurons),
             nn.Tanh(),
+            nn.Linear(N_neurons, N_neurons),
+            nn.Tanh(),
             nn.Linear(N_neurons, N_feat)
         )
         self.device = device
