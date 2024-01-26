@@ -128,9 +128,9 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
     datasets = [dataset1, dataset2, dataset3]
 
     for dataset in datasets:
-        score.append(torch_gridsearch_model(dataset, runid,num_neurons=num_neurons, num_epochs=num_epochs, epochs=epochs, learning_rate=learning_rate,
-                                            batch_size=batch_size, batch_dur_idx=batch_dur_idx,
-                                            batch_range_idx=batch_range_idx,loss_coefficient=loss_coefficient,
+        score.append(torch_gridsearch_model(dataset, runid, num_epochs=num_epochs, epochs=epochs, learning_rate=learning_rate,
+                                            num_neurons=num_neurons, batch_size=batch_size, batch_dur_idx=batch_dur_idx,
+                                            batch_range_idx=batch_range_idx, lmbda=lmbda, loss_coefficient=loss_coefficient,
                                             rel_tol=rel_tol, abs_tol=abs_tol, val_freq=val_freq, regu=regu, ODEmethod=ODEmethod))
 
 
@@ -173,10 +173,6 @@ def gridsearch():
     feature_names = []
 
     # initial values autotuning features
-    
-
-    
-
 
     #initial values non autotuning features
     learning_rate = [0.01] #[0.1, 0.001, 0.00001]
@@ -188,11 +184,13 @@ def gridsearch():
     rel_tol = [1e-7]
     abs_tol = [1e-9]
     val_freq = [5]
-    regu = [None]
+    lmbda = [5e-5, 5e-3, 5e-1]
+    regu = ["l2","l1"]
 
     # list of autotuning features
-    features = [] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
+    features = [lmbda] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
     is_int = [0]
+
     
     #Dataset things
     normalization = ["mean0std1"] #["mean0std1", "norm0_1"]
@@ -200,12 +198,11 @@ def gridsearch():
 
 
     ODEmethod = ['dopri5']
-# def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol,
-#              abs_tol, val_freq, regu, ODEmethod, normalization, interpolation_density, epochs=None)
+
     non_auto = [learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, loss_coefficient, rel_tol, abs_tol, val_freq,regu, ODEmethod, normalization, interpolation_density]
 
     #list of all features
-    all_features = [learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, loss_coefficient, rel_tol,
+    all_features = [learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol,
              abs_tol, val_freq, regu, ODEmethod, normalization, interpolation_density]
     # is_int.extend([0] * (len(all_features) - len(features)))
 
@@ -296,26 +293,25 @@ def gridsearch():
             print("All features tuned")
             break
     
-    if iterations>1:
-        #final tune
-        print("final tuning round")
-        
-        #full feature sets
-        feature_sets = []
-        for i, feature in enumerate(all_features):
-            feature_sets.append(feature)
-        
-        #defining score grid of right shape
-        scores = np.zeros(tuple(len(f) for f in feature_sets))
+    #final tune
+    print("final tuning round")
+    
+    #full feature sets
+    feature_sets = []
+    for i, feature in enumerate(all_features):
+        feature_sets.append(feature)
+    
+    #defining score grid of right shape
+    scores = np.zeros(tuple(len(f) for f in feature_sets))
 
-        #iterating over all combinations of features one last time
-        for indices in itertools.product(*[range(len(f)) for f in feature_sets]):
-            selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
-            scores[indices] = gridmain(*selected_features, epochs=epochs) ##THIS COMMENT IS HERE BECAUSE I KEEP SCROLLLING PAST THIS LINE 
+    #iterating over all combinations of features one last time
+    for indices in itertools.product(*[range(len(f)) for f in feature_sets]):
+        selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
+        scores[indices] = gridmain(*selected_features, epochs=epochs) ##THIS COMMENT IS HERE BECAUSE I KEEP SCROLLLING PAST THIS LINE 
 
-        best_indices = np.unravel_index(np.argmax(scores), scores.shape)
-        final_features = [feature_sets[i][idx] for i, idx in enumerate(best_indices)]
-        print("Final features: ", final_features)
+    best_indices = np.unravel_index(np.argmax(scores), scores.shape)
+    final_features = [feature_sets[i][idx] for i, idx in enumerate(best_indices)]
+    print("Final features: ", final_features)
 
     
     
