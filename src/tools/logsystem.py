@@ -44,6 +44,7 @@ def saveplot(plt, foldername):
     filename = f"src/logging/{foldername}/{number}.png"
     # Save the plot
     plt.savefig(filename)
+    plt.close('all')
 
 
 def getnewlogid():
