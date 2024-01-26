@@ -11,5 +11,3 @@ How to run:
 3) run main.py
     First fill in dataset, this is the file that you created from the data preprocessing function
 
-
-The github has a couple of branches that hold all logs from different 
