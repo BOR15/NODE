@@ -1,24 +1,15 @@
 # NODE
-Capstone project: NODE
 
-In the realm of code and commits so stark,
-GitHub echoes in the coder's park.
-Bukowski's spirit in the pull request,
-A digital realm, where bugs infest.
+DATA:
+The raw data should be a tuple, consisting of: a tensor of time points (1D) and a matrix of (datapoints, features) (2D)
 
-In the push and pull of lines of code,
-A dance of pixels in the developer's abode.
-Commits like verses in a code poet's rhyme,
-GitHub, a stage for the coding paradigm.
+How to run:
+1) In final_data_preprocessing.py fill in:
+    start, shifts, suffixes and the path to where you have stored your data.
+2) run the data preprocessing function
+    The files that are created can be found in the clean_preprocessed_data folder
+3) run main.py
+    First fill in dataset, this is the file that you created from the data preprocessing function
 
-Pulling from branches, merging in strife,
-Conflict resolution, the coder's life.
-Issues opened, discussions unfold,
-A cybernated story, of bugs untold.
 
-So, here's to GitHub, a poet's muse,
-In the programming world, where wizards choose.
-A versioned saga, in repositories deep,
-Bukowski's spirit, in every line you keep.
-
--GitDaddy
+The github has a couple of branches that hold all logs from different 
