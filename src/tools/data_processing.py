@@ -94,7 +94,8 @@ def linspace_time_series(t_tensor: torch.Tensor) -> torch.Tensor:
 #     return train_index, val_index
 
 
-def interpolate_features(data: tuple[torch.Tensor, torch.Tensor], num_sample_points:int = 1024, interpolation_kind:str='linear') -> tuple[torch.Tensor, torch.Tensor]:
+def interpolate_features(data: tuple[torch.Tensor, torch.Tensor], num_sample_points:int = 1024, 
+                         interpolation_kind:str='linear') -> tuple[torch.Tensor, torch.Tensor]:
     """
     Linearly interpolate missing values in the features_tensor based on the time points in t_tensor.
     Sample `num_sample_points` evenly spaced points from the interpolated result.
@@ -255,7 +256,8 @@ def random_sampling(data: tuple[torch.Tensor, torch.Tensor], num_samples: int) -
 #     return train_data, val_data, test_data
 
 
-def get_batch(data_tuple, batch_size, batch_range_idx=None, batch_range_time=None, batch_dur_idx=None, batch_dur_time=None, timestep=None, device=torch.device("cpu")) -> tuple[torch.Tensor, torch.Tensor]:
+def get_batch(data_tuple, batch_size, batch_range_idx=None, batch_range_time=None, batch_dur_idx=None, 
+              batch_dur_time=None, timestep=None, device=torch.device("cpu")) -> tuple[torch.Tensor, torch.Tensor]:
     #maybe later improve:  when using time do math using time then convert to index to reduce rounding errors
     t_tensor, features_tensor = data_tuple
 
@@ -281,7 +283,8 @@ def get_batch(data_tuple, batch_size, batch_range_idx=None, batch_range_time=Non
 
 
 #SCUFFED VERSION of merts idea (unless i look at source code of odeint and change it)
-def get_batch2(data_tuple, batch_size, batch_range_idx=None, batch_range_time=None, batch_dur_idx=None, batch_dur_time=None, timestep=None, device=torch.device("cpu")) -> tuple[torch.Tensor, torch.Tensor]:
+def get_batch2(data_tuple, batch_size, batch_range_idx=None, batch_range_time=None, batch_dur_idx=None, 
+               batch_dur_time=None, timestep=None, device=torch.device("cpu")) -> tuple[torch.Tensor, torch.Tensor]:
     #maybe later improve:  when using time do math using time then convert to index to reduce rounding errors
     t_tensor, features_tensor = data_tuple
 
@@ -308,7 +311,8 @@ def get_batch2(data_tuple, batch_size, batch_range_idx=None, batch_range_time=No
 
 
 #Merts idea but actually this time
-def get_batch3(data_tuple, batch_size, batch_range_idx=None, batch_range_time=None, batch_dur_idx=None, batch_dur_time=None, timestep=None, device=torch.device("cpu")) -> tuple[torch.Tensor, torch.Tensor]:
+def get_batch3(data_tuple, batch_size, batch_range_idx=None, batch_range_time=None, batch_dur_idx=None, 
+               batch_dur_time=None, timestep=None, device=torch.device("cpu")) -> tuple[torch.Tensor, torch.Tensor]:
     #maybe later improve:  when using time do math using time then convert to index to reduce rounding errors
     t_tensor, features_tensor = data_tuple
 
@@ -390,6 +394,7 @@ def save_interpolated_data(filepath: str, num_samples: int, file_suffix: str, in
     '''
     Interpolates features of data with given number of samples num_samples and creates two files:
     one with normalized data and the other with standardized data.
+    Takes the cleaned up (unnormalized) data as input.
     '''
     mean0_filename = "mean0_interpolated_" + file_suffix + "_" + str(num_samples) + "_samples.pt"
     normalized_filename =  "normalized_interpolated_" + file_suffix + "_" + str(num_samples) + "_samples.pt"
@@ -428,6 +433,9 @@ def save_stretched_time_data(filepath: str, shift: int, start: int, file_suffix:
     t_tensor_linspaced = torch.tensor(np.linspace(t_tensor[0], t_tensor[-1], len(t_tensor)))
 
     if downsampling:
+        if downsampling == 0:
+            raise ValueError("Downsampling value must be higher than 0.")
+        
         k = len(t_tensor_linspaced) // downsampling
         t_tensor_downsampled = t_tensor_linspaced[::k]
         features_downsampled = features_tensor[::k]
@@ -460,16 +468,24 @@ def save_stretched_time_data(filepath: str, shift: int, start: int, file_suffix:
 g1_start = 179  # 15h23 sw_g1
 g2_start = 177  # 15h23 ne_g2
 g8_start = 181  # 15h23 sw_g8
+nice_test_start = 55  # 40h17 nw_g5, 2048 points
+ugly_test_start = 24  # 15h23 se_g6
 
 g1_shift = 3
 g2_shift = 0
 g8_shift = 4
+nice_test_shift = 1
+ugly_test_shift = 2
 
 shifts = [g1_shift, g2_shift, g8_shift]
 starts = [g1_start, g2_start, g8_start]
 suffixes = ['g1', 'g2', 'g8']
 
-shortest_data_len = 806  # len of data
+test_shifts = [nice_test_shift, ugly_test_shift]
+test_starts = [nice_test_start, ugly_test_start]
+test_suffixes = ['nice', 'ugly']
+
+shortest_data_len = 806  # shortest length of chosen training data
 interpolation_type = 'quadratic'
 num_samples_interpolation = [100, 400, 1200]
 
@@ -477,7 +493,8 @@ data_15h23_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/
 raw_path_root = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/"
 
 
-def main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[str], path_root: str, interpolation: str, num_samples_interpolation: list[int]) -> None:
+def main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[str], path_root: str, 
+         interpolation: str, num_samples_interpolation: list[int]) -> None:
     '''
     This function creates all the necessary input_data files. 
     '''
@@ -497,6 +514,14 @@ def main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[st
         for num in num_samples_interpolation:
             for suffix in suffixes:
                 save_interpolated_data(path, num, suffix, interpolation)
+
+
+
+def test_main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[str], path_root: str, 
+              interpolation: str, num_samples_interpolation: list[int]) -> None:
+    '''This function creates the files for the test data.'''
+    zipped_arguments = zip(test_shifts, test_starts, test_suffixes)
+    pass
 
 
 if __name__ == "__main__":
