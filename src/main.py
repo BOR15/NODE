@@ -127,19 +127,6 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
                                             rel_tol=rel_tol, abs_tol=abs_tol, val_freq=val_freq, regu=regu, ODEmethod=ODEmethod))
 
 
-    # score.append(torch_gridsearch_model(1, runid, num_epochs=num_epochs, epochs=epochs, learning_rate = learning_rate, num_neurons = num_neurons,
-    #                                     batch_size=batch_size, batch_dur_idx=batch_dur_idx, batch_range_idx=batch_range_idx, lmbda=lmbda,
-    #                                     loss_coefficient=loss_coefficient, rel_tol=rel_tol, abs_tol=abs_tol, val_freq=val_freq, regu=regu,
-    #                                     ODEmethod=ODEmethod))
-    # score.append(torch_gridsearch_model(2, runid, num_epochs=num_epochs, epochs=epochs, learning_rate = learning_rate, num_neurons = num_neurons,
-    #                                     batch_size=batch_size, batch_dur_idx=batch_dur_idx, batch_range_idx=batch_range_idx, lmbda=lmbda,
-    #                                     loss_coefficient=loss_coefficient, rel_tol=rel_tol, abs_tol=abs_tol, val_freq=val_freq, regu=regu,
-    #                                     ODEmethod=ODEmethod))
-    # score.append(torch_gridsearch_model(3, runid, num_epochs=num_epochs, epochs=epochs, learning_rate = learning_rate, num_neurons = num_neurons,
-    #                                     batch_size=batch_size, batch_dur_idx=batch_dur_idx, batch_range_idx=batch_range_idx, lmbda=lmbda,
-    #                                     loss_coefficient=loss_coefficient, rel_tol=rel_tol, abs_tol=abs_tol, val_freq=val_freq, regu=regu,
-    #                                     ODEmethod=ODEmethod))
-
     score = np.mean(np.array(score), axis=0)
     
     frechet, time = score
