@@ -175,10 +175,10 @@ def gridsearch():
     # initial values autotuning features
     
 
-
+    lmbda = [5e-5, 5e-3, 5e-1]
 
     # list of autotuning features
-    features = [] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
+    features = [lmbda] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
     is_int = [0]
 
     #initial values non autotuning features
@@ -187,12 +187,11 @@ def gridsearch():
     batch_size =  [10] #[5, 10, 25, 50] 
     batch_dur_idx = [0.5] #[0.1, 0.3, 0.5]
     batch_range_idx = [4] #[2,5,10]
-    lmbda = [5e-3]
     loss_coefficient = [100] #[1, 10]
     rel_tol = [1e-7]
     abs_tol = [1e-9]
     val_freq = [5]
-    regu = [None]
+    regu = ["l2","l1"]
     
     #Dataset things
     normalization = ["norm0_1"] #["mean0std1", "norm0_1"]
@@ -201,7 +200,7 @@ def gridsearch():
 
     ODEmethod = ['dopri5']
 
-    non_auto = [learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol, abs_tol, val_freq, regu, ODEmethod, normalization, interpolation_density]
+    non_auto = [learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, loss_coefficient, rel_tol, abs_tol, val_freq, ODEmethod, normalization, interpolation_density]
 
     #list of all features
     all_features = [*features, *non_auto]
@@ -250,7 +249,7 @@ def gridsearch():
             selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
             print("features: ", feature_names)
             print("values:   ", selected_features)
-            scores[indices] = gridmain(*selected_features, epochs=epochs)  ##THIS COMMENT IS HERE BECAUSE I KEEP SCROLLLING PAST THIS LINE 
+            scores[indices] = gridmain(*selected_features, epochs=epochs,interpolation_density=interpolation_density)  ##THIS COMMENT IS HERE BECAUSE I KEEP SCROLLLING PAST THIS LINE 
         
         #get best score indices
         best_indices = np.unravel_index(np.argmax(scores), scores.shape)
