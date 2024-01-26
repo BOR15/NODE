@@ -308,8 +308,6 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
 
         #logging at non final epochs
         if epoch+1 in epochs:
-            if epoch+1 == epochs[0]:
-                runid = getnewrunid()
             scores.append(logging(epoch+1))
 
     
