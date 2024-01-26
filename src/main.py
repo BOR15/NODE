@@ -200,7 +200,7 @@ def gridsearch():
 
     ODEmethod = ['dopri5']
 
-    non_auto = [learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, loss_coefficient, rel_tol, abs_tol, val_freq, ODEmethod, normalization, interpolation_density]
+    non_auto = [learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, loss_coefficient, rel_tol, abs_tol, val_freq, ODEmethod, normalization, interpolation_density,regu]
 
     #list of all features
     all_features = [*features, *non_auto]
@@ -249,7 +249,7 @@ def gridsearch():
             selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
             print("features: ", feature_names)
             print("values:   ", selected_features)
-            scores[indices] = gridmain(*selected_features, epochs=epochs,interpolation_density=interpolation_density)  ##THIS COMMENT IS HERE BECAUSE I KEEP SCROLLLING PAST THIS LINE 
+            scores[indices] = gridmain(*selected_features, epochs=epochs)  ##THIS COMMENT IS HERE BECAUSE I KEEP SCROLLLING PAST THIS LINE 
         
         #get best score indices
         best_indices = np.unravel_index(np.argmax(scores), scores.shape)
