@@ -42,12 +42,9 @@ def main(num_neurons=50, num_epochs=50, learning_rate=0.01, train_duration=1.5, 
     # Defining empty lists for the data
     train_losses = []
     val_losses = []
-    
-    berend_dataPath1= r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\real_data_scuffed1.pt"
-    boris_dataPath1 = "NODE/Input_Data/toydata_norm_0_1.pt"
 
     # Load the saved data and split it into train, val and test
-    data = torch.load(berend_dataPath1)
+    data = torch.load('Input_Data\Clean_preprocessed_data\clean_mean0_data_g1.pt')
     train_data, val_data, test_data = val_shift_split(data, train_dur=train_duration, val_shift=val_shift)
 
     # Defining parameters
@@ -91,11 +88,30 @@ def main(num_neurons=50, num_epochs=50, learning_rate=0.01, train_duration=1.5, 
 
 
     # Plotting the losses
-    plot_data(data)
-    plot_actual_vs_predicted_full(data, predicted)
-    plot_phase_space(data, predicted)
-    plot_training_vs_validation([train_losses, val_losses], share_axis=True)
-    plt.show()
+    # plot_data(data)
+    plt.plot(train_losses, label='Train')
+    plt.plot(val_losses, '--', label='Validation')
+    plt.title("Train vs Validation loss")
+    plt.legend()
+    for i in range(5):
+        features = ['Delta', "frequency", 'Voltage', 'Active Power', 'Reactive Power']
+        plt.plot(data[1][:, i], label='Real')
+        plt.plot(predicted[:, i], '--', label='Predicted')
+        plt.title(f'{features[i]}')
+        plt.legend()
+        plt.show()
+
+    plt.plot(train_losses, label='Train')
+    plt.plot(val_losses, '--', label='Validation')
+    plt.title("Train vs Validation loss")
+    plt.legend()
+    plt.show
+    # print(data[1].shape)
+    # print(predicted.shape)
+    # plot_actual_vs_predicted_full(data, predicted, num_feat=1)
+    # plot_phase_space(data, predicted)
+    # plot_training_vs_validation([train_losses, val_losses], share_axis=True)
+    
 
 
 if __name__ == "__main__":

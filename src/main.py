@@ -4,9 +4,10 @@ import itertools
 import pandas as pd
 from tools.logsystem import getnewrunid
 
-# from pytorch_models.Torch_base_model import main as torch_base_model
-from pytorch_models.TorchTest import main as torch_test_model
+from pytorch_models.Torch_base_model import main as torch_base_model
+# from pytorch_models.TorchTest import main as torch_test_model
 from pytorch_models.Torch_Gridsearch import main as torch_gridsearch_model
+from pytorch_models.final_model import main as final_model
 # from pytorch_models.Torch_Toy_Model import main as torch_toy_model
 
 
@@ -14,16 +15,50 @@ from pytorch_models.Torch_Gridsearch import main as torch_gridsearch_model
 # from tensorflow_models.TensorTest import main as tensor_test_model
 
 def main():
+    
+    torch_base_model(num_neurons=50, num_epochs=1, learning_rate=0.01, train_duration=1.5, val_shift=0.1)
+    
+    runid = getnewrunid()
+    final_model(dataset= 'clean_mean0_data_g1.pt',                           # This should be the name of the file that was created by "data_preprocessing_main(...)"
+                runid=runid, 
+                num_neurons=50,                         # amount of neurons in layers.
+                num_epochs=300,                         # total number of epochs
+                epochs=[50, 100, 150, 200, 250],        # intermediate results
+                learning_rate=0.003, 
+                loss_coefficient=1,                     # makes the loss artificially bigger
+                batch_size=60,                          # How many samples per batch
+                batch_dur_idx=3,                      # index indicates how many seconds of the data we use per batch
+                batch_range_idx=60,                    # index the amount of data for sampling training batches
+                rel_tol=1e-7,
+                abs_tol=1e-9, 
+                val_freq=5, 
+                lmbda=5e-3,                             # regularization factor
+                ODEmethod="dopri5", 
+                interpolation_type="quadratic", 
+                num_samples_interpolation=400, 
+                regu=None,
+                mert_batch_scuffed=False, 
+                mert_batch=False,
+                intermediate_pred_freq=0, 
+                live_intermediate_pred=False, 
+                live_plot=False, 
+                savemodel=False, 
+                savepredict=False
+                )
+
+
+
+############################################################
+####                                                    ####
+#### BELOW IS FOR GRIDSEARCHING, NOT NEEDED TO RUN MAIN ####
+####                                                    ####
+############################################################
     # torch_test_model(num_epochs=200, num_neurons=60, learning_rate=0.01, loss_coef=1000, batch_range_idx=600, intermediate_pred_freq=100, mert_batch=True)
-    torch_test_model(num_epochs=20, intermediate_pred_freq=10)
+    # torch_test_model(num_epochs=20, intermediate_pred_freq=10)
     # torch_base_model()
 
     # torch_toy_model(num_epochs=30, learning_rate=0.0003) #, intermediate_pred_freq=300)
     # torch_toy_model(num_epochs=150, learning_rate=0.01, batch_range_idx=300, mert_batch=False, intermediate_pred_freq=40)
-    pass
-
-
-
 #run everything from here
 def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol,
              abs_tol, val_freq, regu, ODEmethod, normalization, interpolation_density, epochs=None): #all hyperparameters get passed here as arguments
@@ -165,7 +200,7 @@ def gridsearch():
     """
     
     #number of iterations for automatic tuning
-    iterations = 100000000
+    iterations = 1
     
     #epochs
     epochs =  [10,20,50,100,150,200]
@@ -182,11 +217,11 @@ def gridsearch():
     is_int = [0]
 
     #initial values non autotuning features
-    learning_rate = [0.01] #[0.1, 0.001, 0.00001]
-    num_neurons = [25] #[10, 25, 50]
-    batch_size =  [10] #[5, 10, 25, 50] 
-    batch_dur_idx = [0.5] #[0.1, 0.3, 0.5]
-    batch_range_idx = [4] #[2,5,10]
+    learning_rate = [0.003]     #[0.1, 0.001, 0.00001]
+    num_neurons = [50]          #[10, 25, 50]
+    batch_size =  [60]          # base = 10 #[5, 10, 25, 50] 
+    batch_dur_idx = [0.35]      # chosen base = 0.5 #[0.1, 0.3, 0.5]
+    batch_range_idx = [4]       #[2,5,10]
     lmbda = [5e-3]
     loss_coefficient = [100] #[1, 10]
     rel_tol = [1e-7]
@@ -195,8 +230,8 @@ def gridsearch():
     regu = [None]
     
     #Dataset things
-    normalization = ["norm0_1"] #["mean0std1", "norm0_1"]
-    interpolation_density = [200] #[None, 100, 400, "stretch"]
+    normalization = ["mean0std1"] #["mean0std1", "norm0_1"]
+    interpolation_density = [100] #[None, 100, 400, "stretch"]
 
 
     ODEmethod = ['dopri5']
@@ -262,7 +297,7 @@ def gridsearch():
         best_features = [feature_sets[i][idx] for i, idx in enumerate(best_indices)]
         print(ii, "Best features: ", best_features)
 
-
+        
         # autotuning features
         for i, feature in enumerate(features):
             if not tuned_features[i]: #if feature is not tuned yet
@@ -293,29 +328,29 @@ def gridsearch():
         if all(tuned_features):
             print("All features tuned")
             break
-    
-    #final tune
-    print("final tuning round")
-    
-    #full feature sets
-    feature_sets = []
-    for i, feature in enumerate(all_features):
-        feature_sets.append(feature)
-    
-    #defining score grid of right shape
-    scores = np.zeros(tuple(len(f) for f in feature_sets))
+    if iterations > 1:
+        #final tune
+        print("final tuning round")
+        
+        #full feature sets
+        feature_sets = []
+        for i, feature in enumerate(all_features):
+            feature_sets.append(feature)
+        
+        #defining score grid of right shape
+        scores = np.zeros(tuple(len(f) for f in feature_sets))
 
-    #iterating over all combinations of features one last time
-    for indices in itertools.product(*[range(len(f)) for f in feature_sets]):
-        selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
-        scores[indices] = gridmain(*selected_features, epochs=epochs) ##THIS COMMENT IS HERE BECAUSE I KEEP SCROLLLING PAST THIS LINE 
+        #iterating over all combinations of features one last time
+        for indices in itertools.product(*[range(len(f)) for f in feature_sets]):
+            selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
+            scores[indices] = gridmain(*selected_features, epochs=epochs) ##THIS COMMENT IS HERE BECAUSE I KEEP SCROLLLING PAST THIS LINE 
 
-    best_indices = np.unravel_index(np.argmax(scores), scores.shape)
-    final_features = [feature_sets[i][idx] for i, idx in enumerate(best_indices)]
-    print("Final features: ", final_features)
+        best_indices = np.unravel_index(np.argmax(scores), scores.shape)
+        final_features = [feature_sets[i][idx] for i, idx in enumerate(best_indices)]
+        print("Final features: ", final_features)
 
-    
-    
+        
+        
 def calculate_score_diff(feature_idx, best_indices, scores):
     temp_indices = list(best_indices)
     
@@ -331,6 +366,6 @@ def calculate_score_diff(feature_idx, best_indices, scores):
 
 
 if __name__ == "__main__":
-    gridsearch()
+    # gridsearch()
     # gridmain()
-    #main()
+    main()

@@ -47,7 +47,7 @@ def plot_actual_vs_predicted_full(true_y, pred_y, num_feat, min_y=None, max_y=No
     total_plot_height = num_feat * 4 
 
     fig, axes = plt.subplots(nrows=num_feat, ncols=1, figsize=(12, total_plot_height))
-    
+    print(axes)
     if not info:
         fig.suptitle('Actual vs Predicted Features Full')
     else:
