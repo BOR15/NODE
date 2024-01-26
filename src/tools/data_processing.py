@@ -414,7 +414,7 @@ def save_interpolated_data(filepath: str, num_samples: int, file_suffix: str, in
 
 
 def save_stretched_time_data(filepath: str, shift: int, start: int, file_suffix: str, 
-                             normalization: bool = False, downsampling: None | int = None) -> None:
+                             normalization: bool = False, downsampling=None) -> None:
     '''
     Creates time tensor as linespaced tensor of same length as original time tensor. 
     Removes bad start of signal and saves time tensor and features tensor as file.
