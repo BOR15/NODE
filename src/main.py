@@ -53,12 +53,7 @@ def main():
 #### BELOW IS FOR GRIDSEARCHING, NOT NEEDED TO RUN MAIN ####
 ####                                                    ####
 ############################################################
-    # torch_test_model(num_epochs=200, num_neurons=60, learning_rate=0.01, loss_coef=1000, batch_range_idx=600, intermediate_pred_freq=100, mert_batch=True)
-    # torch_test_model(num_epochs=20, intermediate_pred_freq=10)
-    # torch_base_model()
-
-    # torch_toy_model(num_epochs=30, learning_rate=0.0003) #, intermediate_pred_freq=300)
-    # torch_toy_model(num_epochs=150, learning_rate=0.01, batch_range_idx=300, mert_batch=False, intermediate_pred_freq=40)
+    
 #run everything from here
 def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol,
              abs_tol, val_freq, regu, ODEmethod, normalization, interpolation_density, epochs=None): #all hyperparameters get passed here as arguments
@@ -184,11 +179,8 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
     frechet = 1 / (1 + (frechet_coeff * frechet)**frechet_pwr) #inverse fretchet distance so that higher is better and between 0 and 1
     time = 1 / (1 + (time_coeff * time)**time_pwr) #inverse time so that higher is better and between 0 and 1
 
-    final_score = frechet * time  #kind of like an and
-    #or this?
-    # final_score = accuracy + loss + time  #kind of like an or
-
-    # return np.random.rand()
+    final_score = frechet * time  
+    
     return final_score
 
 
@@ -213,7 +205,7 @@ def gridsearch():
 
 
     # list of autotuning features
-    features = [] #Do not put things in here that are options like optimizer type ect. just for floats (and its soon probably)
+    features = [] #Do not put things in here that are options like optimizer type ect. 
     is_int = [0]
 
     #initial values non autotuning features
@@ -285,7 +277,7 @@ def gridsearch():
             selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
             print("features: ", feature_names)
             print("values:   ", selected_features)
-            scores[indices] = gridmain(*selected_features, epochs=epochs)  ##THIS COMMENT IS HERE BECAUSE I KEEP SCROLLLING PAST THIS LINE 
+            scores[indices] = gridmain(*selected_features, epochs=epochs)  
         
         #get best score indices
         best_indices = np.unravel_index(np.argmax(scores), scores.shape)
@@ -343,7 +335,7 @@ def gridsearch():
         #iterating over all combinations of features one last time
         for indices in itertools.product(*[range(len(f)) for f in feature_sets]):
             selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
-            scores[indices] = gridmain(*selected_features, epochs=epochs) ##THIS COMMENT IS HERE BECAUSE I KEEP SCROLLLING PAST THIS LINE 
+            scores[indices] = gridmain(*selected_features, epochs=epochs) 
 
         best_indices = np.unravel_index(np.argmax(scores), scores.shape)
         final_features = [feature_sets[i][idx] for i, idx in enumerate(best_indices)]
