@@ -1,0 +1,2 @@
+Different values for relugalizaton options(regu_options = [None, 'l1', 'l2']) and lambda values(lmbda_range = [5e-5, 5e-3, 5e-1]) were tested. 
+Concluding from graphs of g1_100 at 100 epochs for l1 or l2 regularization and the different lambda values, it was found that l1 regularization with 5e-5 lambda values produces the best fit(while keeping other hyperparameters consistent).
