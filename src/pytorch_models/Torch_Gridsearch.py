@@ -150,8 +150,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
 
         # # Plotting   
         saveplot(plot_training_vs_validation([train_losses, val_losses], sample_freq=val_freq, two_plots=True), "Losses")
-        saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, toy=False, for_torch=True), "FullPredictions") #TODO add args for subtitle
-        saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, info=(epoch, loss), toy=False, for_torch=True), "FullPredictions")
+        saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, info=(epoch, loss, dataset), toy=False, for_torch=True), "FullPredictions")
 
 
         scores = [frechet_d,  time]  ##TODO add more scores here

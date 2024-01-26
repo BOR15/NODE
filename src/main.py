@@ -3,6 +3,7 @@ import math
 import itertools
 import pandas as pd
 from tools.logsystem import getnewrunid
+from tools.data_processing import get_time_indexes
 
 # from pytorch_models.Torch_base_model import main as torch_base_model
 from pytorch_models.TorchTest import main as torch_test_model
@@ -26,7 +27,7 @@ def main():
 
 #run everything from here
 def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol,
-             abs_tol, val_freq, regu, ODEmethod, normalization, interpolation_density, epochs=None): #all hyperparameters get passed here as arguments
+             abs_tol, val_freq, regu, ODEmethod, normalization, interpolation_density, stretch, epochs=None): #all hyperparameters get passed here as arguments
     if not epochs:
         print("Epochs not received properly")
         return None
@@ -42,24 +43,24 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
             dataset1 = "clean_mean0_data_g1.pt"
             dataset2 = "clean_mean0_data_g2.pt"
             dataset3 = "clean_mean0_data_g8.pt"
-        elif interpolation_density == 100:
-            dataset1 = "mean0_interpolated_g1_100_samples.pt"
-            dataset2 = "mean0_interpolated_g2_100_samples.pt"
-            dataset3 = "mean0_interpolated_g8_100_samples.pt"
-        elif interpolation_density == 400:
-            dataset1 = "mean0_interpolated_g1_400_samples.pt"
-            dataset2 = "mean0_interpolated_g2_400_samples.pt"
-            dataset3 = "mean0_interpolated_g8_400_samples.pt"
-        elif interpolation_density == 1200:
-            dataset1 = "mean0_interpolated_g1_1200_samples.pt"
-            dataset2 = "mean0_interpolated_g2_1200_samples.pt"
-            dataset3 = "mean0_interpolated_g8_1200_samples.pt"
         elif interpolation_density == "stretch":
             dataset1 = "stretched_mean0_data_g1.pt"
             dataset2 = "stretched_mean0_data_g2.pt"
             dataset3 = "stretched_mean0_data_g8.pt"
+        elif interpolation_density:
+            dataset1 = f"mean0_interpolated_g1_{interpolation_density}_samples.pt"
+            dataset2 = f"mean0_interpolated_g2_{interpolation_density}_samples.pt"
+            dataset3 = f"mean0_interpolated_g8_{interpolation_density}_samples.pt"
+        if stretch == 100:
+            dataset1 = "stretched_downsampled_98_mean0_data_g1.pt"
+            dataset2 = "stretched_downsampled_99_mean0_data_g2.pt"
+            dataset3 = "stretched_downsampled_98_mean0_data_g8.pt"
+        elif stretch == 200:
+            dataset1 = "stretched_downsampled_196_mean0_data_g1.pt"
+            dataset2 = "stretched_downsampled_197_mean0_data_g2.pt"
+            dataset3 = "stretched_downsampled_196_mean0_data_g8.pt"
         else:
-            print("Interpolation density not recognized")
+            print("Interpolation density or stretch not recognized.")
             return None
         
     elif normalization == "norm0_1":
@@ -67,30 +68,22 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
             dataset1 = "clean_normalized_data_g1.pt"
             dataset2 = "clean_normalized_data_g2.pt"
             dataset3 = "clean_normalized_data_g8.pt"
-        elif interpolation_density == 100:
-            dataset1 = "normalized_interpolated_g1_100_samples.pt"
-            dataset2 = "normalized_interpolated_g2_100_samples.pt"
-            dataset3 = "normalized_interpolated_g8_100_samples.pt"
-        elif interpolation_density == 200:
-            dataset1 = "normalized_interpolated_g1_200_samples.pt"
-            dataset2 = "normalized_interpolated_g2_200_samples.pt"
-            dataset3 = "normalized_interpolated_g8_200_samples.pt"
-        elif interpolation_density == 400:
-            dataset1 = "normalized_interpolated_g1_400_samples.pt"
-            dataset2 = "normalized_interpolated_g2_400_samples.pt"
-            dataset3 = "normalized_interpolated_g8_400_samples.pt"
-        elif interpolation_density == 1200:
-            dataset1 = "normalized_interpolated_g1_1200_samples.pt"
-            dataset2 = "normalized_interpolated_g2_1200_samples.pt"
-            dataset3 = "normalized_interpolated_g8_1200_samples.pt"
         elif interpolation_density == "stretch":
             dataset1 = "stretched_normalized_data_g1.pt"
             dataset2 = "stretched_normalized_data_g2.pt"
             dataset3 = "stretched_normalized_data_g8.pt"
+        elif interpolation_density:
+            dataset1 = f"normalized_interpolated_g1_{interpolation_density}_samples.pt"
+            dataset2 = f"normalized_interpolated_g2_{interpolation_density}_samples.pt"
+            dataset3 = f"normalized_interpolated_g8_{interpolation_density}_samples.pt"
+        if stretch == 100:
+            dataset1 = "stretched_downsampled_98_normalized_data_g1.pt"
+            dataset2 = "stretched_downsampled_99_normalized_data_g2.pt"
+            dataset3 = "stretched_downsampled_98_normalized_data_g8.pt"
         else:
-            print("Interpolation density not recognized")
+            print("Interpolation density or stretch not recognized")
             return None
-        
+
     else:
         print("Normalization not recognized")
         return None
@@ -98,21 +91,12 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
     if interpolation_density == None:
         batch_dur_idx /= 18/800
         batch_range_idx /= 18/800
-    elif interpolation_density == 100:
-        batch_dur_idx /= 18/100
-        batch_range_idx /= 18/100
-    elif interpolation_density == 200:
-        batch_dur_idx /= 18/200
-        batch_range_idx /= 18/200
-    elif interpolation_density == 400:
-        batch_dur_idx /= 18/400
-        batch_range_idx /= 18/400
-    elif interpolation_density == 1200:
-        batch_dur_idx /= 18/1200
-        batch_range_idx /= 18/1200
     elif interpolation_density == "stretch":
         batch_dur_idx /= 18/800
         batch_range_idx /= 18/800
+    elif interpolation_density:
+        batch_dur_idx /= 18/interpolation_density
+        batch_range_idx /= 18/interpolation_density
     
     
     batch_dur_idx = int(batch_dur_idx)
@@ -123,6 +107,9 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
     if batch_range_idx < batch_size:
         batch_range_idx = batch_size
 
+    # # overwriting only for stretched and downsampled at 200 points; 130 'stretched' timepoints is about 4s of training data
+    # batch_range_idx = 130  
+        
     print("batch_dur_idx: ", batch_dur_idx, "batch_range_idx: ", batch_range_idx)
     
     datasets = [dataset1, dataset2, dataset3]
@@ -173,8 +160,6 @@ def gridsearch():
     feature_names = []
 
     # initial values autotuning features
-    
-
 
 
     # list of autotuning features
@@ -182,11 +167,11 @@ def gridsearch():
     is_int = [0]
 
     #initial values non autotuning features
-    learning_rate = [0.01]  # [0.1, 0.001, 0.00001]
+    learning_rate = [0.003]  # [0.1, 0.001, 0.00001]
     num_neurons = [25]  # [10, 25, 50]
-    batch_size =  [10]  # [5, 10, 25, 50] 
-    batch_dur_idx = [0.5]  # [0.1, 0.3, 0.5]
-    batch_range_idx = [4]  # [2,5,10]
+    batch_size =  [10]  # [5, 10, 25, 50] aka the number of batches
+    batch_dur_idx = [0.5]  # [0.1, 0.3, 0.5] length of a batch
+    batch_range_idx = [4]  # [2,5,10] range over how long you take the batches, aka training time
     lmbda = [5e-3]
     loss_coefficient = [100] #[1, 10]
     rel_tol = [1e-7]
@@ -195,13 +180,16 @@ def gridsearch():
     regu = [None]
     
     #Dataset things
-    normalization = ["norm0_1", "mean0std1"] #["mean0std1", "norm0_1"]
-    interpolation_density = [100] #[None, 100, 400, "stretch"]
+    normalization = ["mean0std1"] #["mean0std1", "norm0_1"]
+    interpolation_density = [None] #[None, 100, 400, "stretch"]
+    stretch = [200]  # [100, 200]
 
 
     ODEmethod = ['dopri5']
 
-    non_auto = [learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, loss_coefficient, rel_tol, abs_tol, val_freq, regu, ODEmethod, normalization, interpolation_density]
+    non_auto = [learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_idx, lmbda, 
+                loss_coefficient, rel_tol, abs_tol, val_freq, regu, ODEmethod, normalization, 
+                interpolation_density, stretch]
 
     #list of all features
     all_features = [*features, *non_auto]
@@ -294,25 +282,26 @@ def gridsearch():
             print("All features tuned")
             break
     
-    #final tune
-    print("final tuning round")
-    
-    #full feature sets
-    feature_sets = []
-    for i, feature in enumerate(all_features):
-        feature_sets.append(feature)
-    
-    #defining score grid of right shape
-    scores = np.zeros(tuple(len(f) for f in feature_sets))
+    if iterations > 1:
+        #final tune
+        print("final tuning round")
+        
+        #full feature sets
+        feature_sets = []
+        for i, feature in enumerate(all_features):
+            feature_sets.append(feature)
+        
+        #defining score grid of right shape
+        scores = np.zeros(tuple(len(f) for f in feature_sets))
 
-    #iterating over all combinations of features one last time
-    for indices in itertools.product(*[range(len(f)) for f in feature_sets]):
-        selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
-        scores[indices] = gridmain(*selected_features, epochs=epochs) ##THIS COMMENT IS HERE BECAUSE I KEEP SCROLLLING PAST THIS LINE 
+        #iterating over all combinations of features one last time
+        for indices in itertools.product(*[range(len(f)) for f in feature_sets]):
+            selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
+            scores[indices] = gridmain(*selected_features, epochs=epochs) ##THIS COMMENT IS HERE BECAUSE I KEEP SCROLLLING PAST THIS LINE 
 
-    best_indices = np.unravel_index(np.argmax(scores), scores.shape)
-    final_features = [feature_sets[i][idx] for i, idx in enumerate(best_indices)]
-    print("Final features: ", final_features)
+        best_indices = np.unravel_index(np.argmax(scores), scores.shape)
+        final_features = [feature_sets[i][idx] for i, idx in enumerate(best_indices)]
+        print("Final features: ", final_features)
 
     
     
