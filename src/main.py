@@ -165,7 +165,7 @@ def gridsearch():
     """
     
     #number of iterations for automatic tuning
-    iterations = 100000000
+    iterations = 1
     
     #epochs
     epochs =  [10,20,50,100,150,200]
@@ -182,11 +182,11 @@ def gridsearch():
     is_int = [0]
 
     #initial values non autotuning features
-    learning_rate = [0.01] #[0.1, 0.001, 0.00001]
-    num_neurons = [25] #[10, 25, 50]
-    batch_size =  [10] #[5, 10, 25, 50] 
-    batch_dur_idx = [0.5] #[0.1, 0.3, 0.5]
-    batch_range_idx = [4] #[2,5,10]
+    learning_rate = [0.01]  # [0.1, 0.001, 0.00001]
+    num_neurons = [25]  # [10, 25, 50]
+    batch_size =  [10]  # [5, 10, 25, 50] 
+    batch_dur_idx = [0.5]  # [0.1, 0.3, 0.5]
+    batch_range_idx = [4]  # [2,5,10]
     lmbda = [5e-3]
     loss_coefficient = [100] #[1, 10]
     rel_tol = [1e-7]
@@ -195,8 +195,8 @@ def gridsearch():
     regu = [None]
     
     #Dataset things
-    normalization = ["norm0_1"] #["mean0std1", "norm0_1"]
-    interpolation_density = [200] #[None, 100, 400, "stretch"]
+    normalization = ["norm0_1", "mean0std1"] #["mean0std1", "norm0_1"]
+    interpolation_density = [100] #[None, 100, 400, "stretch"]
 
 
     ODEmethod = ['dopri5']
