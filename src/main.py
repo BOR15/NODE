@@ -123,6 +123,10 @@ def gridmain(learning_rate, num_neurons, batch_size, batch_dur_idx, batch_range_
     if batch_range_idx < batch_size:
         batch_range_idx = batch_size
 
+    batch_range_idx = 200
+    batch_dur_idx = 20
+
+
     print("batch_dur_idx: ", batch_dur_idx, "batch_range_idx: ", batch_range_idx)
     
     datasets = [dataset1, dataset2, dataset3]
@@ -168,7 +172,7 @@ def gridsearch():
     iterations = 1
     
     #epochs
-    epochs =  [10,20,50,100,150,200]
+    epochs =  [10,20,50,100,150,200, 600]
 
     feature_names = []
 
@@ -183,12 +187,12 @@ def gridsearch():
 
     #initial values non autotuning features
     learning_rate = [0.001] #[0.1, 0.001, 0.00001]
-    num_neurons = [100] #[10, 25, 50]
-    batch_size =  [10] #[5, 10, 25, 50] 
+    num_neurons = [50] #[10, 25, 50]
+    batch_size =  [40] #[5, 10, 25, 50] 
     batch_dur_idx = [0.5] #[0.1, 0.3, 0.5]
     batch_range_idx = [4] #[2,5,10]
     lmbda = [5e-3]
-    loss_coefficient = [100] #[1, 10]
+    loss_coefficient = [1] #[1, 10]
     rel_tol = [1e-7]
     abs_tol = [1e-9]
     val_freq = [5]
