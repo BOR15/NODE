@@ -89,23 +89,22 @@ def main(num_neurons=50, num_epochs=50, learning_rate=0.01, train_duration=1.5, 
 
     # Plotting the losses
     # plot_data(data)
-    plt.plot(train_losses, label='Train')
-    plt.plot(val_losses, '--', label='Validation')
-    plt.title("Train vs Validation loss")
-    plt.legend()
-    for i in range(5):
-        features = ['Delta', "frequency", 'Voltage', 'Active Power', 'Reactive Power']
-        plt.plot(data[1][:, i], label='Real')
-        plt.plot(predicted[:, i], '--', label='Predicted')
-        plt.title(f'{features[i]}')
-        plt.legend()
+    for i in range(6):
+        features = ['Delta', "frequency", 'Voltage', 'Active Power', 'Reactive Power', "Train vs Validation loss"]
+        plt.figure(i)
+        if i < 5:
+            plt.plot(data[1][:, i], label='Real')
+            plt.plot(predicted[:, i], '--', label='Predicted')
+            plt.title(f'{features[i]}')
+            plt.legend()
+        else:
+            print(train_losses)
+            print(val_losses)
+            plt.plot(train_losses, label='Train')
+            plt.plot(val_losses, '--', label='Validation')
+            plt.title(f'{features[i]}')
+            plt.legend()
         plt.show()
-
-    plt.plot(train_losses, label='Train')
-    plt.plot(val_losses, '--', label='Validation')
-    plt.title("Train vs Validation loss")
-    plt.legend()
-    plt.show
     # print(data[1].shape)
     # print(predicted.shape)
     # plot_actual_vs_predicted_full(data, predicted, num_feat=1)
