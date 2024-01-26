@@ -147,13 +147,13 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
         if savepredict:
             torch.save(predicted, f"logging/Predictions/{id}.pt")
 
-        addlog('src/logging/log.csv', logdict) #TODO FIX THIS 
+        addlog('src/logging/log.csv', logdict)  
 
         # # Plotting   
         saveplot(plot_training_vs_validation([train_losses, val_losses], sample_freq=val_freq, two_plots=True), "Losses")
-        saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, toy=False, for_torch=True), "FullPredictions") #TODO add args for subtitle
+        saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, info=(epoch, loss), toy=False, for_torch=True), "FullPredictions") 
 
-        scores = [frechet_d,  time]  ##TODO add more scores here
+        scores = [frechet_d,  time]  
         return scores
         
 
@@ -168,11 +168,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
     device = torch.device("cpu")
 
     #import preprocessed data
-    berend_path = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\real_data_scuffed1.pt"
-    laetitia_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/real_data_scuffed40h17_avg.pt"
-    boris_path = "NODE/Input_Data/real_data_scuffed1.pt"
-
-    data = torch.load(f"Input_Data/Clean_preprocessed_data/{dataset}")  #this is the actual correct path for final submission (i think)
+    data = torch.load(f"Input_Data/Clean_preprocessed_data/{dataset}")  
     num_feat = data[1].shape[1]
 
     #defining model, loss function and optimizer
@@ -201,44 +197,12 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
         start_training = perf_counter()
 
         #training
-        optimizer.zero_grad()
-
-        # pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method="dopri5")
-        
-        
-        if mert_batch_scuffed: #this right now forces the code to unparaledize, which is makes it really slow but maybe i can change odeint sourcecode so it works.
-            #get batch
-            s, t, features = get_batch2(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
-            pred_y = []
-            #loop through minibatches
-            for i in range(batch_size):
-                #doing predict
-                pred_y.append(odeint(net, data[1][0], t[i], rtol=rel_tol, atol=abs_tol, method=ODEmethod)[-20:])
-            pred_y = torch.stack(pred_y).reshape(20, 50, 5)
-        elif mert_batch:
-            #get batch
-            s, t, features = get_batch3(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
-            #doing predict
-            pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method=ODEmethod)
-
-            pred_y_cut = torch.zeros_like(pred_y)[:20,:,:]
+        optimizer.zero_grad()        
             
-            # i think this is slower then the advanced indexing but im not sure
-            # for i in range(batch_size):
-            #     pred_y_cut[:,i,:] = pred_y[:,i,:][s[i]:s[i]+batch_dur_idx]
-            # pred_y = pred_y_cut
-
-            range_tensor = torch.arange(0, batch_dur_idx, device=device)
-            index_tensor = s[:, None] + range_tensor[None, :]
-            pred_y_cut = pred_y.gather(0, index_tensor[:, :, None].expand(-1, -1, pred_y.size(2)))
-            pred_y = pred_y_cut.transpose(0, 1)
-            
-
-        else:
-            #get batch
-            t, features = get_batch(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
-            #doing predict
-            pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method=ODEmethod)
+        #get batch
+        t, features = get_batch(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
+        #doing predict
+        pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method=ODEmethod)
 
         
         loss = loss_coefficient * loss_function(pred_y, features)

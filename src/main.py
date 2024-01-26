@@ -294,25 +294,26 @@ def gridsearch():
             print("All features tuned")
             break
     
-    #final tune
-    print("final tuning round")
-    
-    #full feature sets
-    feature_sets = []
-    for i, feature in enumerate(all_features):
-        feature_sets.append(feature)
-    
-    #defining score grid of right shape
-    scores = np.zeros(tuple(len(f) for f in feature_sets))
+    if iterations>1:
+        #final tune
+        print("final tuning round")
+        
+        #full feature sets
+        feature_sets = []
+        for i, feature in enumerate(all_features):
+            feature_sets.append(feature)
+        
+        #defining score grid of right shape
+        scores = np.zeros(tuple(len(f) for f in feature_sets))
 
-    #iterating over all combinations of features one last time
-    for indices in itertools.product(*[range(len(f)) for f in feature_sets]):
-        selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
-        scores[indices] = gridmain(*selected_features, epochs=epochs) ##THIS COMMENT IS HERE BECAUSE I KEEP SCROLLLING PAST THIS LINE 
+        #iterating over all combinations of features one last time
+        for indices in itertools.product(*[range(len(f)) for f in feature_sets]):
+            selected_features = [feature_sets[i][idx] for i, idx in enumerate(indices)]
+            scores[indices] = gridmain(*selected_features, epochs=epochs) ##THIS COMMENT IS HERE BECAUSE I KEEP SCROLLLING PAST THIS LINE 
 
-    best_indices = np.unravel_index(np.argmax(scores), scores.shape)
-    final_features = [feature_sets[i][idx] for i, idx in enumerate(best_indices)]
-    print("Final features: ", final_features)
+        best_indices = np.unravel_index(np.argmax(scores), scores.shape)
+        final_features = [feature_sets[i][idx] for i, idx in enumerate(best_indices)]
+        print("Final features: ", final_features)
 
     
     
