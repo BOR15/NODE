@@ -12,6 +12,7 @@ from tools.Metrics import frechet_distance, average_steady_state_error
 from tools.data_processing import get_batch, get_batch2, get_batch3
 from tools.misc import check_cuda, tictoc
 from tools.plots import *
+from tools.loss_funcs import mean_third_power_error, mean_fourth_power_error
 
 from time import perf_counter
 
@@ -33,8 +34,6 @@ class ODEFunc(nn.Module):
         super(ODEFunc, self).__init__()
         self.net = nn.Sequential(
             nn.Linear(N_feat, N_neurons),
-            nn.Tanh(),
-            nn.Linear(N_neurons, N_neurons),
             nn.Tanh(),
             nn.Linear(N_neurons, N_feat)
         )
@@ -308,8 +307,6 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
 
         #logging at non final epochs
         if epoch+1 in epochs:
-            if epoch+1 == epochs[0]:
-                runid = getnewrunid()
             scores.append(logging(epoch+1))
 
     
