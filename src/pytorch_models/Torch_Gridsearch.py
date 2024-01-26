@@ -32,6 +32,7 @@ class ODEFunc(nn.Module):
 
     def __init__(self, N_neurons, N_feat, device):
         super(ODEFunc, self).__init__()
+        print(N_feat, N_neurons,"test")
         self.net = nn.Sequential(
             nn.Linear(N_feat, N_neurons),
             nn.Tanh(),
