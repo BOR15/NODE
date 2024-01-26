@@ -1,1 +1,5 @@
 logid,runid,val_loss,Frechet_distance,inference_time,training_time,dataset,num_neurons,num_epochs,learning_rate,loss_coefficient,batch_size,batch_dur_idx,batch_range_idx,mert_batch,lambda,ODEmethod,rel_tol,abs_tol,val_freq,loss_function,regularization,interpolation_type,num_samples,optimizer
+0,1,1147.0531005859375,21.45050411493621,0.139075000000048,3.162245100003929,clean_raw_data_Final_test.pt,50,50,0.003,1,60,3,60,False,0.005,dopri5,1e-07,1e-09,5,MSELoss(),,quadratic,400,Adam
+1,1,4383.00146484375,34.901162523061544,0.3391799000000901,6.655970000000707,clean_raw_data_Final_test.pt,50,100,0.003,1,60,3,60,False,0.005,dopri5,1e-07,1e-09,5,MSELoss(),,quadratic,400,Adam
+2,1,8584.3271484375,45.47021017061575,0.2118851000004724,11.179936600000474,clean_raw_data_Final_test.pt,50,150,0.003,1,60,3,60,False,0.005,dopri5,1e-07,1e-09,5,MSELoss(),,quadratic,400,Adam
+3,1,11814.8828125,52.82416834421756,0.2990153000000646,14.717062200000328,clean_raw_data_Final_test.pt,50,200,0.003,1,60,3,60,False,0.005,dopri5,1e-07,1e-09,5,MSELoss(),,quadratic,400,Adam

@@ -495,7 +495,7 @@ data_15h23_path = ''
 raw_path_root = ''
 
 
-def main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[str], path_root: str = "NODE/", 
+def main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[str], path_root: str = "", 
          normalization:list[str] = [None], stretching:bool = False, downsampling: int | None = None, interpolation: str = 'linear',
          num_samples_interpolation: list[int] | None = None) -> None:
     '''

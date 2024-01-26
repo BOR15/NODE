@@ -19,7 +19,7 @@ def main():
     torch_base_model(num_neurons=50, num_epochs=1, learning_rate=0.01, train_duration=1.5, val_shift=0.1)
     
     runid = getnewrunid()
-    final_model(dataset= 'clean_mean0_data_g1.pt',                           # This should be the name of the file that was created by "data_preprocessing_main(...)"
+    final_model(dataset= 'clean_raw_data_Final_test.pt',      # This should be the name of the file that was created by "data_preprocessing_main(...)"
                 runid=runid, 
                 num_neurons=50,                         # amount of neurons in layers.
                 num_epochs=300,                         # total number of epochs
@@ -27,8 +27,8 @@ def main():
                 learning_rate=0.003, 
                 loss_coefficient=1,                     # makes the loss artificially bigger
                 batch_size=60,                          # How many samples per batch
-                batch_dur_idx=3,                      # index indicates how many seconds of the data we use per batch
-                batch_range_idx=60,                    # index the amount of data for sampling training batches
+                batch_dur_idx=3,                        # index indicates how many seconds of the data we use per batch
+                batch_range_idx=60,                     # index the amount of data for sampling training batches
                 rel_tol=1e-7,
                 abs_tol=1e-9, 
                 val_freq=5, 

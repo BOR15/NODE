@@ -167,12 +167,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
     # device = check_cuda(use_cuda=False) ##Uncomment this if you want to use cuda or just to print what device is used
     device = torch.device("cpu")
 
-    #import preprocessed data
-    berend_path = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\real_data_scuffed1.pt"
-    laetitia_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/real_data_scuffed40h17_avg.pt"
-    boris_path = "NODE/Input_Data/real_data_scuffed1.pt"
-
-    data = torch.load(f"Input_Data/Clean_preprocessed_data/{dataset}")  #this is the actual correct path for final submission (i think)
+    data = torch.load(f"{dataset}")  #this is the actual correct path for final submission (i think)
     num_feat = data[1].shape[1]
 
     #defining model, loss function and optimizer

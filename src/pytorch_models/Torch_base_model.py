@@ -44,7 +44,7 @@ def main(num_neurons=50, num_epochs=50, learning_rate=0.01, train_duration=1.5, 
     val_losses = []
 
     # Load the saved data and split it into train, val and test
-    data = torch.load('Input_Data\Clean_preprocessed_data\clean_mean0_data_g1.pt')
+    data = torch.load('clean_raw_data_Final_test.pt')
     train_data, val_data, test_data = val_shift_split(data, train_dur=train_duration, val_shift=val_shift)
 
     # Defining parameters
