@@ -324,61 +324,6 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
 
     ########argmin frechet distance
     return best_score
-
-    
-
-
-    # # Final predict
-    # with torch.no_grad():
-    #     predicted = odeint(net, data[1][0], data[0])
-    #     evaluation_loss = loss_function(predicted, data[1]).item()
-    # print(f"Mean Squared Error Loss: {evaluation_loss}")
-
-
-    # #Frechet distance similairity metric
-    # Frechet_distance = frechet_distance(net, data[1], predicted)
-
-    # logid = logid()
-
-    # logdict = {
-    #     "logid" : logid,
-    #     "num_neurons" : num_neurons,
-    #     "num_epochs" : num_epochs,
-    #     "learning_rate" : learning_rate,
-    #     "batch_size" : batch_size,
-    #     "batch_dur_idx" : batch_dur_idx,
-    #     "batch_range_idx" : batch_range_idx,
-    #     "rel_tol" : rel_tol,
-    #     "abs_tol" : abs_tol,
-    #     "val_freq" : val_freq,
-    #     "mert_batch" : mert_batch,
-    #     "loss_function" : loss_function,
-    #     "optimizer" : optimizer,
-    #     'frechet distance' : Frechet_distance
-
-    # }
-    # # saving model and predict
-    # if savemodel:
-    #     torch.save(net,  f"logging/Models/{id}.pth")
-    # if savepredict:
-    #     torch.save(predicted, f"logging/Predictions/{id}.pt")
-
-    # addlog('logging/log.csv', logdict)
-
-    # # Plotting 
-    # # TODO add saving for the plots.
-        
-
-    # saveplot(plot_training_vs_validation([train_losses, val_losses], sample_freq="?", two_plots=True), "Losses", id)
-    # saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, toy=False, for_torch=True), "FullPredictions", id)
-
-
-    # plot_data(data)
-    # plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat)
-    # plot_training_vs_validation([train_losses, val_losses], share_axis=True)
-
-    # plt.show(block=True) #Ig we dont need this to save the graphs?
-
     
     
 if __name__ == "__main__":

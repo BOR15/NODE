@@ -105,13 +105,6 @@ def main(num_neurons=50, num_epochs=50, learning_rate=0.01, train_duration=1.5, 
             plt.title(f'{features[i]}')
             plt.legend()
         plt.show()
-    # print(data[1].shape)
-    # print(predicted.shape)
-    # plot_actual_vs_predicted_full(data, predicted, num_feat=1)
-    # plot_phase_space(data, predicted)
-    # plot_training_vs_validation([train_losses, val_losses], share_axis=True)
-    
-
 
 if __name__ == "__main__":
     # main() # this doesnt work, run from main.py

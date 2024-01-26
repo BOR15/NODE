@@ -6,6 +6,7 @@ suffixes = []   # This helps to name the file in your repository
 data_path = []
 
 def preprocessing():
+    """This function is the main function for preprocessing the raw data. (How the data should be is in READ ME)"""
     data_preprocessing_main(data_path=data_path, shifts=shifts, starts=starts, suffixes=suffixes, path_root=..., interpolation_type=..., num_samples_interpolation=[200])
 
 
