@@ -1,10 +1,10 @@
 from tools.data_processing import main as data_preprocessing_main
 
 # These lists should align per index (first element of each list should be the information for one signal, and so on)
-starts = []     # List of indices at which the signal is cut from (start is removed because of bad measurements--find manually on graph)
-shifts = []     # List of integers between 0 and 4, where it indicates 1 out the 5 meaurement sources--find in CSV file; first source after time axis has shift 0 
-suffixes = []   # List of strings to add as suffix to file names (one suffix per source; types of processing are already named in the data_preprocessing function)
-data_path = ''  # Relative path to the data you want to process
+starts = [150]     # List of indices at which the signal is cut from (start is removed because of bad measurements--find manually on graph)
+shifts = [0]     # List of integers between 0 and 4, where it indicates 1 out the 5 meaurement sources--find in CSV file; first source after time axis has shift 0 
+suffixes = ["Final_test_Interpolated"]   # List of strings to add as suffix to file names (one suffix per source; types of processing are already named in the data_preprocessing function)
+data_path = 'Input_Data\Raw_Data\Dynamics107h16.csv'  # Relative path to the data you want to process
 
 def preprocessing():
     '''
@@ -22,11 +22,11 @@ def preprocessing():
         starts, 
         suffixes, 
         path_root= "", 
-        normalization=[None], 
+        normalization=['mean0std1'], 
         stretching=False,  
         downsampling=None, 
         interpolation='linear',  
-        num_samples_interpolation=None 
+        num_samples_interpolation=[200] 
         )
 
 

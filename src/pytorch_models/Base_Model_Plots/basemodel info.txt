@@ -1,0 +1,7 @@
+Base_model training and MSE LOSS:
+- Training time: 64.25462329999937 seconds
+- Mean Squared Error Loss: 6259.837890625
+
+Base_model training and MSE LOSS on normalized data:
+- Training time: 76.97153029999936 seconds
+- Mean Squared Error Loss: 85.0939712524414

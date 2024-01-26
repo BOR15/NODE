@@ -168,6 +168,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
     device = torch.device("cpu")
 
     data = torch.load(f"{dataset}")  #this is the actual correct path for final submission (i think)
+    print(data[1].shape)
     num_feat = data[1].shape[1]
 
     #defining model, loss function and optimizer

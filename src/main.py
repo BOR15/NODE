@@ -14,25 +14,26 @@ from pytorch_models.final_model import main as final_model
 # from tensorflow_models.Tensor_base_model import main as tensor_base_model
 # from tensorflow_models.TensorTest import main as tensor_test_model
 
+data_path = 'mean0_interpolated_Final_test_Interpolated_200_samples.pt'
+
 def main():
     
-    torch_base_model(num_neurons=50, num_epochs=1, learning_rate=0.01, train_duration=1.5, val_shift=0.1)
-    
+    torch_base_model(num_neurons=50, num_epochs=50, learning_rate=0.01, train_duration=1.5, val_shift=0.1)
     runid = getnewrunid()
-    final_model(dataset= 'clean_raw_data_Final_test.pt',      # This should be the name of the file that was created by "data_preprocessing_main(...)"
+    final_model(dataset= data_path,      # This should be the name of the file that was created by "data_preprocessing_main(...)"
                 runid=runid, 
                 num_neurons=50,                         # amount of neurons in layers.
                 num_epochs=300,                         # total number of epochs
                 epochs=[50, 100, 150, 200, 250],        # intermediate results
                 learning_rate=0.003, 
                 loss_coefficient=1,                     # makes the loss artificially bigger
-                batch_size=60,                          # How many samples per batch
-                batch_dur_idx=3,                        # index indicates how many seconds of the data we use per batch
+                batch_size=50,                          # How many samples per batch
+                batch_dur_idx=5,                        # index indicates how many seconds of the data we use per batch
                 batch_range_idx=60,                     # index the amount of data for sampling training batches
                 rel_tol=1e-7,
                 abs_tol=1e-9, 
                 val_freq=5, 
-                lmbda=5e-3,                             # regularization factor
+                lmbda=9e-4,                             # regularization factor
                 ODEmethod="dopri5", 
                 interpolation_type="quadratic", 
                 num_samples_interpolation=400, 
