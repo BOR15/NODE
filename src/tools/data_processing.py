@@ -6,8 +6,24 @@ import tensorflow as tf
 
 from scipy.interpolate import interp1d
 
+"""
+READ THIS:
 
-def load_data(filename: str, shift: int=0) -> tuple[torch.Tensor, torch.Tensor]:
+This stuff hasnt been worked on yet, right now its just an old copy of toydata_processing.py 
+
+I have now started on this but still mess 
+"""
+
+# Testing testing how to commit and push 
+berend_path = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\Raw_Data\Dynamics40h17.csv"
+boris_path = "NODE/Input_Data/Raw_data/Dynamics40h17.csv"
+#laetitia_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/Raw_Data/Dynamics40h17.csv"
+
+berend_scufed = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\real_data_scuffed2.pt"
+boris_scufed = "real_data_scuffed2.pt"
+
+
+def load_data(filename, shift=0):
     '''
     Loads the data from a CSV file.
     Drops duplicates in the time axis, keeping the last one only. 
@@ -33,10 +49,11 @@ def load_data(filename: str, shift: int=0) -> tuple[torch.Tensor, torch.Tensor]:
     return t_tensor, features_tensor
 
 
-# def load_data_avg_duplicates(filename:str, shift:int =0, start:int =300) -> tuple[torch.Tensor, torch.Tensor]:
+# def load_data_avg_duplicates(filename, shift=0, start=300):
 #     '''
 #     Loads the data from a CSV file. 
 #     Replaces duplicate time points by their average value.
+#     Normalizes the features with mean 0 and std 1.
 #     Returns two tensors: time and features.
 #     '''
 #     # Import data
@@ -53,13 +70,14 @@ def load_data(filename: str, shift: int=0) -> tuple[torch.Tensor, torch.Tensor]:
 #     # Defining tensors
 #     t_tensor = torch.tensor(data.iloc[start:, 1].values, dtype=torch.float32)
 #     features_tensor = torch.tensor(data.iloc[start:, 2+shift:27+shift:5].values, dtype=torch.float32)
-#     print("Time tensor shape:", t_tensor.shape, "; Features tensor shape:", features_tensor.shape)
-#     print("Time tensor: ", t_tensor[0], "; Features tensor: ", features_tensor[0])
+#     print(features_tensor.shape, t_tensor.shape)
+#     print(features_tensor[0], t_tensor[0])
 
+#     features_tensor = normalize_data_mean_0(features_tensor)
 #     return t_tensor, features_tensor
 
 
-def clean_start(data: tuple[torch.Tensor, torch.Tensor], start_idx: int) -> tuple[torch.Tensor, torch.Tensor]:
+def clean_start(data: tuple[torch.Tensor, torch.Tensor], start_idx: int):
     '''Cuts off start of signal up to given index and realigns time tensor from 0.'''
     t_tensor, features_tensor = data
 
@@ -331,6 +349,7 @@ def get_batch3(data_tuple, batch_size, batch_range_idx=None, batch_range_time=No
             return None
         batch_range_idx = int(batch_range_time / timestep)
 
+
     s = torch.from_numpy(np.random.choice(np.arange(batch_range_idx - batch_dur_idx, dtype=np.int64), batch_size, replace=False))
     batch_t = t_tensor[:batch_range_idx]  # (T)
     batch_y = torch.stack([features_tensor[s + i] for i in range(batch_dur_idx)], dim=0)  # (T, M, D)
@@ -343,13 +362,14 @@ def plot_interpolated_data(data_tuple: tuple[torch.Tensor, torch.Tensor]) -> Non
     plot_data((t_tensor, features_tensor))
 
 
-def plot_data(data_tuple: tuple[torch.Tensor, torch.Tensor]) -> None:
-    '''Plot the input data features over time.'''
+# plotting input data
+def plot_data(data_tuple):
     time_points = data_tuple[0].numpy()  
     feature_data = data_tuple[1].numpy() 
     
     plt.figure(figsize=(14, 6))
 
+    
     plt.plot(time_points, feature_data[:, 0], label='Angle (Delta)') 
     plt.plot(time_points, feature_data[:, 1], label='frequency (f)')
     plt.plot(time_points, feature_data[:, 2], label='Voltage (V)')
@@ -360,6 +380,38 @@ def plot_data(data_tuple: tuple[torch.Tensor, torch.Tensor]) -> None:
     plt.xlabel('Time (seconds)')
     plt.ylabel('Feature Values')
     plt.legend()
+
+
+# if __name__ == "__main__":
+#     # Add your code here
+#     savefile = False
+    
+#     # # data = load_data()
+#     # #plot_data(data)
+
+#     data = load_data_avg_duplicates()
+#     plot_interpolated_data(data)
+#     plt.show()
+
+#     #previous
+#     # data = load_data_avg_duplicates()
+#     # t_tensor, features_tensor = interpolate_features(data[0], data[1])
+#     # # Remove redundant data
+#     # t_tensor_non_redundant, features_tensor_non_redundant = remove_redundant_data(t_tensor, features_tensor)
+#     # # Plot the data after removing redundant points
+#     # plot_data((t_tensor_non_redundant, features_tensor_non_redundant))
+#     # plt.show()
+
+#     # train_data, val_data, test_data = simple_split(data, 3, 0)
+#     # train_data, val_data, test_data = val_shift_split(data, 3, .2)
+
+#     if savefile:
+#         # tf.saved_model.save(data, "real_data_scuffed1")
+
+#         #previous
+#         #torch.save((t_tensor_non_redundant, features_tensor_non_redundant), "real_data_scuffed2_non_redundant.pt")
+
+#         torch.save(data, "real_data_scuffed2.pt")
 
 
 def save_clean_raw_data(filepath: str, shift: int, start: int, file_suffix: str, normalization=False) -> str:
@@ -394,7 +446,6 @@ def save_interpolated_data(filepath: str, num_samples: int, file_suffix: str, in
     '''
     Interpolates features of data with given number of samples num_samples and creates two files:
     one with normalized data and the other with standardized data.
-    Takes the cleaned up (unnormalized) data as input.
     '''
     mean0_filename = "mean0_interpolated_" + file_suffix + "_" + str(num_samples) + "_samples.pt"
     normalized_filename =  "normalized_interpolated_" + file_suffix + "_" + str(num_samples) + "_samples.pt"
@@ -413,13 +464,11 @@ def save_interpolated_data(filepath: str, num_samples: int, file_suffix: str, in
     torch.save((t_tensor, features_tensor_normalized), normalized_filename)
 
 
-def save_stretched_time_data(filepath: str, shift: int, start: int, file_suffix: str, 
-                             normalization: bool = False, downsampling: None | int = None) -> None:
+def save_stretched_time_data(filepath: str, shift: int, start: int, file_suffix: str, normalization=False) -> None:
     '''
     Creates time tensor as linespaced tensor of same length as original time tensor. 
     Removes bad start of signal and saves time tensor and features tensor as file.
     If normalization=True, then save a version with normalized data and another with standardized data.
-    If downsampling is given, downsample 
     '''
     full_filename = "stretched_data_" + file_suffix + ".pt"
 
@@ -432,69 +481,39 @@ def save_stretched_time_data(filepath: str, shift: int, start: int, file_suffix:
     t_tensor, features_tensor = data_clean
     t_tensor_linspaced = torch.tensor(np.linspace(t_tensor[0], t_tensor[-1], len(t_tensor)))
 
-    if downsampling:
-        if downsampling == 0:
-            raise ValueError("Downsampling value must be higher than 0.")
-        
-        k = len(t_tensor_linspaced) // downsampling
-        t_tensor_downsampled = t_tensor_linspaced[::k]
-        features_downsampled = features_tensor[::k]
-        num_points = len(t_tensor_downsampled)
-
-        if normalization:
-            mean0_filename = f"stretched_downsampled_{num_points}_mean0_data_{file_suffix}.pt"
-            normalized_filename = f"stretched_downsampled_{num_points}_normalized_data_{file_suffix}.pt"
-
-            torch.save((t_tensor_downsampled, normalize_data_mean_0(features_downsampled)), mean0_filename)
-            torch.save((t_tensor_downsampled, normalize_data(features_downsampled)), normalized_filename)
-
-        else:
-            dowsampled_filename = "stretched_downsampled_data_" + file_suffix + ".pt"
-            torch.save((t_tensor_downsampled, features_downsampled), dowsampled_filename)   
-
-    elif normalization and not downsampling:
+    if normalization:
         mean0_filename = "stretched_mean0_data_" + file_suffix + ".pt"
         normalized_filename = "stretched_normalized_data_" + file_suffix + ".pt"
 
         torch.save((t_tensor_linspaced, normalize_data_mean_0(features_tensor)), mean0_filename)
         torch.save((t_tensor_linspaced, normalize_data(features_tensor)), normalized_filename)
 
-    else:
-        # save the unnormalized, not downsampled data
-        torch.save((t_tensor_linspaced, features_tensor), full_filename)
-        return full_filename
+    # save the unnormalized data
+    # torch.save((t_tensor_linspaced, features_tensor), full_filename)
+    # return full_filename
 
 
 g1_start = 179  # 15h23 sw_g1
 g2_start = 177  # 15h23 ne_g2
 g8_start = 181  # 15h23 sw_g8
-nice_test_start = 55  # 40h17 nw_g5, 2048 points
-ugly_test_start = 24  # 15h23 se_g6
 
 g1_shift = 3
 g2_shift = 0
 g8_shift = 4
-nice_test_shift = 1
-ugly_test_shift = 2
 
 shifts = [g1_shift, g2_shift, g8_shift]
 starts = [g1_start, g2_start, g8_start]
 suffixes = ['g1', 'g2', 'g8']
 
-test_shifts = [nice_test_shift, ugly_test_shift]
-test_starts = [nice_test_start, ugly_test_start]
-test_suffixes = ['nice', 'ugly']
-
-shortest_data_len = 806  # shortest length of chosen training data
+shortest_data_len = 806  # len of data
 interpolation_type = 'quadratic'
 num_samples_interpolation = [100, 400, 1200]
 
-data_15h23_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/Raw_Data/Dynamics15h23.csv"
-raw_path_root = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/"
+data_15h23_path = r"C:\Users\Mieke\Documents\GitHub\NODE\Input_Data\Raw_Data\Dynamics15h23.csv"
+raw_path_root = r"C:\Users\Mieke\Documents\GitHub\NODE"
 
 
-def main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[str], path_root: str, 
-         interpolation: str, num_samples_interpolation: list[int]) -> None:
+def main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[str], path_root: str, interpolation: str, num_samples_interpolation: list[int]) -> None:
     '''
     This function creates all the necessary input_data files. 
     '''
@@ -516,19 +535,11 @@ def main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[st
                 save_interpolated_data(path, num, suffix, interpolation)
 
 
-
-def test_main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[str], path_root: str, 
-              interpolation: str, num_samples_interpolation: list[int]) -> None:
-    '''This function creates the files for the test data.'''
-    zipped_arguments = zip(test_shifts, test_starts, test_suffixes)
-    pass
-
-
 if __name__ == "__main__":
     savefile = True
     
     if savefile:
-        main(data_15h23_path, shifts, starts, suffixes, raw_path_root, interpolation_type, num_samples_interpolation=[200])
+        main(data_15h23_path, shifts, starts, suffixes, raw_path_root, interpolation_type, num_samples_interpolation)
 
 
 # if __name__ == "__main__":
@@ -547,6 +558,27 @@ if __name__ == "__main__":
 
 #     if savefile:
 #         torch.save((t_tensor, features_tensor), "clean_raw_data_g1.pt")
+
+
+# if __name__ == "__main__":
+#     '''
+#     Save file of randomly sampled preprocessed data, taking clean_raw_data as input. 
+#     '''
+#     data = torch.load(filepath)
+
+#     # Random sampling
+#     t_tensor, features_tensor = random_sampling(data, data_len)
+
+#     # Normalize features
+#     features_tensor_normalized = normalize_data(features_tensor)
+#     features_tensor_normalized = normalize_data_mean_0(features_tensor)
+
+#     # # Plot the data
+#     # plot_data((t_tensor, features_tensor))
+#     # plt.show()
+
+#     if savefile:
+#         torch.save((t_tensor, features_tensor_normalized), "real_data_.pt")
 
     
 # if __name__ == "__main__":
