@@ -408,11 +408,13 @@ def save_interpolated_data(filepath: str, num_samples: int, file_suffix: str, in
     torch.save((t_tensor, features_tensor_normalized), normalized_filename)
 
 
-def save_stretched_time_data(filepath: str, shift: int, start: int, file_suffix: str, normalization=False) -> None:
+def save_stretched_time_data(filepath: str, shift: int, start: int, file_suffix: str, 
+                             normalization:bool=False, downsampling:int=None) -> None:
     '''
     Creates time tensor as linespaced tensor of same length as original time tensor. 
     Removes bad start of signal and saves time tensor and features tensor as file.
     If normalization=True, then save a version with normalized data and another with standardized data.
+    If downsampling is given, downsample 
     '''
     full_filename = "stretched_data_" + file_suffix + ".pt"
 
@@ -425,16 +427,34 @@ def save_stretched_time_data(filepath: str, shift: int, start: int, file_suffix:
     t_tensor, features_tensor = data_clean
     t_tensor_linspaced = torch.tensor(np.linspace(t_tensor[0], t_tensor[-1], len(t_tensor)))
 
-    if normalization:
+    if downsampling:
+        k = len(t_tensor_linspaced) // downsampling
+        t_tensor_downsampled = t_tensor_linspaced[::k]
+        features_downsampled = features_tensor[::k]
+        num_points = len(t_tensor_downsampled)
+
+        if normalization:
+            mean0_filename = f"stretched_downsampled_{num_points}_mean0_data_{file_suffix}.pt"
+            normalized_filename = f"stretched_downsampled_{num_points}_normalized_data_{file_suffix}.pt"
+
+            torch.save((t_tensor_downsampled, normalize_data_mean_0(features_downsampled)), mean0_filename)
+            torch.save((t_tensor_downsampled, normalize_data(features_downsampled)), normalized_filename)
+
+        else:
+            dowsampled_filename = "stretched_downsampled_data_" + file_suffix + ".pt"
+            torch.save((t_tensor_downsampled, features_downsampled), dowsampled_filename)   
+
+    elif normalization and not downsampling:
         mean0_filename = "stretched_mean0_data_" + file_suffix + ".pt"
         normalized_filename = "stretched_normalized_data_" + file_suffix + ".pt"
 
         torch.save((t_tensor_linspaced, normalize_data_mean_0(features_tensor)), mean0_filename)
         torch.save((t_tensor_linspaced, normalize_data(features_tensor)), normalized_filename)
 
-    # save the unnormalized data
-    # torch.save((t_tensor_linspaced, features_tensor), full_filename)
-    # return full_filename
+    else:
+        # save the unnormalized, not downsampled data
+        torch.save((t_tensor_linspaced, features_tensor), full_filename)
+        return full_filename
 
 
 g1_start = 179  # 15h23 sw_g1
