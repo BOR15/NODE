@@ -165,7 +165,7 @@ def gridsearch():
     """
     
     #number of iterations for automatic tuning
-    iterations = 100000000
+    iterations = 1
     
     #epochs
     epochs =  [10,20,50,100,150,200]
