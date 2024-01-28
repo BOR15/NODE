@@ -8,6 +8,7 @@ How to run:
     start, shifts, suffixes and the path to where you have stored your data.
 2) run the data preprocessing function
     The files that are created can be found in the clean_preprocessed_data folder
+    # changed after submission: files can be found at the destination of 'path_root'
 3) run main.py
     First fill in dataset, this is the file that you created from the data preprocessing function
 
