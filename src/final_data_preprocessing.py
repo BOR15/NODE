@@ -1,10 +1,29 @@
 from tools.data_processing import main as data_preprocessing_main
 
+# # These lists should align per index (first element of each list should be the information for one signal, and so on)
+# starts = [150]     # List of indices at which the signal is cut from (start is removed because of bad measurements--find manually on graph)
+# shifts = [0]     # List of integers between 0 and 4, where it indicates 1 out the 5 meaurement sources--find in CSV file; first source after time axis has shift 0 
+# suffixes = ["Final_test_Interpolated"]   # List of strings to add as suffix to file names (one suffix per source; types of processing are already named in the data_preprocessing function)
+# data_path = 'Input_Data\Raw_Data\Dynamics107h16.csv'  # Relative path to the data you want to process
+
+# # These lists should align per index (first element of each list should be the information for one signal, and so on)
+# starts = [179]     # List of indices at which the signal is cut from (start is removed because of bad measurements--find manually on graph)
+# shifts = [3]     # List of integers between 0 and 4, where it indicates 1 out the 5 meaurement sources--find in CSV file; first source after time axis has shift 0 
+# suffixes = ["Final_train_copy_1"]   # List of strings to add as suffix to file names (one suffix per source; types of processing are already named in the data_preprocessing function)
+# data_path = 'Input_Data\Raw_Data\Dynamics15h23.csv'  # Relative path to the data you want to process
+
+# # These lists should align per index (first element of each list should be the information for one signal, and so on)
+# starts = [177]     # List of indices at which the signal is cut from (start is removed because of bad measurements--find manually on graph)
+# shifts = [0]     # List of integers between 0 and 4, where it indicates 1 out the 5 meaurement sources--find in CSV file; first source after time axis has shift 0 
+# suffixes = ["Final_train_copy_2"]   # List of strings to add as suffix to file names (one suffix per source; types of processing are already named in the data_preprocessing function)
+# data_path = 'Input_Data\Raw_Data\Dynamics15h23.csv'  # Relative path to the data you want to process
+
 # These lists should align per index (first element of each list should be the information for one signal, and so on)
-starts = [150]     # List of indices at which the signal is cut from (start is removed because of bad measurements--find manually on graph)
-shifts = [0]     # List of integers between 0 and 4, where it indicates 1 out the 5 meaurement sources--find in CSV file; first source after time axis has shift 0 
-suffixes = ["Final_test_Interpolated"]   # List of strings to add as suffix to file names (one suffix per source; types of processing are already named in the data_preprocessing function)
-data_path = 'Input_Data\Raw_Data\Dynamics107h16.csv'  # Relative path to the data you want to process
+starts = [181]     # List of indices at which the signal is cut from (start is removed because of bad measurements--find manually on graph)
+shifts = [4]     # List of integers between 0 and 4, where it indicates 1 out the 5 meaurement sources--find in CSV file; first source after time axis has shift 0 
+suffixes = ["Final_train_copy_8"]   # List of strings to add as suffix to file names (one suffix per source; types of processing are already named in the data_preprocessing function)
+data_path = 'Input_Data\Raw_Data\Dynamics15h23.csv'  # Relative path to the data you want to process
+
 
 def preprocessing():
     '''

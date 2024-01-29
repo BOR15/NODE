@@ -151,7 +151,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
 
         # # Plotting   
         saveplot(plot_training_vs_validation([train_losses, val_losses], sample_freq=val_freq, two_plots=True), "Losses")
-        saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, info=(epoch, loss), toy=False, for_torch=True), "FullPredictions") #TODO add args for subtitle
+        saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, info=(epoch, evaluation_loss), toy=False, for_torch=True), "FullPredictions") #TODO add args for subtitle
 
         scores = [frechet_d,  time]  ##TODO add more scores here
         return scores
@@ -251,6 +251,42 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
             for p in net.parameters():
                 l2 = l2 + torch.pow(p,2).sum()
             loss = loss + lmbda * l2
+
+        if regu == 'ss_adv':
+            pos = torch.abs(pred_y)
+            mean = torch.mean(pos)
+            mean = 0
+            if epoch % val_freq == val_freq-1:
+                pred_y_val = odeint(net, data[1][0], data[0])
+                pred_y_val_half = pred_y_val[int(len(pred_y_val)*7/8):]    
+                pos_val = torch.abs(pred_y_val_half)
+                mean_val = torch.mean(pos_val)
+                loss = loss + lmbda * (mean + mean_val)
+            else:
+                loss = loss +  lmbda * mean
+
+        if regu == 'ss_adv2':
+            pos = torch.abs(pred_y)
+            mean = torch.mean(pos)
+            mean = 0
+            if epoch % val_freq == val_freq-1:
+                pred_y_ss = odeint(net, data[1][int(len(data[0])*7/8)], data[0][int(len(data[0])*7/8):] )
+                pos_ss = torch.abs(pred_y_ss)
+                mean_ss = torch.mean(pos_ss)
+                loss = loss + lmbda * (mean + mean_ss)
+            else:
+                loss = loss +  lmbda * mean
+
+        if epoch % 20 == 19 and epoch > 100 and regu == 'ss_long':
+            pred_y_long = odeint(net, data[1][0], data[0])
+            pos = torch.abs(pred_y_long[170:,:])
+            mean = torch.mean(pos)
+            loss = loss + lmbda * mean
+
+        if regu == 'ss':
+            pos = torch.abs(pred_y)
+            mean = torch.mean(pos)
+            loss = loss + lmbda * mean
         
         
         loss.backward()
@@ -265,9 +301,13 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
         
         #validation
         if epoch % val_freq == val_freq-1:
-            with torch.no_grad():
-                pred_y_val = odeint(net, data[1][0], data[0]) 
-                loss_val = loss_function(pred_y_val, data[1])
+            if regu != "ss_adv":
+                with torch.no_grad():
+                    pred_y_val = odeint(net, data[1][0], data[0]) 
+                    loss_val = loss_function(pred_y_val, data[1])
+            else:
+                with torch.no_grad():
+                    loss_val = loss_function(pred_y_val, data[1])
             
             train_losses.append(np.mean(train_losses_cache))
             val_losses.append(loss_val.item())
