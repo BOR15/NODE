@@ -139,7 +139,6 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
             'Frechet_distance' : frechet_d,
             "inference_time" : inference_time,
             'training_time' : training_time
-
         }
         # saving model and predict
         if savemodel:

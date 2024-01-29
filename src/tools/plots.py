@@ -24,6 +24,8 @@ def plot_data(data_tuple, toy=False):
     plt.xlabel('Time (seconds)')
     plt.ylabel('Feature Values')
     plt.legend()
+
+    return plt
     
 
 # plotting actual vs predicted values
@@ -78,7 +80,7 @@ def plot_actual_vs_predicted_full(true_y, pred_y, num_feat, min_y=None, max_y=No
         ax.set_ylabel(feature_names[i])
         ax.set_ylim(min_y, max_y)
         ax.legend()
-    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    plt.tight_layout(rect=[0.05, 0.03, 1, 0.95])
     return plt
 
 

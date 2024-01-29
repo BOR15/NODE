@@ -447,8 +447,8 @@ def save_stretched_time_data(filepath: str, shift: int, start: int, file_suffix:
             torch.save((t_tensor_lin_downsampled, normalize_data_mean_0(features_downsampled)), mean0_filename)
 
             # save unstretched time axis
-            time_filename = f"downsampled_{num_points}_timepoints_{file_suffix}.pt"
-            torch.save((t_tensor_downsampled), time_filename)
+            time_filename = f"downsampled_{num_points}_timepoints_data_{file_suffix}.pt"
+            torch.save((t_tensor_downsampled, normalize_data_mean_0(features_downsampled)), time_filename)
 
         elif normalize == "normalize":
             normalized_filename = f"stretched_downsampled_{num_points}_normalized_data_{file_suffix}.pt"

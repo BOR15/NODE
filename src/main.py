@@ -29,7 +29,7 @@ def main():
                 learning_rate=0.003, 
                 loss_coefficient=10,                     # makes the loss artificially bigger
                 batch_size=50,                          # How many samples per batch
-                batch_dur_idx=15,                        # index indicates how many seconds of the data we use per batch
+                batch_dur_idx=5,                        # index indicates how many seconds of the data we use per batch
                 batch_range_idx=60,                     # index the amount of data for sampling training batches
                 rel_tol=1e-7,
                 abs_tol=1e-9, 
