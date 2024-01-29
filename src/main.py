@@ -14,7 +14,8 @@ from pytorch_models.final_model import main as final_model
 # from tensorflow_models.Tensor_base_model import main as tensor_base_model
 # from tensorflow_models.TensorTest import main as tensor_test_model
 
-data_path = 'mean0_interpolated_Final_train_copy_2_200_samples.pt'
+data_path = '/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/stretched_downsampled_197_mean0_data_g2.pt'
+time_axis_path = "/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/downsampled_197_timepoints_g2.pt"
 
 def main():
     
@@ -24,11 +25,11 @@ def main():
                 runid=runid, 
                 num_neurons=50,                         # amount of neurons in layers.
                 num_epochs=800,                         # total number of epochs
-                epochs=[100, 200, 300, 400,500,600,700],        # intermediate results
+                epochs=[100, 200, 300, 400, 500, 600, 700],        # intermediate results
                 learning_rate=0.003, 
                 loss_coefficient=10,                     # makes the loss artificially bigger
                 batch_size=50,                          # How many samples per batch
-                batch_dur_idx=8,                        # index indicates how many seconds of the data we use per batch
+                batch_dur_idx=15,                        # index indicates how many seconds of the data we use per batch
                 batch_range_idx=60,                     # index the amount of data for sampling training batches
                 rel_tol=1e-7,
                 abs_tol=1e-9, 
@@ -44,9 +45,15 @@ def main():
                 live_intermediate_pred=False, 
                 live_plot=False, 
                 savemodel=False, 
-                savepredict=False
+                savepredict=False,
+                unstretched_time=time_axis_path
                 )
 
+
+'''
+For stretched data downsampled to 197 points, we see 12 seconds as the end of training data in new time axis. 
+We then have 12/18*197 = 131 as the number of datapoints in training in the new time series
+'''
 
 
 ############################################################

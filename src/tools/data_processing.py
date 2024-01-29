@@ -437,21 +437,26 @@ def save_stretched_time_data(filepath: str, shift: int, start: int, file_suffix:
             raise ValueError("Downsampling value must be higher than 0.")
         
         k = len(t_tensor_linspaced) // downsample
-        t_tensor_downsampled = t_tensor_linspaced[::k]
+        t_tensor_lin_downsampled = t_tensor_linspaced[::k]
+        t_tensor_downsampled = t_tensor[::k]
         features_downsampled = features_tensor[::k]
-        num_points = len(t_tensor_downsampled)
+        num_points = len(t_tensor_lin_downsampled)
 
         if normalize == "mean0std1":
             mean0_filename = f"stretched_downsampled_{num_points}_mean0_data_{file_suffix}.pt"
-            torch.save((t_tensor_downsampled, normalize_data_mean_0(features_downsampled)), mean0_filename)
+            torch.save((t_tensor_lin_downsampled, normalize_data_mean_0(features_downsampled)), mean0_filename)
+
+            # save unstretched time axis
+            time_filename = f"downsampled_{num_points}_timepoints_{file_suffix}.pt"
+            torch.save((t_tensor_downsampled), time_filename)
 
         elif normalize == "normalize":
             normalized_filename = f"stretched_downsampled_{num_points}_normalized_data_{file_suffix}.pt"
-            torch.save((t_tensor_downsampled, normalize_data(features_downsampled)), normalized_filename)
+            torch.save((t_tensor_lin_downsampled, normalize_data(features_downsampled)), normalized_filename)
 
         else:
             dowsampled_filename = "stretched_downsampled_data_" + file_suffix + ".pt"
-            torch.save((t_tensor_downsampled, features_downsampled), dowsampled_filename)   
+            torch.save((t_tensor_lin_downsampled, features_downsampled), dowsampled_filename)   
 
     elif normalize and not downsample:
         if normalize == "mean0std1":
@@ -489,12 +494,12 @@ test_suffixes = ['nice', 'ugly']
 
 shortest_data_len = 806  # shortest length of chosen training data
 interpolation = 'quadratic'
-interpolation_samples = [200]
+interpolation_samples = [200]  # Can also be None
 downsample_num = 190
 normalization_in = ["mean0std1"]  # options are 'mean0std1' and 'normalize'
 
-data_15h23_path = ''
-raw_path_root = ''
+data_15h23_path = '/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/Input_Data/Raw_Data/Dynamics15h23.csv'
+raw_path_root = '/Users/laetitiaguerin/Library/CloudStorage/OneDrive-Personal/Documents/BSc Nanobiology/Year 4/Capstone Project/Github repository/NODE/'
 
 
 def main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[str], path_root: str = "", 
@@ -511,11 +516,11 @@ def main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[st
     for shift, start, suffix in zipped_arguments:
         if stretching:
             for norm in normalization:
-                save_stretched_time_data(filepath=data_path, shift=shift, start=start, file_suffix=suffix, 
-                                        normalize=norm, downsample=downsampling)
+                save_stretched_time_data(filepath=data_path, shift=shift, start=start, file_suffix=suffix,
+                                         normalize=norm, downsample=downsampling)
         for norm in normalization:
-            raw_filename = save_clean_raw_data(filepath=data_path, shift=shift, start=start, file_suffix=suffix, 
-                                            normalize=norm)
+            raw_filename = save_clean_raw_data(filepath=data_path, shift=shift, start=start, file_suffix=suffix,
+                                               normalize=norm)
         raw_file_names.append(raw_filename)
         raw_file_paths.append(path_root + raw_filename)
     
@@ -524,8 +529,8 @@ def main(data_path: str, shifts: list[int], starts: list[int], suffixes: list[st
             for num in num_samples_interpolation:
                 for norm in normalization:
                     for suffix in suffixes:
-                        save_interpolated_data(filepath=path, num_samples=num, file_suffix=suffix, 
-                                            interpolation_type=interpolation, normalize=norm)
+                        save_interpolated_data(filepath=path, num_samples=num, file_suffix=suffix,
+                                               interpolation_type=interpolation, normalize=norm)
 
     
 
@@ -540,7 +545,7 @@ if __name__ == "__main__":
     savefile = True
     
     if savefile:
-        main(data_path=data_15h23_path, shifts=shifts, starts=starts, suffixes=suffixes, path_root=raw_path_root, 
+        main(data_path=data_15h23_path, shifts=[0], starts=[177], suffixes=['g2'], path_root=raw_path_root, 
              stretching=True, downsampling=downsample_num, normalization=normalization_in, interpolation=interpolation,
              num_samples_interpolation=None)
 

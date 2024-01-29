@@ -27,15 +27,26 @@ def plot_data(data_tuple, toy=False):
     
 
 # plotting actual vs predicted values
-def plot_actual_vs_predicted_full(true_y, pred_y, num_feat, min_y=None, max_y=None, lim_space=0.5, info=None, toy=False, for_torch=True):
+def plot_actual_vs_predicted_full(true_y, pred_y, num_feat, min_y=None, max_y=None, lim_space=0.5, 
+                                  info=None, toy=False, for_torch=True, unstretched=None):
     if for_torch:
-        t = true_y[0].detach().numpy()
-        true_y = true_y[1].detach().numpy()
-        pred_y = pred_y.detach().numpy()
+        if unstretched is not None:
+            t = unstretched
+            true_y = true_y[1].detach().numpy()
+            pred_y = pred_y.detach().numpy()
+        else:
+            t = true_y[0].detach().numpy()
+            true_y = true_y[1].detach().numpy()
+            pred_y = pred_y.detach().numpy()
     else:
-        t = true_y[0].numpy()
-        true_y = true_y[1].numpy()
-        pred_y = pred_y.numpy()
+        if unstretched is not None:
+            t = unstretched
+            true_y = true_y[1].numpy()
+            pred_y = pred_y.numpy()
+        else:
+            t = true_y[0].numpy()
+            true_y = true_y[1].numpy()
+            pred_y = pred_y.numpy()
     
 
     if not min_y:

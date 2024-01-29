@@ -70,7 +70,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
          lmbda=5e-3, ODEmethod="dopri5", interpolation_type="quadratic", num_samples_interpolation=400, regu=None,
          mert_batch_scuffed=False, mert_batch=False,
          intermediate_pred_freq=0, live_intermediate_pred=False, live_plot=False, 
-         savemodel=False, savepredict=False):
+         savemodel=False, savepredict=False, unstretched_time=None):
     """
     Main function for training and evaluating a PyTorch model using ODE integration.
 
@@ -151,7 +151,13 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
 
         # # Plotting   
         saveplot(plot_training_vs_validation([train_losses, val_losses], sample_freq=val_freq, two_plots=True), "Losses")
-        saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, info=(epoch, evaluation_loss), toy=False, for_torch=True), "FullPredictions") #TODO add args for subtitle
+        if unstretched_time:
+            time_axis = torch.load(unstretched_time)
+            saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, info=(epoch, evaluation_loss), toy=False, 
+                                               for_torch=True, unstretched=time_axis), "FullPredictions") #TODO add args for subtitle
+        else:
+            saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, info=(epoch, evaluation_loss), toy=False, 
+                                                for_torch=True, unstretched=None), "FullPredictions") #TODO add args for subtitle
 
         scores = [frechet_d,  time]  ##TODO add more scores here
         return scores
