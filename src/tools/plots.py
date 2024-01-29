@@ -27,7 +27,7 @@ def plot_data(data_tuple, toy=False):
     
 
 # plotting actual vs predicted values
-def plot_actual_vs_predicted_full(true_y, pred_y, num_feat, min_y=None, max_y=None, lim_space=0.5, info=None, toy=False, for_torch=True):
+def plot_actual_vs_predicted_full(true_y, pred_y, num_feat, min_y=None, max_y=None, lim_space=0.5, info=None, toy=False, for_torch=True, train_range=None):
     if for_torch:
         t = true_y[0].detach().numpy()
         true_y = true_y[1].detach().numpy()
@@ -63,6 +63,8 @@ def plot_actual_vs_predicted_full(true_y, pred_y, num_feat, min_y=None, max_y=No
     for i, ax in enumerate(axes):  # Update the loop to iterate over subplots
         ax.plot(t, true_y[:,i], label='Actual ' + feature_names[i])
         ax.plot(t, pred_y[:,i], label='Predicted ' + feature_names[i], linestyle='--')
+        if train_range:
+            ax.axvline(x=t[train_range], color='darkgrey', linestyle='--')  # Add horizontal line
         ax.set_xlabel('Time (s)')
         ax.set_ylabel(feature_names[i])
         ax.set_ylim(min_y, max_y)

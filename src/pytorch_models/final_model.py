@@ -151,7 +151,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
 
         # # Plotting   
         saveplot(plot_training_vs_validation([train_losses, val_losses], sample_freq=val_freq, two_plots=True), "Losses")
-        saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, info=(epoch, evaluation_loss), toy=False, for_torch=True), "FullPredictions") #TODO add args for subtitle
+        saveplot(plot_actual_vs_predicted_full(data, predicted, num_feat=num_feat, info=(epoch, evaluation_loss), toy=False, for_torch=True, train_range=batch_range_idx), "FullPredictions") #TODO add args for subtitle
 
         scores = [frechet_d,  time]  ##TODO add more scores here
         return scores
@@ -232,7 +232,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
 
         else:
             #get batch
-            t, features = get_batch(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device, magic_batch=True)
+            t, features = get_batch(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device, magic_batching=False)
             #doing predict
             pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method=ODEmethod)
 
