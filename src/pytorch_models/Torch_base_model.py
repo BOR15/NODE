@@ -44,7 +44,7 @@ def main(num_neurons=50, num_epochs=50, learning_rate=0.01, train_duration=1.5, 
     val_losses = []
 
     # Load the saved data and split it into train, val and test
-    data = torch.load('clean_mean0_data_Final_test_Norm.pt')
+    data = torch.load('mean0_interpolated_Final_test_Interpolated_200_samples.pt')
     train_data, val_data, test_data = val_shift_split(data, train_dur=train_duration, val_shift=val_shift)
 
     # Defining parameters
@@ -98,8 +98,8 @@ def main(num_neurons=50, num_epochs=50, learning_rate=0.01, train_duration=1.5, 
             plt.title(f'{features[i]}')
             plt.legend()
         else:
-            print(train_losses)
-            print(val_losses)
+            # print(train_losses)
+            # print(val_losses)
             plt.plot(train_losses, label='Train')
             plt.plot(val_losses, '--', label='Validation')
             plt.title(f'{features[i]}')

@@ -18,7 +18,7 @@ data_path = 'mean0_interpolated_Final_test_Interpolated_200_samples.pt'
 
 def main():
     
-    torch_base_model(num_neurons=50, num_epochs=50, learning_rate=0.01, train_duration=1.5, val_shift=0.1)
+    # torch_base_model(num_neurons=50, num_epochs=50, learning_rate=0.3, train_duration=3, val_shift=0.1)
     runid = getnewrunid()
     final_model(dataset= data_path,      # This should be the name of the file that was created by "data_preprocessing_main(...)"
                 runid=runid, 
