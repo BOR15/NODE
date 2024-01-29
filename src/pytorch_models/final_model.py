@@ -232,7 +232,7 @@ def main(dataset, runid, num_neurons=50, num_epochs=300, epochs=[200, 250],
 
         else:
             #get batch
-            t, features = get_batch(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device)
+            t, features = get_batch(data, batch_size = batch_size, batch_dur_idx = batch_dur_idx, batch_range_idx=batch_range_idx, device=device, magic_batch=True)
             #doing predict
             pred_y = odeint(net, features[0], t, rtol=rel_tol, atol=abs_tol, method=ODEmethod)
 
