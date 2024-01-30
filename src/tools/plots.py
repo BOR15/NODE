@@ -49,10 +49,10 @@ def plot_actual_vs_predicted_full(true_y, pred_y, num_feat, min_y=None, max_y=No
     fig, axes = plt.subplots(nrows=num_feat, ncols=1, figsize=(12, total_plot_height))
     
     if not info:
-        fig.suptitle('Actual vs Predicted Features Full')
+        fig.suptitle('Actual vs Predicted Features Full', fontsize=20)
     else:
         epoch, loss, *ect = info 
-        fig.suptitle(f'Actual vs Predicted Features, epoch = {epoch+1}, Loss = {loss}') #TODO add the info we want in the image here.
+        fig.suptitle((f'Actual vs Predicted Features, epoch = {epoch+1}, Loss = {round(loss, 3)}') , fontsize = 20) #TODO add the info we want in the image here.
 
 
     if toy:
@@ -68,7 +68,7 @@ def plot_actual_vs_predicted_full(true_y, pred_y, num_feat, min_y=None, max_y=No
         ax.set_xlabel('Time (s)')
         ax.set_ylabel(feature_names[i])
         ax.set_ylim(min_y, max_y)
-        ax.legend()
+        ax.legend(fontsize=13)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     return plt
 

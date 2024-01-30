@@ -17,14 +17,16 @@ from pytorch_models.final_model import main as final_model
 data_path1 = 'mean0_interpolated_Final_train_copy_1_200_samples.pt'
 data_path2 = 'mean0_interpolated_Final_train_copy_2_200_samples.pt'
 data_path3 = 'mean0_interpolated_Final_train_copy_8_200_samples.pt'
+data_path4 = "mean0_interpolated_Final_test_Interpolated_200_samples.pt"
 
 data_paths = [data_path1, data_path2, data_path3]
 def main():
     
     # torch_base_model(num_neurons=50, num_epochs=50, learning_rate=0.01, train_duration=1.5, val_shift=0.1)
+    # for data_path in data_paths:
     for i in range(1):
         runid = getnewrunid()
-        final_model(dataset= data_path2,      # This should be the name of the file that was created by "data_preprocessing_main(...)"
+        final_model(dataset= data_path4,      # This should be the name of the file that was created by "data_preprocessing_main(...)"
                     runid=runid, 
                     num_neurons=50,                         # amount of neurons in layers.
                     num_epochs=160,                         # total number of epochs
@@ -32,16 +34,16 @@ def main():
                     learning_rate=0.04, 
                     loss_coefficient=1,                     # makes the loss artificially bigger
                     batch_size=60,                          # How many samples per batch
-                    batch_dur_idx=10,                        # index indicates how many seconds of the data we use per batch
-                    batch_range_idx=20,                     # index the amount of data for sampling training batches
-                    rel_tol=0.0002,                           #default 1e-7
-                    abs_tol=0.00005,                           #default 1e-9
+                    batch_dur_idx=9,                        # index indicates how many seconds of the data we use per batch
+                    batch_range_idx=50,                     # index the amount of data for sampling training batches
+                    rel_tol=0.00003,                           #default 1e-7
+                    abs_tol=0.000009,                           #default 1e-9
                     val_freq=5, 
-                    lmbda=1e-4,                             # regularization factor
+                    lmbda=1e-6,                             # regularization factor
                     ODEmethod="dopri5", 
                     interpolation_type="quadratic", 
-                    num_samples_interpolation=400, 
-                    regu= "L2",  
+                    num_samples_interpolation=200, 
+                    regu= None ,
                     mert_batch_scuffed=False, 
                     mert_batch=False,
                     intermediate_pred_freq=0, 

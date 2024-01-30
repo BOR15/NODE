@@ -274,9 +274,9 @@ def get_batch(data_tuple, batch_size, batch_range_idx=None, batch_range_time=Non
     s = torch.from_numpy(np.random.choice(np.arange(batch_range_idx - batch_dur_idx, dtype=np.int64), batch_size, replace=True))
     batch_t = t_tensor[:batch_dur_idx]  # (T)
     batch_y = torch.stack([features_tensor[s + i] for i in range(batch_dur_idx)], dim=0) # (T, M, D)
-    # if magic_batching:
-    #     magic_batch = torch.ones((batch_dur_idx, 1, 5)) 
-    #     batch_y =  torch.cat((batch_y, magic_batch), dim=1)
+    if magic_batching:
+        magic_batch = torch.ones((batch_dur_idx, 1, 5)) 
+        batch_y =  torch.cat((batch_y, magic_batch), dim=1)
     return batch_t.to(device), batch_y.to(device)
 
 
